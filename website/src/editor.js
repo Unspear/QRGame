@@ -14,11 +14,11 @@ export class Editor {
         this.editorCanvas = editorCanvas;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
-        editorCanvas.addEventListener('pointerdown', (event) => {
+        window.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
             this.draw();
         });
-        editorCanvas.addEventListener('pointerup', (event) => {
+        window.addEventListener('pointerup', (event) => {
             this.placingTiles = false;
             this.draw();
         });
