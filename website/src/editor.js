@@ -1,35 +1,44 @@
 import { Game } from './game.js'
+import charRenderer from './render.js'
+
+function getPointerPos(canvas, event) {
+    const canvasScaleX = canvas.offsetWidth / canvas.width;
+    const canvasScaleY = canvas.offsetHeight / canvas.height;
+    const x = Math.floor(event.offsetX / canvasScaleX)
+    const y = Math.floor(event.offsetY / canvasScaleY)
+    return { x: x, y: y };
+}
 
 export class Editor {
     constructor(editorCanvas) {
-        this.drawBuffer = document.createElement('canvas');
-        this.drawBuffer.width = CHAR_WIDTH;
-        this.drawBuffer.height = CHAR_WIDTH;
-        this.dbctx = this.drawBuffer.getContext('2d');
-        this.spriteSheet = new Image();
-        this.spriteSheet.src = Chars;
-        this.spriteSheetData = {};
-        let lines = CharsText.split('\n');
-        for (let i = 0; i < lines.length; i++)
-        {
-            let l = lines[i].split(',');
-            this.spriteSheetData[parseInt(l[0])] = {
-                index: i,
-                isFullWidth: l[1] > 0
-            }
-        }
-        this.gameCanvas = gameCanvas;
-        this.luaFactory = new LuaFactory();
-        this.matterEngine = Matter.Engine.create({});
-        this.matterEngine.gravity.scale = 0;
-        this.spriteDragConstraint = SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
-        Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
-        this.ctx = gameCanvas.getContext('2d');
-        gameCanvas.addEventListener('pointerdown', (event) => {
-            if (this.luaTap)
-            {
-                this.luaTap();
+        this.editorCanvas = editorCanvas;
+        this.ctx = editorCanvas.getContext('2d');
+        this.placingTiles = false;
+        editorCanvas.addEventListener('pointerdown', (event) => {
+            this.placingTiles = true;
+            this.draw();
+        });
+        editorCanvas.addEventListener('pointerup', (event) => {
+            this.placingTiles = false;
+            this.draw();
+        });
+        editorCanvas.addEventListener('pointermove', (event) => {
+            if (this.placingTiles) {
+                let epos = getPointerPos(editorCanvas, event);
+                let x = Math.floor(epos.x / 16);
+                let y = Math.floor(epos.y / 16);
+                this.tiles[y * 12 + x] = '#';
+                this.draw();
             }
         });
+        this.tiles = Array(16*12).fill(' ');
+        this.draw();
+    }
+    draw() {
+        this.ctx.beginPath();
+        // Fill Background
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+        charRenderer.draw(this.ctx, this.tiles.join(''), 0, 0, '#ffffff', 12, false);
     }
 }

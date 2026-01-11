@@ -113,7 +113,8 @@ function gameToEditor(game) {
 function editorToGame() {
     return new Game(scriptInput.state.doc.toString(), "testing");
 }
-
+// Editor
+const editor = new Editor(editorCanvas);
 // Engine
 const engine = new Engine(gameCanvas);
 let game = urlToGame();
