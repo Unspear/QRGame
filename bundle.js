@@ -45324,6 +45324,66 @@ module.exports = "0,1\r\n1,1\r\n2,1\r\n3,1\r\n4,1\r\n5,1\r\n6,1\r\n7,1\r\n8,1\r\
 
 /***/ }),
 
+/***/ "./src/editor.js":
+/*!***********************!*\
+  !*** ./src/editor.js ***!
+  \***********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Editor: () => (/* binding */ Editor)
+/* harmony export */ });
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
+
+
+
+function getPointerPos(canvas, event) {
+    const canvasScaleX = canvas.offsetWidth / canvas.width;
+    const canvasScaleY = canvas.offsetHeight / canvas.height;
+    const x = Math.floor(event.offsetX / canvasScaleX)
+    const y = Math.floor(event.offsetY / canvasScaleY)
+    return { x: x, y: y };
+}
+
+class Editor {
+    constructor(editorCanvas) {
+        this.editorCanvas = editorCanvas;
+        this.ctx = editorCanvas.getContext('2d');
+        this.placingTiles = false;
+        editorCanvas.addEventListener('pointerdown', (event) => {
+            this.placingTiles = true;
+            this.draw();
+        });
+        editorCanvas.addEventListener('pointerup', (event) => {
+            this.placingTiles = false;
+            this.draw();
+        });
+        editorCanvas.addEventListener('pointermove', (event) => {
+            if (this.placingTiles) {
+                let epos = getPointerPos(editorCanvas, event);
+                let x = Math.floor(epos.x / 16);
+                let y = Math.floor(epos.y / 16);
+                this.tiles[y * 12 + x] = '#';
+                this.draw();
+            }
+        });
+        this.tiles = Array(16*12).fill(' ');
+        this.draw();
+    }
+    draw() {
+        this.ctx.beginPath();
+        // Fill Background
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+        _render_js__WEBPACK_IMPORTED_MODULE_1__["default"].draw(this.ctx, this.tiles.join(''), 0, 0, '#ffffff', 12, false);
+    }
+}
+
+/***/ }),
+
 /***/ "./src/engine.js":
 /*!***********************!*\
   !*** ./src/engine.js ***!
@@ -45333,16 +45393,15 @@ module.exports = "0,1\r\n1,1\r\n2,1\r\n3,1\r\n4,1\r\n5,1\r\n6,1\r\n7,1\r\n8,1\r\
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Engine: () => (/* binding */ Engine),
-/* harmony export */   Game: () => (/* binding */ Game)
+/* harmony export */   Engine: () => (/* binding */ Engine)
 /* harmony export */ });
 /* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! wasmoon */ "./node_modules/wasmoon/dist/index.js");
 /* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(wasmoon__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _chars_png__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chars.png */ "./src/chars.png");
-/* harmony import */ var _chars_txt_raw__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./chars.txt?raw */ "./src/chars.txt?raw");
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./spriteDragConstraint.js */ "./src/spriteDragConstraint.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint.js */ "./src/spriteDragConstraint.js");
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
 
 
 
@@ -45351,6 +45410,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const FRAME_TIME = 1.0 / 60.0
 const FRAME_TIME_MS = FRAME_TIME * 1000.0;
+
 const CHAR_WIDTH = 16;
 
 // https://lospec.com/palette-list/shmupy-16
@@ -45373,21 +45433,6 @@ const PALETTE = [
     '#3377dd',
 ]
 
-class Game {
-    constructor(script) {
-        this.script = script;
-    }
-    toData() {
-        return new TextEncoder().encode(this.script);
-    }
-    static fromData(data) {
-        if (data === null) return null;
-        const script = new TextDecoder().decode(data);
-        if (script.length === 0) return null;
-        return new Game(script);
-    }
-}
-
 class Sprite {
     #x;
     #y;
@@ -45403,7 +45448,7 @@ class Sprite {
         this.#py = 0.0;
         this.wrap = 0;
         this.compact = true;
-        this.body = matter_js__WEBPACK_IMPORTED_MODULE_3___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), CHAR_WIDTH, CHAR_WIDTH);
+        this.body = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), CHAR_WIDTH, CHAR_WIDTH);
         this.body.isSensor = true;
         this.drag = false;
     }
@@ -45427,7 +45472,7 @@ class Sprite {
     }
     set x(value) {
         this.#x = value;
-        matter_js__WEBPACK_IMPORTED_MODULE_3___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
+        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
         //Matter.Body.setVelocity(this.body, {x: 0, y: 0})
     }
     get x() {
@@ -45435,7 +45480,7 @@ class Sprite {
     }
     set y(value) {
         this.#y = value;
-        matter_js__WEBPACK_IMPORTED_MODULE_3___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
+        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
         //Matter.Body.setVelocity(this.body, {x: 0, y: 0})
     }
     get y() {
@@ -45452,70 +45497,19 @@ class Sprite {
         this.#x = this.#getEntityXFromBody();
         this.#y = this.#getEntityYFromBody();
     }
-    draw(engine) {
-        engine.ctx.fillStyle = "white";
-        const array = Array.from(this.char);
-        let offsetX = 0;
-        let offsetY = 0;
-        let roundedX = Math.round(this.#getSpriteX());
-        let roundedY = Math.round(this.#getSpriteY());
-        for (let i = 0; i < array.length; i++) {
-            const codepoint = array[i].codePointAt(0);
-            const data = engine.spriteSheetData[codepoint];
-            const spriteSheetWidth = engine.spriteSheet.width / CHAR_WIDTH;
-            const x = (data.index % spriteSheetWidth);
-            const y = Math.floor(data.index / spriteSheetWidth);
-            const isFullWidth = !this.compact || data.isFullWidth;
-            const width = isFullWidth ? CHAR_WIDTH : CHAR_WIDTH / 2;
-            if (this.wrap > 0 && offsetX + width > this.wrap * CHAR_WIDTH)
-            {
-                offsetX = 0;
-                offsetY += CHAR_WIDTH;
-            }
-            // https://stackoverflow.com/a/4231508
-            engine.dbctx.fillStyle = PALETTE[this.color];
-            engine.dbctx.globalCompositeOperation = "source-over";
-            engine.dbctx.fillRect(0, 0, engine.drawBuffer.width, engine.drawBuffer.height);
-            engine.dbctx.globalCompositeOperation = "destination-atop";
-            if (isFullWidth)
-            {
-                engine.dbctx.drawImage(engine.spriteSheet, x * CHAR_WIDTH, y * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, 0, 0, CHAR_WIDTH, CHAR_WIDTH);
-            }
-            else
-            {
-                engine.dbctx.drawImage(engine.spriteSheet, x * CHAR_WIDTH + CHAR_WIDTH / 4, y * CHAR_WIDTH, CHAR_WIDTH / 2, CHAR_WIDTH, 0, 0, CHAR_WIDTH / 2, CHAR_WIDTH);
-            }
-            engine.ctx.drawImage(engine.drawBuffer, roundedX + offsetX, roundedY + offsetY);
-            // Update offset
-            offsetX += width
-        }
+    draw(context) {
+        _render_js__WEBPACK_IMPORTED_MODULE_4__["default"].draw(context, this.char, this.#getSpriteX(), this.#getSpriteY(), PALETTE[this.color], this.wrap, this.compact)
     }
 }
 
 class Engine {
     constructor(gameCanvas) {
-        this.drawBuffer = document.createElement('canvas');
-        this.drawBuffer.width = CHAR_WIDTH;
-        this.drawBuffer.height = CHAR_WIDTH;
-        this.dbctx = this.drawBuffer.getContext('2d');
-        this.spriteSheet = new Image();
-        this.spriteSheet.src = _chars_png__WEBPACK_IMPORTED_MODULE_1__;
-        this.spriteSheetData = {};
-        let lines = _chars_txt_raw__WEBPACK_IMPORTED_MODULE_2__.split('\n');
-        for (let i = 0; i < lines.length; i++)
-        {
-            let l = lines[i].split(',');
-            this.spriteSheetData[parseInt(l[0])] = {
-                index: i,
-                isFullWidth: l[1] > 0
-            }
-        }
         this.gameCanvas = gameCanvas;
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory();
-        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_3___default().Engine.create({});
+        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({});
         this.matterEngine.gravity.scale = 0;
-        this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_4__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
-        matter_js__WEBPACK_IMPORTED_MODULE_3___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
+        this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
+        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         this.ctx = gameCanvas.getContext('2d');
         gameCanvas.addEventListener('pointerdown', (event) => {
             if (this.luaTap)
@@ -45533,7 +45527,7 @@ class Engine {
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
         this.lua.global.set('createSprite', (char, color, x, y) => {
             let newSprite = new Sprite(char, color, x, y);
-            matter_js__WEBPACK_IMPORTED_MODULE_3___default().Composite.add(this.matterEngine.world, newSprite.body);
+            matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, newSprite.body);
             this.sprites.push(newSprite);
             return newSprite;
         });
@@ -45560,7 +45554,7 @@ class Engine {
                 this.luaFrame();
             }
             // Physics
-            matter_js__WEBPACK_IMPORTED_MODULE_3___default().Engine.update(this.matterEngine, FRAME_TIME_MS);
+            matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.update(this.matterEngine, FRAME_TIME_MS);
             for (let sprite of this.sprites) {
                 sprite.postPhysicsUpdate(this)
             }
@@ -45571,7 +45565,7 @@ class Engine {
             this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
             // Draw Sprites
             for (let sprite of this.sprites) {
-                sprite.draw(this)
+                sprite.draw(this.ctx)
             }
             if (elapsed > FRAME_TIME_MS * 5) {
                 console.log("Elapsed time is large, skipping frames")
@@ -45583,6 +45577,36 @@ class Engine {
         requestAnimationFrame((t) => this.#mainLoop(t));
     }
     #previousTimestamp;
+}
+
+/***/ }),
+
+/***/ "./src/game.js":
+/*!*********************!*\
+  !*** ./src/game.js ***!
+  \*********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Game: () => (/* binding */ Game)
+/* harmony export */ });
+class Game {
+    constructor(script, tiles) {
+        this.script = script;
+        this.tiles = tiles;
+    }
+    toData() {
+        return new TextEncoder().encode(JSON.stringify(this));
+    }
+    static fromData(data) {
+        if (data === null) return null;
+        const string = new TextDecoder().decode(data);
+        if (string.length === 0) return null;
+        const parsed = JSON.parse(string);
+        return new Game(parsed.script, parsed.tiles);
+    }
 }
 
 /***/ }),
@@ -45602,9 +45626,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
 /* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
 /* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
-/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
-/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
+/* harmony import */ var _editor_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./editor.js */ "./src/editor.js");
+/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
+/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
 
 
 
@@ -45613,7 +45639,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_8__["default"];
+
+
+const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_10__["default"];
 
 // DOM
 
@@ -45638,9 +45666,8 @@ for i = 1, 16 do
     sprs[i] = createSprite(c, i-1, 0, 0)
 end
 
-local text = createSprite('🍕araf🍔q5r32🍟3s r🌭32🍿qdf🧂4q🥓f🥚435🍳46tr🧇45g🥞64tg🧈45eg🍞df🥐23f🥨d🥯', 8, 0, 0)
-text.wrap = 12
-text.compact = true
+local text = createSprite('🍕', 8, 0, 0)
+text.drag = true
 
 local f = 0
 function frame()
@@ -45697,7 +45724,7 @@ function dataToUrl(data) {
     return window.location.origin+window.location.pathname+"?"+params;
 }
 function urlToGame() {
-    return _engine_js__WEBPACK_IMPORTED_MODULE_6__.Game.fromData(urlToData());
+    return _game_js__WEBPACK_IMPORTED_MODULE_6__.Game.fromData(urlToData());
 }
 function gameToUrl(game) {
     return dataToUrl(game.toData());
@@ -45717,14 +45744,15 @@ function gameToEditor(game) {
     scriptInput.update([transaction]);
 }
 function editorToGame() {
-    return new _engine_js__WEBPACK_IMPORTED_MODULE_6__.Game(scriptInput.state.doc.toString());
+    return new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(scriptInput.state.doc.toString(), "testing");
 }
-
+// Editor
+const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas);
 // Engine
-const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_6__.Engine(gameCanvas);
+const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
 let game = urlToGame();
 if (game === null) {
-    game = new _engine_js__WEBPACK_IMPORTED_MODULE_6__.Game(INITIAL_SCRIPT);
+    game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(INITIAL_SCRIPT, "testing");
 }
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
@@ -45752,14 +45780,14 @@ reloadButton.onclick = async function(){
     }
     const fflateOpts = {level: 9, mem: 8};
     const fflateOptsDict = {level: 9, mem: 8, dictionary: new TextEncoder().encode(LUA_KEYWORDS)};
-    results["fflate gzip"] = fflate__WEBPACK_IMPORTED_MODULE_7__.gzipSync(gameData, fflateOpts).length;
-    results["fflate gzip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_7__.gzipSync(gameData, fflateOptsDict).length;
-    results["fflate zip"] = fflate__WEBPACK_IMPORTED_MODULE_7__.zipSync(gameData, fflateOpts).length;
-    results["fflate zip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_7__.zipSync(gameData, fflateOptsDict).length;
-    results["fflate zlib"] = fflate__WEBPACK_IMPORTED_MODULE_7__.zlibSync(gameData, fflateOpts).length;
-    results["fflate zlib w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_7__.zlibSync(gameData, fflateOptsDict).length;
-    results["fflate deflate"] = fflate__WEBPACK_IMPORTED_MODULE_7__.deflateSync(gameData, fflateOpts).length;
-    results["fflate deflate w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_7__.deflateSync(gameData, fflateOptsDict).length;
+    results["fflate gzip"] = fflate__WEBPACK_IMPORTED_MODULE_9__.gzipSync(gameData, fflateOpts).length;
+    results["fflate gzip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_9__.gzipSync(gameData, fflateOptsDict).length;
+    results["fflate zip"] = fflate__WEBPACK_IMPORTED_MODULE_9__.zipSync(gameData, fflateOpts).length;
+    results["fflate zip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_9__.zipSync(gameData, fflateOptsDict).length;
+    results["fflate zlib"] = fflate__WEBPACK_IMPORTED_MODULE_9__.zlibSync(gameData, fflateOpts).length;
+    results["fflate zlib w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_9__.zlibSync(gameData, fflateOptsDict).length;
+    results["fflate deflate"] = fflate__WEBPACK_IMPORTED_MODULE_9__.deflateSync(gameData, fflateOpts).length;
+    results["fflate deflate w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_9__.deflateSync(gameData, fflateOptsDict).length;
     results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
     console.table(results);
 };
@@ -45774,6 +45802,87 @@ qrButton.onclick = async function(){
 }
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
+
+/***/ }),
+
+/***/ "./src/render.js":
+/*!***********************!*\
+  !*** ./src/render.js ***!
+  \***********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _chars_png__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./chars.png */ "./src/chars.png");
+/* harmony import */ var _chars_txt_raw__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chars.txt?raw */ "./src/chars.txt?raw");
+
+
+
+const CHAR_WIDTH = 16;
+
+class CharRenderer {
+   constructor() {
+        this.drawBuffer = document.createElement('canvas');
+        this.drawBuffer.width = CHAR_WIDTH;
+        this.drawBuffer.height = CHAR_WIDTH;
+        this.dbctx = this.drawBuffer.getContext('2d');
+        this.spriteSheet = new Image();
+        this.spriteSheet.src = _chars_png__WEBPACK_IMPORTED_MODULE_0__;
+        this.spriteSheetData = {};
+        let lines = _chars_txt_raw__WEBPACK_IMPORTED_MODULE_1__.split('\n');
+        for (let i = 0; i < lines.length; i++)
+        {
+            let l = lines[i].split(',');
+            this.spriteSheetData[parseInt(l[0])] = {
+                index: i,
+                isFullWidth: l[1] > 0
+            }
+        }
+    }
+   draw(context, chars, posX, posY, color, wrap, compact) {
+        context.fillStyle = "white";
+        const array = Array.from(chars);
+        let offsetX = 0;
+        let offsetY = 0;
+        let roundedX = Math.round(posX);
+        let roundedY = Math.round(posY);
+        for (let i = 0; i < array.length; i++) {
+            const codepoint = array[i].codePointAt(0);
+            const data = this.spriteSheetData[codepoint];
+            const spriteSheetWidth = this.spriteSheet.width / CHAR_WIDTH;
+            const x = (data.index % spriteSheetWidth);
+            const y = Math.floor(data.index / spriteSheetWidth);
+            const isFullWidth = !compact || data.isFullWidth;
+            const width = isFullWidth ? CHAR_WIDTH : CHAR_WIDTH / 2;
+            if (wrap > 0 && offsetX + width > wrap * CHAR_WIDTH)
+            {
+                offsetX = 0;
+                offsetY += CHAR_WIDTH;
+            }
+            // https://stackoverflow.com/a/4231508
+            this.dbctx.fillStyle = color;
+            this.dbctx.globalCompositeOperation = "source-over";
+            this.dbctx.fillRect(0, 0, this.drawBuffer.width, this.drawBuffer.height);
+            this.dbctx.globalCompositeOperation = "destination-atop";
+            if (isFullWidth)
+            {
+                this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH, y * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, 0, 0, CHAR_WIDTH, CHAR_WIDTH);
+            }
+            else
+            {
+                this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH + CHAR_WIDTH / 4, y * CHAR_WIDTH, CHAR_WIDTH / 2, CHAR_WIDTH, 0, 0, CHAR_WIDTH / 2, CHAR_WIDTH);
+            }
+            context.drawImage(this.drawBuffer, roundedX + offsetX, roundedY + offsetY);
+            // Update offset
+            offsetX += width
+        }
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new CharRenderer());
 
 /***/ }),
 
