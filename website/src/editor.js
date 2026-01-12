@@ -17,11 +17,13 @@ export class Editor {
         window.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
             this.draw();
-        });
+            event.preventDefault();
+        }, { passive: false });
         window.addEventListener('pointerup', (event) => {
             this.placingTiles = false;
             this.draw();
-        });
+            event.preventDefault();
+        }, { passive: false });
         editorCanvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
                 let epos = getPointerPos(editorCanvas, event);
@@ -29,9 +31,10 @@ export class Editor {
                 let y = Math.floor(epos.y / 16);
                 this.tiles[y * 12 + x] = '#';
                 this.draw();
+                event.preventDefault();
             }
-        });
-        this.tiles = Array(16*12).fill(' ');
+        }, { passive: false });
+        this.tiles = Array(16 * 12).fill(' ');
         this.draw();
     }
     draw() {
