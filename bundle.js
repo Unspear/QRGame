@@ -45680,6 +45680,16 @@ _benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_async_dependencies_result
 
 const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_10__["default"];
 
+// Web app service worker
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+        console.log('SW registered: ', registration);
+    }).catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+    });
+ }
+
 // DOM
 
 const gameCanvas = document.getElementById('game-canvas');
