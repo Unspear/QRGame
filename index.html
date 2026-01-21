@@ -40,6 +40,9 @@
 
       <div class="tab-content" id="tab-content-edit">
           <canvas id="editor-canvas" width="192" height="256"></canvas>
+          <p>
+            <input type="text" id="editor-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
+          </p>
       </div>
 
       <div class="tab-content" id="tab-content-code">
