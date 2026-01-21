@@ -1,7 +1,6 @@
 import Chars from './chars.png';
 import CharsText from './chars.txt?raw'
-
-const CHAR_WIDTH = 16;
+import { CHAR_WIDTH } from './constants';
 
 class CharRenderer {
    constructor() {
@@ -22,15 +21,17 @@ class CharRenderer {
             }
         }
     }
-   draw(context, chars, posX, posY, color, wrap, compact) {
+   draw(context, array, posX, posY, color, wrap, compact) {
         context.fillStyle = "white";
-        const array = Array.from(chars);
         let offsetX = 0;
         let offsetY = 0;
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            const codepoint = array[i].codePointAt(0);
+            let codepoint = array[i].codePointAt(0);
+            if (!(codepoint in this.spriteSheetData)) {
+                codepoint = 0;// NUL character
+            }
             const data = this.spriteSheetData[codepoint];
             const spriteSheetWidth = this.spriteSheet.width / CHAR_WIDTH;
             const x = (data.index % spriteSheetWidth);

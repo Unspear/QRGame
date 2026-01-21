@@ -6,7 +6,7 @@ import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game.js'
 import {Engine} from './engine.js'
 import {Editor} from './editor.js'
-import * as fflate from 'fflate'
+import benchmark from './benchmark.js';
 import brotliPromise from 'brotli-wasm';
 const brotli = await brotliPromise;
 
@@ -14,6 +14,7 @@ const brotli = await brotliPromise;
 
 const gameCanvas = document.getElementById('game-canvas');
 const editorCanvas = document.getElementById('editor-canvas');
+const editorInput = document.getElementById('editor-input');
 const codeContent = document.getElementById('tab-content-code');
 const reloadButton = document.getElementById('reload-button');
 const urlButton = document.getElementById('url-button');
@@ -46,34 +47,6 @@ function frame()
   f = f + FRAME_TIME
 end`;
 
-const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
-
-class StreamCompressor {
-    constructor(algorithm) {
-        this.#algorithm = algorithm;
-    }
-    async compress(data) {
-        const stream = new Blob([data]).stream();
-        const compressedStream = stream.pipeThrough(new CompressionStream(this.#algorithm));
-        return await new Response(compressedStream).bytes();
-    }
-    async decompress(data) {
-        const stream = new Blob([data]).stream();
-        const decompressedStream = stream.pipeThrough(new DecompressionStream(this.#algorithm));
-        return await new Response(decompressedStream).bytes();
-    }
-    toString() {
-        return "web " + this.#algorithm;
-    }
-    #algorithm
-}
-
-const compressors = [
-    new StreamCompressor("deflate-raw"),
-    new StreamCompressor("gzip"),
-    new StreamCompressor("deflate"),
-];
-
 // Import/Export
 //Compression Stream: https://evanhahn.com/javascript-compression-streams-api-with-strings/
 function urlToData() {
@@ -90,11 +63,18 @@ function dataToUrl(data) {
     params.set("s", base64);
     return window.location.origin+window.location.pathname+"?"+params;
 }
+function compressData(data) {
+    return brotli.compress(data, {quality: 11});
+}
+function decompressData(data) {
+    if (data === null) return null;
+    return brotli.decompress(data);
+}
 function urlToGame() {
-    return Game.fromData(urlToData());
+    return Game.fromData(decompressData(urlToData()));
 }
 function gameToUrl(game) {
-    return dataToUrl(game.toData());
+    return dataToUrl(compressData(game.toData()));
 }
 
 // Script Editor
@@ -114,7 +94,7 @@ function editorToGame() {
     return new Game(scriptInput.state.doc.toString(), "testing");
 }
 // Editor
-const editor = new Editor(editorCanvas);
+const editor = new Editor(editorCanvas, editorInput);
 // Engine
 const engine = new Engine(gameCanvas);
 let game = urlToGame();
@@ -137,26 +117,7 @@ generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOp
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
     generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    console.log("Compression Results");
-    const gameData = engine.game.toData();
-    const results = {};
-    results["raw"] = gameData.length;
-    for (const c of compressors) {
-        const compressed = await c.compress(gameData);
-        results[c.toString()] = compressed.length;
-    }
-    const fflateOpts = {level: 9, mem: 8};
-    const fflateOptsDict = {level: 9, mem: 8, dictionary: new TextEncoder().encode(LUA_KEYWORDS)};
-    results["fflate gzip"] = fflate.gzipSync(gameData, fflateOpts).length;
-    results["fflate gzip w/dict"] = fflate.gzipSync(gameData, fflateOptsDict).length;
-    results["fflate zip"] = fflate.zipSync(gameData, fflateOpts).length;
-    results["fflate zip w/dict"] = fflate.zipSync(gameData, fflateOptsDict).length;
-    results["fflate zlib"] = fflate.zlibSync(gameData, fflateOpts).length;
-    results["fflate zlib w/dict"] = fflate.zlibSync(gameData, fflateOptsDict).length;
-    results["fflate deflate"] = fflate.deflateSync(gameData, fflateOpts).length;
-    results["fflate deflate w/dict"] = fflate.deflateSync(gameData, fflateOptsDict).length;
-    results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
-    console.table(results);
+    benchmark(engine.game.toData());
 };
 urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));

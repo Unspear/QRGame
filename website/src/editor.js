@@ -9,27 +9,29 @@ function getPointerPos(canvas, event) {
     return { x: x, y: y };
 }
 
+function pixelToTile(coords) {
+    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
+}
+
 export class Editor {
-    constructor(editorCanvas) {
+    constructor(editorCanvas, editorCharInput) {
         this.editorCanvas = editorCanvas;
+        this.editorCharInput = editorCharInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
-        window.addEventListener('pointerdown', (event) => {
+        editorCanvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
+            this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
             this.draw();
             event.preventDefault();
         }, { passive: false });
         window.addEventListener('pointerup', (event) => {
             this.placingTiles = false;
             this.draw();
-            event.preventDefault();
-        }, { passive: false });
+        });
         editorCanvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
-                let epos = getPointerPos(editorCanvas, event);
-                let x = Math.floor(epos.x / 16);
-                let y = Math.floor(epos.y / 16);
-                this.tiles[y * 12 + x] = '#';
+                this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
                 this.draw();
                 event.preventDefault();
             }
@@ -37,11 +39,20 @@ export class Editor {
         this.tiles = Array(16 * 12).fill(' ');
         this.draw();
     }
+    getTileFromInput() {
+        if (this.editorCharInput.value.length > 0) {
+            return String.fromCodePoint(this.editorCharInput.value.codePointAt(0));
+        }
+        return ' ';
+    }
+    setTile(char, coords) {
+        this.tiles[coords.y * 12 + coords.x] = char;
+    }
     draw() {
         this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-        charRenderer.draw(this.ctx, this.tiles.join(''), 0, 0, '#ffffff', 12, false);
+        charRenderer.draw(this.ctx, this.tiles, 0, 0, '#ffffff', 12, false);
     }
 }
