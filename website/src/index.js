@@ -1,4 +1,5 @@
 import './style.css';
+import './manifest.json';
 import {EditorView, basicSetup} from 'codemirror'
 import {StreamLanguage} from '@codemirror/language'
 import {lua} from '@codemirror/legacy-modes/mode/lua'

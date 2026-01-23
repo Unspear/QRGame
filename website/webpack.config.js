@@ -32,6 +32,13 @@ module.exports = {
         type: 'asset/resource',
       },
       {
+        test: /\.(json)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: '[name][ext]',
+        },
+      },
+      {
         resourceQuery: /raw/,
         type: 'asset/source',
       },
@@ -40,13 +47,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html',
-      favicon: 'src/icon.png'
+      favicon: 'src/icon.png',
     }),
     new WorkboxPlugin.GenerateSW({
        // these options encourage the ServiceWorkers to get in there fast
        // and not allow any straggling "old" SWs to hang around
        clientsClaim: true,
-       skipWaiting: true,
+       skipWaiting: true
      }),
   ]
 };
