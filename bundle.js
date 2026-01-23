@@ -45464,39 +45464,38 @@ function pixelToTile(coords) {
     return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
 }
 
+function clamp(number, min, max) {
+  return Math.max(min, Math.min(number, max));
+}
+
 class Editor {
     constructor(editorCanvas, editorCharInput) {
         this.editorCanvas = editorCanvas;
         this.editorCharInput = editorCharInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
-        let pointerDown = (event) => {
+        // Place tile while pointer is held
+        editorCanvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
             this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
             this.draw();
-            event.preventDefault();
-        };
-        let pointerUp = (event) => {
+        });
+        window.addEventListener('pointerup', (event) => {
             this.placingTiles = false;
             this.draw();
-            event.preventDefault();
-        };
-        let pointerMove = (event) => {
+        });
+        editorCanvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
                 this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
                 this.draw();
-                event.preventDefault();
             }
-        };
-        // Mouse
-        editorCanvas.addEventListener('mousedown', pointerDown, { passive: false });
-        window.addEventListener('mouseup', pointerUp);
-        editorCanvas.addEventListener('mousemove', pointerMove, { passive: false });
-        // Touch
-        editorCanvas.addEventListener('touchstart', pointerDown, { passive: false });
-        editorCanvas.addEventListener('touchend', pointerUp, { passive: false});
-        editorCanvas.addEventListener('touchmove', pointerMove, { passive: false });
-        this.tiles = Array(16 * 12).fill(' ');
+        });
+        // Nuke default touch behaviour (pull down screen to reload)
+        editorCanvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+        editorCanvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
+        editorCanvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+        this.dim = { w: 12, h: 16 };
+        this.tiles = Array(this.dim.w * this.dim.h).fill(' ');
         this.draw();
     }
     getTileFromInput() {
@@ -45506,7 +45505,7 @@ class Editor {
         return ' ';
     }
     setTile(char, coords) {
-        this.tiles[coords.y * 12 + coords.x] = char;
+        this.tiles[clamp(coords.y, 0, this.dim.h - 1) * this.dim.w + clamp(coords.x, 0, this.dim.w - 1)] = char;
     }
     draw() {
         this.ctx.beginPath();
