@@ -45470,23 +45470,32 @@ class Editor {
         this.editorCharInput = editorCharInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
-        editorCanvas.addEventListener('pointerdown', (event) => {
+        let pointerDown = (event) => {
             this.placingTiles = true;
             this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
             this.draw();
             event.preventDefault();
-        }, { passive: false });
-        window.addEventListener('pointerup', (event) => {
+        };
+        let pointerUp = (event) => {
             this.placingTiles = false;
             this.draw();
-        });
-        editorCanvas.addEventListener('pointermove', (event) => {
+            event.preventDefault();
+        };
+        let pointerMove = (event) => {
             if (this.placingTiles) {
                 this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
                 this.draw();
                 event.preventDefault();
             }
-        }, { passive: false });
+        };
+        // Mouse
+        editorCanvas.addEventListener('mousedown', pointerDown, { passive: false });
+        window.addEventListener('mouseup', pointerUp);
+        editorCanvas.addEventListener('mousemove', pointerMove, { passive: false });
+        // Touch
+        editorCanvas.addEventListener('touchstart', pointerDown, { passive: false });
+        editorCanvas.addEventListener('touchend', pointerUp, { passive: false});
+        editorCanvas.addEventListener('touchmove', pointerMove, { passive: false });
         this.tiles = Array(16 * 12).fill(' ');
         this.draw();
     }
