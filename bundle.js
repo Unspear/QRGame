@@ -45470,37 +45470,23 @@ class Editor {
         this.editorCharInput = editorCharInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
-        let that = this;
-        this.pointerDown = function(e) {
-            that.placingTiles = true;
-            that.setTile(that.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, e)));
-            that.draw();
-            if (e.changedTouches) {
-                e.preventDefault();
+        editorCanvas.addEventListener('pointerdown', (event) => {
+            this.placingTiles = true;
+            this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+            this.draw();
+            event.preventDefault();
+        }, { passive: false });
+        window.addEventListener('pointerup', (event) => {
+            this.placingTiles = false;
+            this.draw();
+        });
+        editorCanvas.addEventListener('pointermove', (event) => {
+            if (this.placingTiles) {
+                this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+                this.draw();
+                event.preventDefault();
             }
-        }
-        this.pointerUp = function(e) {
-            that.placingTiles = false;
-            that.draw();
-            if (e.changedTouches) {
-                e.preventDefault();
-            }
-        }
-        this.pointerMove = function(e) {
-            if (that.placingTiles) {
-                that.setTile(that.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, e)));
-                that.draw();
-                if (e.changedTouches) {
-                    e.preventDefault();
-                }
-            }
-        }
-        editorCanvas.addEventListener('mousemove', this.pointerMove, { passive: true });
-        editorCanvas.addEventListener('mousedown', this.pointerDown, { passive: true });
-        editorCanvas.addEventListener('mouseup', this.pointerUp, { passive: true });
-        editorCanvas.addEventListener('touchmove', this.pointerMove, { passive: false });
-        editorCanvas.addEventListener('touchstart', this.pointerDown, { passive: false });
-        editorCanvas.addEventListener('touchend', this.pointerUp, { passive: false });
+        }, { passive: false });
         this.tiles = Array(16 * 12).fill(' ');
         this.draw();
     }
