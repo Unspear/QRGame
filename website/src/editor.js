@@ -1,5 +1,6 @@
 import { Game } from './game.js'
 import charRenderer from './render.js'
+import { TileMap } from './tile.js'
 
 function getPointerPos(canvas, event) {
     const canvasScaleX = canvas.offsetWidth / canvas.width;
@@ -26,7 +27,7 @@ export class Editor {
         // Place tile while pointer is held
         editorCanvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
-            this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+            this.setTileFromEvent(event);
             this.draw();
         });
         window.addEventListener('pointerup', (event) => {
@@ -35,7 +36,7 @@ export class Editor {
         });
         editorCanvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
-                this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+                this.setTileFromEvent(event);
                 this.draw();
             }
         });
@@ -43,24 +44,28 @@ export class Editor {
         editorCanvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
         editorCanvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         editorCanvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-        this.dim = { w: 12, h: 16 };
-        this.tiles = Array(this.dim.w * this.dim.h).fill(' ');
+        this.tileMap = new TileMap({ w: 12, h: 16 });
         this.draw();
     }
-    getTileFromInput() {
-        if (this.editorCharInput.value.length > 0) {
-            return String.fromCodePoint(this.editorCharInput.value.codePointAt(0));
+    setTileFromEvent(event) {
+        // Get array of codepoints
+        const codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
+        if (codePoints.length == 0) {
+            // Erase
+            codePoints = [' '.codePointAt(0)];
         }
-        return ' ';
-    }
-    setTile(char, coords) {
-        this.tiles[clamp(coords.y, 0, this.dim.h - 1) * this.dim.w + clamp(coords.x, 0, this.dim.w - 1)] = char;
+        // Draw array to tilemap
+        let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
+        for (const codePoint of codePoints) {
+            this.tileMap.setTile(coords, { codePoint: codePoint });
+            coords.x++;
+        }
     }
     draw() {
         this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-        charRenderer.draw(this.ctx, this.tiles, 0, 0, '#ffffff', 12, false);
+        charRenderer.draw(this.ctx, this.tileMap.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.tileMap.dim.w, false);
     }
 }
