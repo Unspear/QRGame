@@ -23,6 +23,9 @@ export class TileMap {
             this.tiles[index] = Object.assign({}, this.tiles[index], tileData);
         }
     }
+    draw(ctx) {
+        charRenderer.draw(ctx, this.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.dim.w, false);
+    }
 }
 
 export class MetaTileMap {

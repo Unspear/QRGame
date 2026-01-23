@@ -40,18 +40,18 @@ const INITIAL_SCRIPT = `function utf8.sub(s,i,j)
 end
 
 local sprs = {}
-for i = 1, 16 do
-    local c = utf8.sub('🍕🍔🍟🌭🍿🧂🥓🥚🍳🧇🥞🧈🍞🥐🥨🥯', i, i)
+for i = 1, 8 do
+    local c = utf8.sub('🍕🍔🍟🌭🍿🧂🥓🥚', i, i)
     sprs[i] = createSprite(c, i-1, 0, 0)
 end
 
-local text = createSprite('🍕', 8, 0, 0)
+local text = createSprite('🍕', 0, 0, 0)
 text.drag = true
 
 local f = 0
 function frame()
-  for i = 1, 16 do
-    local radians = f * math.pi * 0.5 + (math.pi * 2) * (i / 16)
+  for i = 1, 8 do
+    local radians = f * math.pi * 0.5 + (math.pi * 2) * (i / 8)
     sprs[i].x = math.floor(88.5+math.sin(radians)*45)
     sprs[i].y = math.floor(120.5+math.cos(radians)*45)
   end

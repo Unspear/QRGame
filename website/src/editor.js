@@ -66,6 +66,6 @@ export class Editor {
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-        charRenderer.draw(this.ctx, this.tileMap.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.tileMap.dim.w, false);
+        this.tileMap.draw(this.ctx);
     }
 }
