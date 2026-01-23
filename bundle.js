@@ -45655,19 +45655,20 @@ class Game {
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ "./src/style.css");
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
-/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
-/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
-/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
-/* harmony import */ var _editor_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./editor.js */ "./src/editor.js");
-/* harmony import */ var _benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./benchmark.js */ "./src/benchmark.js");
-/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_benchmark_js__WEBPACK_IMPORTED_MODULE_9__]);
+/* harmony import */ var _manifest_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./manifest.json */ "./src/manifest.json");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
+/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
+/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
+/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
+/* harmony import */ var _editor_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./editor.js */ "./src/editor.js");
+/* harmony import */ var _benchmark_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./benchmark.js */ "./src/benchmark.js");
+/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_benchmark_js__WEBPACK_IMPORTED_MODULE_10__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_async_dependencies_result__[0];
+_benchmark_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_async_dependencies_result__[0];
 
 
 
@@ -45678,7 +45679,8 @@ _benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_async_dependencies_result
 
 
 
-const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_10__["default"];
+
+const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_11__["default"];
 
 // Web app service worker
 
@@ -45751,15 +45753,15 @@ function decompressData(data) {
     return brotli.decompress(data);
 }
 function urlToGame() {
-    return _game_js__WEBPACK_IMPORTED_MODULE_6__.Game.fromData(decompressData(urlToData()));
+    return _game_js__WEBPACK_IMPORTED_MODULE_7__.Game.fromData(decompressData(urlToData()));
 }
 function gameToUrl(game) {
     return dataToUrl(compressData(game.toData()));
 }
 
 // Script Editor
-let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
-    extensions: [codemirror__WEBPACK_IMPORTED_MODULE_2__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_3__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__.lua)],
+let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_2__.EditorView({
+    extensions: [codemirror__WEBPACK_IMPORTED_MODULE_3__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_4__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_5__.lua)],
     parent: codeContent
 })
 function gameToEditor(game) {
@@ -45771,33 +45773,33 @@ function gameToEditor(game) {
     scriptInput.update([transaction]);
 }
 function editorToGame() {
-    return new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(scriptInput.state.doc.toString(), "testing");
+    return new _game_js__WEBPACK_IMPORTED_MODULE_7__.Game(scriptInput.state.doc.toString(), "testing");
 }
 // Editor
-const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas, editorInput);
+const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_9__.Editor(editorCanvas, editorInput);
 // Engine
-const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
+const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_8__.Engine(gameCanvas);
 let game = urlToGame();
 if (game === null) {
-    game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(INITIAL_SCRIPT, "testing");
+    game = new _game_js__WEBPACK_IMPORTED_MODULE_7__.Game(INITIAL_SCRIPT, "testing");
 }
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
 engine.play(editorToGame());
 const qrGenerateOptions = {
-    minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_5__.correction.L
+    minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_6__.correction.L
 }
 const qrImageOptions = {
     on: [0, 0, 0, 255],
     off: [255, 255, 255, 255]
 }
-;(0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+;(0,lean_qr__WEBPACK_IMPORTED_MODULE_6__.generate)(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 
 // Buttons
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
-    (0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    (0,_benchmark_js__WEBPACK_IMPORTED_MODULE_9__["default"])(engine.game.toData());
+    (0,lean_qr__WEBPACK_IMPORTED_MODULE_6__.generate)(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+    (0,_benchmark_js__WEBPACK_IMPORTED_MODULE_10__["default"])(engine.game.toData());
 };
 urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));
@@ -45810,6 +45812,17 @@ qrButton.onclick = async function(){
 }
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
+
+/***/ }),
+
+/***/ "./src/manifest.json":
+/*!***************************!*\
+  !*** ./src/manifest.json ***!
+  \***************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "manifest.json";
 
 /***/ }),
 

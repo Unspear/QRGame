@@ -1,0 +1,15 @@
+{
+  "short_name": "QR Game",
+  "name": "QR Game",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "black",
+  "background_color": "white"
+}

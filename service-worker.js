@@ -88,13 +88,16 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
     "url": "bundle.js",
-    "revision": "80779f2e3f6123252f7d9f64353b7100"
+    "revision": "12bcecdea9e3ebc89b60a53d3f03512d"
   }, {
     "url": "icon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "index.html",
     "revision": "51cbc15e54c6ebc450fd8b83dadeb699"
+  }, {
+    "url": "manifest.json",
+    "revision": "7a0c5ac3d5253d2d4f89acd16be32d7c"
   }], {});
 
 }));
