@@ -45416,22 +45416,14 @@ const CHAR_WIDTH = 16;
 
 // https://lospec.com/palette-list/shmupy-16
 const PALETTE = [
-    '#101020',
-    '#222244',
-    '#334455',
-    '#556666',
-    '#664455',
-    '#887766',
-    '#999988',
-    '#ccccaa',
-    '#ffffee',
-    '#cc5544',
+    '#ffffff',
+    '#636363',
+    '#cc2222',
     '#ff8822',
     '#ffcc33',
     '#88cc44',
-    '#449944',
-    '#44aaff',
     '#3377dd',
+    '#8e20bd',
 ]
 
 /***/ }),
@@ -45449,6 +45441,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
 /* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
+/* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
+
 
 
 
@@ -45477,7 +45471,7 @@ class Editor {
         // Place tile while pointer is held
         editorCanvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
-            this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+            this.setTileFromEvent(event);
             this.draw();
         });
         window.addEventListener('pointerup', (event) => {
@@ -45486,7 +45480,7 @@ class Editor {
         });
         editorCanvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
-                this.setTile(this.getTileFromInput(), pixelToTile(getPointerPos(editorCanvas, event)));
+                this.setTileFromEvent(event);
                 this.draw();
             }
         });
@@ -45494,25 +45488,29 @@ class Editor {
         editorCanvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
         editorCanvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         editorCanvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-        this.dim = { w: 12, h: 16 };
-        this.tiles = Array(this.dim.w * this.dim.h).fill(' ');
+        this.tileMap = new _tile_js__WEBPACK_IMPORTED_MODULE_2__.TileMap({ w: 12, h: 16 });
         this.draw();
     }
-    getTileFromInput() {
-        if (this.editorCharInput.value.length > 0) {
-            return String.fromCodePoint(this.editorCharInput.value.codePointAt(0));
+    setTileFromEvent(event) {
+        // Get array of codepoints
+        const codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
+        if (codePoints.length == 0) {
+            // Erase
+            codePoints = [' '.codePointAt(0)];
         }
-        return ' ';
-    }
-    setTile(char, coords) {
-        this.tiles[clamp(coords.y, 0, this.dim.h - 1) * this.dim.w + clamp(coords.x, 0, this.dim.w - 1)] = char;
+        // Draw array to tilemap
+        let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
+        for (const codePoint of codePoints) {
+            this.tileMap.setTile(coords, { codePoint: codePoint });
+            coords.x++;
+        }
     }
     draw() {
         this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-        _render_js__WEBPACK_IMPORTED_MODULE_1__["default"].draw(this.ctx, this.tiles, 0, 0, '#ffffff', 12, false);
+        this.tileMap.draw(this.ctx);
     }
 }
 
@@ -45719,18 +45717,18 @@ const INITIAL_SCRIPT = `function utf8.sub(s,i,j)
 end
 
 local sprs = {}
-for i = 1, 16 do
-    local c = utf8.sub('🍕🍔🍟🌭🍿🧂🥓🥚🍳🧇🥞🧈🍞🥐🥨🥯', i, i)
+for i = 1, 8 do
+    local c = utf8.sub('🍕🍔🍟🌭🍿🧂🥓🥚', i, i)
     sprs[i] = createSprite(c, i-1, 0, 0)
 end
 
-local text = createSprite('🍕', 8, 0, 0)
+local text = createSprite('🍕', 0, 0, 0)
 text.drag = true
 
 local f = 0
 function frame()
-  for i = 1, 16 do
-    local radians = f * math.pi * 0.5 + (math.pi * 2) * (i / 16)
+  for i = 1, 8 do
+    local radians = f * math.pi * 0.5 + (math.pi * 2) * (i / 8)
     sprs[i].x = math.floor(88.5+math.sin(radians)*45)
     sprs[i].y = math.floor(120.5+math.cos(radians)*45)
   end
@@ -46185,6 +46183,76 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
        /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_style_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
 
+
+/***/ }),
+
+/***/ "./src/tile.js":
+/*!*********************!*\
+  !*** ./src/tile.js ***!
+  \*********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MetaTileMap: () => (/* binding */ MetaTileMap),
+/* harmony export */   TileMap: () => (/* binding */ TileMap),
+/* harmony export */   TileSet: () => (/* binding */ TileSet)
+/* harmony export */ });
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+/**
+TileMap: An arragement of tiles (referenced from a TileSet). Does NOT have an inherent position.
+- Dimensions
+- Tile data array
+- TileSet? (if null, the default tileset is just all the tiles in the sprite sheet)
+TileSet: but a tileset can also contain a TileMap which
+- TileMap
+ */
+
+class TileMap {
+    constructor(dim) {
+        this.dim = dim;
+        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0, solid: false });
+    }
+    setTile(coords, tileData) {
+        if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
+        {
+            const index = coords.y * this.dim.w + coords.x;
+            this.tiles[index] = Object.assign({}, this.tiles[index], tileData);
+        }
+    }
+    draw(ctx) {
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.dim.w, false);
+    }
+}
+
+class MetaTileMap {
+    constructor(dim, tileSet) {
+        this.dim = dim;
+        this.tiles = Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
+        this.tileSet = tileSet;
+    }
+    setTile(coords, tileId, transform) {
+        let tile = this.tiles[coords.y * this.dim.w + coords.x];
+        tile.tileId = tileId;
+        tile.transform = transform;
+    }
+    getTileMap() {
+    }
+}
+
+class TileSet {
+    constructor(count, dim, tileSet) {
+        this.tiles = {};
+    }
+}
 
 /***/ }),
 
