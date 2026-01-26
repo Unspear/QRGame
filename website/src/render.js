@@ -1,6 +1,6 @@
 import Chars from './chars.png';
 import CharsText from './chars.txt?raw'
-import { CHAR_WIDTH } from './constants';
+import { CHAR_WIDTH, PALETTE } from './constants';
 
 class CharRenderer {
    constructor() {
@@ -21,14 +21,15 @@ class CharRenderer {
             }
         }
     }
-   draw(context, array, posX, posY, color, wrap, compact) {
+   draw(context, array, posX, posY, wrap, compact) {
         context.fillStyle = "white";
         let offsetX = 0;
         let offsetY = 0;
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            let codepoint = array[i].codePointAt(0);
+            let codepoint = array[i].codePoint;
+            let color = PALETTE[array[i].color % PALETTE.length];
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }

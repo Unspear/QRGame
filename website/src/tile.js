@@ -24,7 +24,7 @@ export class TileMap {
         }
     }
     draw(ctx) {
-        charRenderer.draw(ctx, this.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.dim.w, false);
+        charRenderer.draw(ctx, this.tiles.map(tile => ({ codePoint: tile.codePoint, color: tile.color }) ), 0, 0, this.dim.w, false);
     }
 }
 
