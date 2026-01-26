@@ -28676,12 +28676,14 @@ button {
     text-wrap: nowrap;
     text-overflow: clip;
 }
+.tab-centred {
+    margin-inline: auto;
+    width: min(calc(192px * 3), 100%);
+}
 canvas {
     margin-inline: auto;
-    max-width: 100%;
     display: block;
-    width: min(calc(192px * 3), 100%);
-    /*height: calc(256px * 3);*/
+    width: 100%;
     image-rendering: pixelated;
 }
 #qr-canvas {
@@ -28708,7 +28710,7 @@ canvas {
 .tabs input[id="tab-code"]:checked ~ #tab-content-code {
 	display: block;
 }
-`, "",{"version":3,"sources":["webpack://./src/style.css"],"names":[],"mappings":"AAAA;IACI,gBAAgB;AACpB;AACA;IACI,WAAW;AACf;AACA;EACE,cAAc;EACd,mBAAmB;AACrB;AACA;IACI,kBAAkB;AACtB;AACA;IACI,uBAAuB;IACvB,gBAAgB;IAChB,mBAAmB;AACvB;AACA;IACI,WAAW;IACX,iBAAiB;IACjB,gBAAgB;IAChB,iBAAiB;IACjB,mBAAmB;AACvB;AACA;IACI,mBAAmB;IACnB,eAAe;IACf,cAAc;IACd,iCAAiC;IACjC,2BAA2B;IAC3B,0BAA0B;AAC9B;AACA;IACI,uBAAuB;IACvB,iBAAiB;AACrB;;AAEA;CACC,aAAa;AACd;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf","sourcesContent":["html {\r\n    min-width: 200px;\r\n}\r\nbody {\r\n    margin: 0px;\r\n}\r\n#tab-content-code {\r\n  max-width: 95%;\r\n  margin-inline: auto;\r\n}\r\np {\r\n    text-align: center;\r\n}\r\n.cm-editor {\r\n    outline: 2px solid grey;\r\n    margin-top: 1rem;\r\n    margin-bottom: 1rem;\r\n}\r\nbutton {\r\n    width: 18ch;\r\n    font-size: 1.2rem;\r\n    line-height: 1.5;\r\n    text-wrap: nowrap;\r\n    text-overflow: clip;\r\n}\r\ncanvas {\r\n    margin-inline: auto;\r\n    max-width: 100%;\r\n    display: block;\r\n    width: min(calc(192px * 3), 100%);\r\n    /*height: calc(256px * 3);*/\r\n    image-rendering: pixelated;\r\n}\r\n#qr-canvas {\r\n    outline: 2px solid grey;\r\n    background: white;\r\n}\r\n\r\n.tabs .tab-content {\r\n\tdisplay: none;\r\n}\r\n\r\n.tabs input[id=\"tab-play\"]:checked ~ #tab-content-play {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-share\"]:checked ~ #tab-content-share {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-edit\"]:checked ~ #tab-content-edit {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-code\"]:checked ~ #tab-content-code {\r\n\tdisplay: block;\r\n}\r\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/style.css"],"names":[],"mappings":"AAAA;IACI,gBAAgB;AACpB;AACA;IACI,WAAW;AACf;AACA;EACE,cAAc;EACd,mBAAmB;AACrB;AACA;IACI,kBAAkB;AACtB;AACA;IACI,uBAAuB;IACvB,gBAAgB;IAChB,mBAAmB;AACvB;AACA;IACI,WAAW;IACX,iBAAiB;IACjB,gBAAgB;IAChB,iBAAiB;IACjB,mBAAmB;AACvB;AACA;IACI,mBAAmB;IACnB,iCAAiC;AACrC;AACA;IACI,mBAAmB;IACnB,cAAc;IACd,WAAW;IACX,0BAA0B;AAC9B;AACA;IACI,uBAAuB;IACvB,iBAAiB;AACrB;;AAEA;CACC,aAAa;AACd;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf;;AAEA;CACC,cAAc;AACf","sourcesContent":["html {\r\n    min-width: 200px;\r\n}\r\nbody {\r\n    margin: 0px;\r\n}\r\n#tab-content-code {\r\n  max-width: 95%;\r\n  margin-inline: auto;\r\n}\r\np {\r\n    text-align: center;\r\n}\r\n.cm-editor {\r\n    outline: 2px solid grey;\r\n    margin-top: 1rem;\r\n    margin-bottom: 1rem;\r\n}\r\nbutton {\r\n    width: 18ch;\r\n    font-size: 1.2rem;\r\n    line-height: 1.5;\r\n    text-wrap: nowrap;\r\n    text-overflow: clip;\r\n}\r\n.tab-centred {\r\n    margin-inline: auto;\r\n    width: min(calc(192px * 3), 100%);\r\n}\r\ncanvas {\r\n    margin-inline: auto;\r\n    display: block;\r\n    width: 100%;\r\n    image-rendering: pixelated;\r\n}\r\n#qr-canvas {\r\n    outline: 2px solid grey;\r\n    background: white;\r\n}\r\n\r\n.tabs .tab-content {\r\n\tdisplay: none;\r\n}\r\n\r\n.tabs input[id=\"tab-play\"]:checked ~ #tab-content-play {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-share\"]:checked ~ #tab-content-share {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-edit\"]:checked ~ #tab-content-edit {\r\n\tdisplay: block;\r\n}\r\n\r\n.tabs input[id=\"tab-code\"]:checked ~ #tab-content-code {\r\n\tdisplay: block;\r\n}\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -45414,16 +45416,15 @@ const FRAME_TIME_MS = FRAME_TIME * 1000.0;
 
 const CHAR_WIDTH = 16;
 
-// https://lospec.com/palette-list/shmupy-16
 const PALETTE = [
-    '#ffffff',
-    '#636363',
-    '#cc2222',
-    '#ff8822',
-    '#ffcc33',
-    '#88cc44',
-    '#3377dd',
-    '#8e20bd',
+    '#ffffff',// 1 0 0
+    '#636363',// 0.5 0 0
+    '#cc2222',// 0.545 0.2036 27.36
+    '#e5882A',// 0.7116 0.1515 60.23
+    '#ffcc00',// 0.8652 0.1768 90.38
+    '#88cc44',// 0.7729 0.1803 132.16
+    '#3377dd',// 0.5804 0.1704 258.65
+    '#8e20bd',// 0.5012 0.2271 312.5
 ]
 
 /***/ }),
@@ -45463,9 +45464,11 @@ function clamp(number, min, max) {
 }
 
 class Editor {
-    constructor(editorCanvas, editorCharInput) {
+    constructor(editorCanvas, editorCharInput, editorColorInput, editorInvertedInput) {
         this.editorCanvas = editorCanvas;
         this.editorCharInput = editorCharInput;
+        this.editorColorInput = editorColorInput;
+        this.editorInvertedInput = editorInvertedInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
         // Place tile while pointer is held
@@ -45494,6 +45497,7 @@ class Editor {
     setTileFromEvent(event) {
         // Get array of codepoints
         const codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
+        const color = parseInt(this.editorColorInput.value);
         if (codePoints.length == 0) {
             // Erase
             codePoints = [' '.codePointAt(0)];
@@ -45501,7 +45505,7 @@ class Editor {
         // Draw array to tilemap
         let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile(coords, { codePoint: codePoint });
+            this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
         }
     }
@@ -45702,7 +45706,9 @@ if ('serviceWorker' in navigator) {
 
 const gameCanvas = document.getElementById('game-canvas');
 const editorCanvas = document.getElementById('editor-canvas');
-const editorInput = document.getElementById('editor-input');
+const editorCharInput = document.getElementById('editor-char-input');
+const editorColorInput = document.getElementById('editor-color-input');
+const editorInvertInput = document.getElementById('editor-invert-input');
 const codeContent = document.getElementById('tab-content-code');
 const reloadButton = document.getElementById('reload-button');
 const urlButton = document.getElementById('url-button');
@@ -45782,7 +45788,7 @@ function editorToGame() {
     return new _game_js__WEBPACK_IMPORTED_MODULE_7__.Game(scriptInput.state.doc.toString(), "testing");
 }
 // Editor
-const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_9__.Editor(editorCanvas, editorInput);
+const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_9__.Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
 // Engine
 const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_8__.Engine(gameCanvas);
 let game = urlToGame();
@@ -45869,14 +45875,15 @@ class CharRenderer {
             }
         }
     }
-   draw(context, array, posX, posY, color, wrap, compact) {
+   draw(context, array, posX, posY, wrap, compact) {
         context.fillStyle = "white";
         let offsetX = 0;
         let offsetY = 0;
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            let codepoint = array[i].codePointAt(0);
+            let codepoint = array[i].codePoint;
+            let color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[array[i].color % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }
@@ -45999,7 +46006,11 @@ class Sprite {
         this.#y = this.#getEntityYFromBody();
     }
     draw(context) {
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, Array.from(this.char), this.#getSpriteX(), this.#getSpriteY(), _constants__WEBPACK_IMPORTED_MODULE_1__.PALETTE[this.color], this.wrap, this.compact)
+        let array = []
+        for (let c of this.char) {
+            array.push({ codePoint: c.codePointAt(0), color: this.color });
+        }
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, array, this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
     }
 }
 
@@ -46219,7 +46230,7 @@ TileSet: but a tileset can also contain a TileMap which
 class TileMap {
     constructor(dim) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0, solid: false });
+        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0 });
     }
     setTile(coords, tileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
@@ -46229,7 +46240,7 @@ class TileMap {
         }
     }
     draw(ctx) {
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tiles.map(tile => String.fromCodePoint(tile.codePoint)), 0, 0, '#ffffff', this.dim.w, false);
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tiles.map(tile => ({ codePoint: tile.codePoint, color: tile.color }) ), 0, 0, this.dim.w, false);
     }
 }
 
