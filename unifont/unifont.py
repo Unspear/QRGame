@@ -1,5 +1,11 @@
 import png
 import unicodedataplus as ud
+
+blocks = set()
+with open('blocks_by_char.txt', 'r', encoding="utf-8") as file:
+    for c in file.read():
+        blocks.add(ud.block(c))
+
 unidata = {}
 lines = 0
 with open('unifont.hex', 'r') as file:
@@ -7,10 +13,13 @@ with open('unifont.hex', 'r') as file:
         lines += 1
         code, value = line.strip().split(':')
         index = int(code, 16)
+        # Skip sensitive characters
+        if index >= 0x0FD5 and index <= 0x0FD8:
+            continue
         c = chr(index)
-        if ud.is_extended_pictographic(c) or index < 128 or 'drawing' in ud.block(c).lower():
+        if (ud.is_extended_pictographic(c) or ud.block(c) in blocks) and ud.category(c) != 'Mn':# Mn == Non-spacing e.i. combining which won't work on a tilemap
             unidata[index] = value
-            
+
 print("Lines:"+str(lines))
 print("Codepoints:"+str(len(unidata)))
 width = 16
@@ -45,3 +54,7 @@ png.from_array(atlas, 'LA;1').save("chars.png")
 with open("chars.txt", "w", encoding="utf-8") as f:
     for code in sorted(unidata):
         f.write(str(code)+","+str(int(unidata_width[code]))+"\n")
+
+import subprocess
+
+subprocess.run(["pingo", "-lossless", "-s4", "chars.png"]) 

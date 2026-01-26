@@ -28,8 +28,9 @@ class CharRenderer {
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            let codepoint = array[i].codePoint;
-            let color = PALETTE[array[i].color % PALETTE.length];
+            const codepoint = array[i].codePoint;
+            const color = PALETTE[array[i].color % PALETTE.length];
+            const inverted = Math.floor(array[i].color / PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }
@@ -48,7 +49,12 @@ class CharRenderer {
             this.dbctx.fillStyle = color;
             this.dbctx.globalCompositeOperation = "source-over";
             this.dbctx.fillRect(0, 0, this.drawBuffer.width, this.drawBuffer.height);
-            this.dbctx.globalCompositeOperation = "destination-atop";
+            if (inverted) {
+                this.dbctx.globalCompositeOperation = "destination-out";
+            }
+            else{
+                this.dbctx.globalCompositeOperation = "destination-atop";
+            }
             if (isFullWidth)
             {
                 this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH, y * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, 0, 0, CHAR_WIDTH, CHAR_WIDTH);

@@ -51,8 +51,12 @@ export class Editor {
     }
     setTileFromEvent(event) {
         // Get array of codepoints
-        const codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
-        const color = parseInt(this.editorColorInput.value);
+        let codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
+        let color = parseInt(this.editorColorInput.value);
+        const inverted = this.editorInvertedInput.checked;
+        if (inverted) {
+            color += 8;
+        }
         if (codePoints.length == 0) {
             // Erase
             codePoints = [' '.codePointAt(0)];
