@@ -23,12 +23,14 @@ button {
     text-wrap: nowrap;
     text-overflow: clip;
 }
+.tab-centred {
+    margin-inline: auto;
+    width: min(calc(192px * 3), 100%);
+}
 canvas {
     margin-inline: auto;
-    max-width: 100%;
     display: block;
-    width: min(calc(192px * 3), 100%);
-    /*height: calc(256px * 3);*/
+    width: 100%;
     image-rendering: pixelated;
 }
 #qr-canvas {

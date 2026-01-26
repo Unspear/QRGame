@@ -14,7 +14,7 @@ TileSet: but a tileset can also contain a TileMap which
 export class TileMap {
     constructor(dim) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0, solid: false });
+        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0 });
     }
     setTile(coords, tileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)

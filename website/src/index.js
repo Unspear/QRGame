@@ -25,7 +25,9 @@ if ('serviceWorker' in navigator) {
 
 const gameCanvas = document.getElementById('game-canvas');
 const editorCanvas = document.getElementById('editor-canvas');
-const editorInput = document.getElementById('editor-input');
+const editorCharInput = document.getElementById('editor-char-input');
+const editorColorInput = document.getElementById('editor-color-input');
+const editorInvertInput = document.getElementById('editor-invert-input');
 const codeContent = document.getElementById('tab-content-code');
 const reloadButton = document.getElementById('reload-button');
 const urlButton = document.getElementById('url-button');
@@ -105,7 +107,7 @@ function editorToGame() {
     return new Game(scriptInput.state.doc.toString(), "testing");
 }
 // Editor
-const editor = new Editor(editorCanvas, editorInput);
+const editor = new Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
 // Engine
 const engine = new Engine(gameCanvas);
 let game = urlToGame();

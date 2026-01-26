@@ -19,9 +19,11 @@ function clamp(number, min, max) {
 }
 
 export class Editor {
-    constructor(editorCanvas, editorCharInput) {
+    constructor(editorCanvas, editorCharInput, editorColorInput, editorInvertedInput) {
         this.editorCanvas = editorCanvas;
         this.editorCharInput = editorCharInput;
+        this.editorColorInput = editorColorInput;
+        this.editorInvertedInput = editorInvertedInput;
         this.ctx = editorCanvas.getContext('2d');
         this.placingTiles = false;
         // Place tile while pointer is held
@@ -50,6 +52,7 @@ export class Editor {
     setTileFromEvent(event) {
         // Get array of codepoints
         const codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
+        const color = parseInt(this.editorColorInput.value);
         if (codePoints.length == 0) {
             // Erase
             codePoints = [' '.codePointAt(0)];
@@ -57,7 +60,7 @@ export class Editor {
         // Draw array to tilemap
         let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile(coords, { codePoint: codePoint });
+            this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
         }
     }
