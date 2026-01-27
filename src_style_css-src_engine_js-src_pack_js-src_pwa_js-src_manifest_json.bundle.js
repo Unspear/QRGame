@@ -410,7 +410,7 @@ class CharRenderer {
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            const codepoint = array[i].codePoint;
+            let codepoint = array[i].codePoint;
             const color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[array[i].color % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
             const inverted = Math.floor(array[i].color / _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
