@@ -30,7 +30,9 @@ const compressors = [
     new StreamCompressor("deflate"),
 ];
 
-export default async function(gameData) {
+export default async function(game) {
+        console.log(JSON.stringify(game));
+        const gameData = game.toData();
         const results = {};
         results["raw"] = gameData.length;
         for (const c of compressors) {

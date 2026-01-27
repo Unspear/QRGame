@@ -104,7 +104,7 @@ function gameToEditor(game) {
     scriptInput.update([transaction]);
 }
 function editorToGame() {
-    return new Game(scriptInput.state.doc.toString(), "testing");
+    return new Game(scriptInput.state.doc.toString(), editor.tileMap);
 }
 // Editor
 const editor = new Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
@@ -112,7 +112,7 @@ const editor = new Editor(editorCanvas, editorCharInput, editorColorInput, edito
 const engine = new Engine(gameCanvas);
 let game = urlToGame();
 if (game === null) {
-    game = new Game(INITIAL_SCRIPT, "testing");
+    game = new Game(INITIAL_SCRIPT, editor.tileMap);
 }
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
@@ -130,7 +130,7 @@ generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOp
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
     generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    benchmark(engine.game.toData());
+    benchmark(engine.game);
 };
 urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));

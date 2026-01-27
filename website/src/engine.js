@@ -3,6 +3,7 @@ import Matter from 'matter-js'
 import { SpriteDragConstraint } from './spriteDragConstraint.js'
 import { Sprite } from './sprite.js'
 import { FRAME_TIME, FRAME_TIME_MS } from './constants.js'
+import { TileMap } from './tile.js'
 
 export class Engine {
     constructor(gameCanvas) {
@@ -24,6 +25,7 @@ export class Engine {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
+        this.tileMap = game.tileMap.clone();
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
@@ -66,6 +68,8 @@ export class Engine {
                 // Fill Background
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+                // Draw Tilemap
+                this.tileMap.draw(this.ctx);
                 // Draw Sprites
                 for (let sprite of this.sprites) {
                     sprite.draw(this.ctx)

@@ -16,6 +16,11 @@ export class TileMap {
         this.dim = dim;
         this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0 });
     }
+    clone() {
+        let cloned = new TileMap(this.dim);
+        cloned.tiles = structuredClone(this.tiles);
+        return cloned;
+    }
     setTile(coords, tileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
