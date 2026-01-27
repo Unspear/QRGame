@@ -28,7 +28,7 @@ class CharRenderer {
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
         for (let i = 0; i < array.length; i++) {
-            const codepoint = array[i].codePoint;
+            let codepoint = array[i].codePoint;
             const color = PALETTE[array[i].color % PALETTE.length];
             const inverted = Math.floor(array[i].color / PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
