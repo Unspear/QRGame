@@ -1,7 +1,7 @@
 import { TileMap } from "./tile";
 
 export class Game {
-    constructor(script, tileMap) {
+    constructor(script = "", tileMap = new TileMap({w: 12, h: 16})) {
         this.script = script;
         this.tileMap = tileMap.clone();
     }

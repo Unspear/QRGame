@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Game</title>
+  </head>
+  <body>
+    <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
+    <div class="tabs tab-centred">
+      <!-- Radio Buttons -->
+      <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
+      <label for="tab-play">Play</label>
+
+      <input type="radio" name="tab" id="tab-share" autocomplete="off">
+      <label for="tab-share">Share</label>
+
+      <% if (isEditor) { %>
+
+      <input type="radio" name="tab" id="tab-edit" autocomplete="off">
+      <label for="tab-edit">Edit</label>
+
+      <input type="radio" name="tab" id="tab-code" autocomplete="off">
+      <label for="tab-code">Code</label>
+
+      <% } %>
+
+      <!-- Tab Content -->
+      <div class="tab-content tab-centred" id="tab-content-play">
+          <button id="reload-button">Reload Game</button>
+          <canvas id="game-canvas" width="192" height="256"></canvas>
+      </div>
+
+      <div class="tab-content tab-centred" id="tab-content-share">
+        <p>
+          <button id="url-button">URL to Clipboard</button>
+          <button id="qr-button">QR to Clipboard</button>
+        </p>
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      
+      <% if (isEditor) { %>
+
+      <div class="tab-content tab-centred" id="tab-content-edit">
+          <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
+          <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
+          <br>
+          <label for="editor-color-input">Color:</label>
+          <select id="editor-color-input">
+            <option value="0">White</option>
+            <option value="1">Grey</option>
+            <option value="2">Red</option>
+            <option value="3">Orange</option>
+            <option value="4">Yellow</option>
+            <option value="5">Green</option>
+            <option value="6">Blue</option>
+            <option value="7">Magenta</option>
+          </select>
+          <br>
+          <label for="editor-invert-input">Inverted:</label>
+          <input type="checkbox" id="editor-invert-input">
+          <br>
+          <canvas id="editor-canvas" width="192" height="256"></canvas>
+      </div>
+
+      <div class="tab-content" id="tab-content-code">
+          <!-- Code editor will be inserted here from JS -->
+      </div>
+
+      <% } %>
+    </div>
+  </body>
+</html>

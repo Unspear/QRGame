@@ -6,7 +6,11 @@ module.exports = {
   mode: 'development',
   devtool: 'source-map',
   target: 'web',
-  entry: './src/index.js',
+  entry: {
+    index: './src/index.js',
+    play: './src/play.js',
+    edit: './src/edit.js'
+  },
   resolve: {
     fallback: {
       path: false,
@@ -18,8 +22,13 @@ module.exports = {
     },
   },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
   },
   module: {
     rules: [
@@ -46,7 +55,26 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
+      chunks: ["index"],
       template: 'src/index.html',
+      favicon: 'src/icon.png',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["play"],
+      template: 'src/engine.html',
+      templateParameters: {
+        isEditor: false,
+      },
+      filename: 'play.html',
+      favicon: 'src/icon.png',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["edit"],
+      template: 'src/engine.html',
+      templateParameters: {
+        isEditor: true,
+      },
+      filename: 'edit.html',
       favicon: 'src/icon.png',
     }),
     new WorkboxPlugin.GenerateSW({
