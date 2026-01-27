@@ -32,7 +32,7 @@ generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOp
 
 // Buttons
 reloadButton.onclick = async function(){
-    engine.play(editorToGame());
+    engine.play(game);
     generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 };
 urlButton.onclick = async function(){
