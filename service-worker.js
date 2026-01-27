@@ -87,17 +87,38 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "_9995.bundle.js",
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
-    "url": "bundle.js",
-    "revision": "f027e6ab2edcf63b0b2831bcf37258de"
+    "url": "edit.bundle.js",
+    "revision": "4b70f1638b1d3c22d7f545fb3c708603"
+  }, {
+    "url": "edit.html",
+    "revision": "c834373dcad3d1f49a32d08c27f87f3d"
   }, {
     "url": "icon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
+    "url": "index.bundle.js",
+    "revision": "15e5ac190c8d27a2bc813b5f786dfa71"
+  }, {
     "url": "index.html",
-    "revision": "5fca177b85ea82c0d967dfe3c59c86ee"
+    "revision": "2f43075102f887cb2afdc65055058dbb"
   }, {
     "url": "manifest.json",
     "revision": "7a0c5ac3d5253d2d4f89acd16be32d7c"
+  }, {
+    "url": "play.bundle.js",
+    "revision": "ab15f7c42d6e03543adae0fbf25990e1"
+  }, {
+    "url": "play.html",
+    "revision": "7d3423a6906eeb9d19d21583ac94dbc8"
+  }, {
+    "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json.bundle.js",
+    "revision": "695c8d756e5389c5aa9e5b1bbb289857"
+  }, {
+    "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f.bundle.js",
+    "revision": "0814596612f9bc742a187aef1029f06d"
+  }, {
+    "url": "vendors-node_modules_fflate_esm_browser_js-node_modules_codemirror_legacy-modes_mode_lua_js-n-690802.bundle.js",
+    "revision": "9acbbe0e3666a9721a5f2b66b0f1fb40"
   }], {});
 
 }));
