@@ -55,7 +55,7 @@ const qrImageOptions = {
 
 // Buttons
 reloadButton.onclick = async function(){
-    engine.play(editorToGame());
+    engine.play(game);
     (0,lean_qr__WEBPACK_IMPORTED_MODULE_2__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_6__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 };
 urlButton.onclick = async function(){

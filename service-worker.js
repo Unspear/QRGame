@@ -91,7 +91,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "4b70f1638b1d3c22d7f545fb3c708603"
   }, {
     "url": "edit.html",
-    "revision": "c834373dcad3d1f49a32d08c27f87f3d"
+    "revision": "a2c30472462ab128e41fed5771e93bd3"
   }, {
     "url": "icon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -100,13 +100,13 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "15e5ac190c8d27a2bc813b5f786dfa71"
   }, {
     "url": "index.html",
-    "revision": "2f43075102f887cb2afdc65055058dbb"
+    "revision": "f7e55c61605a7ad676d8805dcf377117"
   }, {
     "url": "manifest.json",
     "revision": "7a0c5ac3d5253d2d4f89acd16be32d7c"
   }, {
     "url": "play.bundle.js",
-    "revision": "ab15f7c42d6e03543adae0fbf25990e1"
+    "revision": "183620f09812fc8df8b360273ac95243"
   }, {
     "url": "play.html",
     "revision": "7d3423a6906eeb9d19d21583ac94dbc8"
