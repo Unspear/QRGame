@@ -13,8 +13,8 @@ export class Sprite {
         this.color = color;
         this.#x = x;
         this.#y = y;
-        this.#px = 0.0;
-        this.#py = 0.0;
+        this.#px = 0.5;
+        this.#py = 0.5;
         this.wrap = 0;
         this.compact = true;
         this.body = Matter.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), CHAR_WIDTH, CHAR_WIDTH);
