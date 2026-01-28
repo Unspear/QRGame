@@ -1,4 +1,4 @@
-(self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json"],{
+(self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_style_css-src_engine_js-src_pack_js-src_pwa_js"],{
 
 /***/ "./node_modules/css-loader/dist/cjs.js!./src/style.css":
 /*!*************************************************************!*\
@@ -281,17 +281,6 @@ class Game {
         return new Game(parsed.script, parsed.tileMap);
     }
 }
-
-/***/ }),
-
-/***/ "./src/manifest.json":
-/*!***************************!*\
-  !*** ./src/manifest.json ***!
-  \***************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-module.exports = __webpack_require__.p + "manifest.json";
 
 /***/ }),
 
@@ -818,4 +807,4 @@ class TileSet {
 /***/ })
 
 }]);
-//# sourceMappingURL=src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json.bundle.js.map
+//# sourceMappingURL=src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js.map

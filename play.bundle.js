@@ -11,17 +11,15 @@
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ "./src/style.css");
-/* harmony import */ var _manifest_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./manifest.json */ "./src/manifest.json");
-/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack_js__WEBPACK_IMPORTED_MODULE_6__]);
+/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
+/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
+/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack_js__WEBPACK_IMPORTED_MODULE_5__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_pack_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_async_dependencies_result__[0];
-
+_pack_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_async_dependencies_result__[0];
 
 
 
@@ -37,29 +35,29 @@ const qrButton = document.getElementById('qr-button');
 const qrCanvas = document.getElementById('qr-canvas');
 
 // Engine
-const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_4__.Engine(gameCanvas);
-let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_6__.urlToGame)();
+const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_3__.Engine(gameCanvas);
+let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_5__.urlToGame)();
 if (game === null) {
-    game = new _game_js__WEBPACK_IMPORTED_MODULE_3__.Game();
+    game = new _game_js__WEBPACK_IMPORTED_MODULE_2__.Game();
 }
 // (could load the game directly here but want to make sure the editor works properly)
 engine.play(game);
 const qrGenerateOptions = {
-    minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_2__.correction.L
+    minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_1__.correction.L
 }
 const qrImageOptions = {
     on: [0, 0, 0, 255],
     off: [255, 255, 255, 255]
 }
-;(0,lean_qr__WEBPACK_IMPORTED_MODULE_2__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_6__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+;(0,lean_qr__WEBPACK_IMPORTED_MODULE_1__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_5__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 
 // Buttons
 reloadButton.onclick = async function(){
     engine.play(game);
-    (0,lean_qr__WEBPACK_IMPORTED_MODULE_2__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_6__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+    (0,lean_qr__WEBPACK_IMPORTED_MODULE_1__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_5__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 };
 urlButton.onclick = async function(){
-    navigator.clipboard.writeText((0,_pack_js__WEBPACK_IMPORTED_MODULE_6__.gameToUrl)(engine.game));
+    navigator.clipboard.writeText((0,_pack_js__WEBPACK_IMPORTED_MODULE_5__.gameToUrl)(engine.game));
 };
 qrButton.onclick = async function(){
     qrCanvas.toBlob(function(blob) { 
@@ -483,7 +481,7 @@ __webpack_async_result__();
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f","src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json"], () => (__webpack_require__("./src/play.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/play.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

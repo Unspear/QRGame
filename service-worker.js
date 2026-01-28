@@ -88,31 +88,28 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
     "url": "edit.bundle.js",
-    "revision": "4b70f1638b1d3c22d7f545fb3c708603"
+    "revision": "f177c1d95c6ed1d24db13ac0aabd8224"
   }, {
     "url": "edit.html",
-    "revision": "70af1a70d6cbdc51b8f33256e4b70ee8"
+    "revision": "2056c8c455a7335024560ea38a5d7185"
   }, {
     "url": "icon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "index.bundle.js",
-    "revision": "15e5ac190c8d27a2bc813b5f786dfa71"
+    "revision": "593e534eaf85310dc758ec6120166265"
   }, {
     "url": "index.html",
     "revision": "7442db4ba51ea55c3fb46cc73c901d8a"
   }, {
-    "url": "manifest.json",
-    "revision": "7a0c5ac3d5253d2d4f89acd16be32d7c"
-  }, {
     "url": "play.bundle.js",
-    "revision": "183620f09812fc8df8b360273ac95243"
+    "revision": "f8c47794452c8b6cfbbbfd7db531aa56"
   }, {
     "url": "play.html",
-    "revision": "c56bec502acfa392387aac0d9b08d3bb"
+    "revision": "73a99cf4d8ff3e391504c4693c0acfd3"
   }, {
-    "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json.bundle.js",
-    "revision": "e9ee9612798b626920d2aefd691ac654"
+    "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js",
+    "revision": "f2a98a039425dfa54f430d3a571660d8"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f.bundle.js",
     "revision": "0814596612f9bc742a187aef1029f06d"
