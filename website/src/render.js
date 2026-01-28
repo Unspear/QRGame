@@ -21,16 +21,17 @@ class CharRenderer {
             }
         }
     }
-   draw(context, array, posX, posY, wrap, compact) {
+   draw(context, codePoints, colors, posX, posY, wrap, compact) {
+        console.assert(codePoints.length == colors.length)
         context.fillStyle = "white";
         let offsetX = 0;
         let offsetY = 0;
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
-        for (let i = 0; i < array.length; i++) {
-            let codepoint = array[i].codePoint;
-            const color = PALETTE[array[i].color % PALETTE.length];
-            const inverted = Math.floor(array[i].color / PALETTE.length) % 2 === 1
+        for (let i = 0; i < codePoints.length; i++) {
+            let codepoint = codePoints[i];
+            const color = PALETTE[colors[i] % PALETTE.length];
+            const inverted = Math.floor(colors[i] / PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }

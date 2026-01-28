@@ -67,10 +67,7 @@ export class Sprite {
         this.#y = this.#getEntityYFromBody();
     }
     draw(context) {
-        let array = []
-        for (let c of this.char) {
-            array.push({ codePoint: c.codePointAt(0), color: this.color });
-        }
-        charRenderer.draw(context, array, this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
+        const codePoints = [...this.char];
+        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
     }
 }

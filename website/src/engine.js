@@ -25,7 +25,7 @@ export class Engine {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
-        this.tileMap = game.tileMap.clone();
+        this.tileMap = TileMap.Copy(game.tileMap);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);

@@ -14,29 +14,37 @@ TileSet: but a tileset can also contain a TileMap which
 export class TileMap {
     constructor(dim) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0 });
+        this.tileData = {
+            codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
+            color: new Array(dim.w * dim.h,).fill(0)
+        };
     }
-    clone() {
-        let cloned = new TileMap(this.dim);
-        cloned.tiles = structuredClone(this.tiles);
-        return cloned;
+    static Copy(tileMap) {
+        let copied = new TileMap(tileMap.dim);
+        copied.tileData = structuredClone(tileMap.tileData);
+        return copied;
     }
-    setTile(coords, tileData) {
+    setTile(coords, newTileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
             const index = coords.y * this.dim.w + coords.x;
-            this.tiles[index] = Object.assign({}, this.tiles[index], tileData);
+            if (newTileData.hasOwn("codePoint")) {
+                this.tileData.codePoint[index] = newTileData.codePoint;
+            }
+            if (newTileData.hasOwn("color")) {
+                this.tileData.color[index] = newTileData.color;
+            }
         }
     }
     draw(ctx) {
-        charRenderer.draw(ctx, this.tiles.map(tile => ({ codePoint: tile.codePoint, color: tile.color }) ), 0, 0, this.dim.w, false);
+        charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, this.dim.w, false);
     }
 }
 
 export class MetaTileMap {
     constructor(dim, tileSet) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
+        this.tiles = new Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
         this.tileSet = tileSet;
     }
     setTile(coords, tileId, transform) {

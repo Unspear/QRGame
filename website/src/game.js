@@ -1,9 +1,9 @@
 import { TileMap } from "./tile";
 
 export class Game {
-    constructor(script = "", tileMap = new TileMap({w: 12, h: 16})) {
+    constructor(script = "", tileMap = null) {
         this.script = script;
-        this.tileMap = tileMap.clone();
+        this.tileMap = tileMap ? TileMap.Copy(tileMap) : new TileMap({w: 12, h: 16});
     }
     toData() {
         return new TextEncoder().encode(JSON.stringify(this));
