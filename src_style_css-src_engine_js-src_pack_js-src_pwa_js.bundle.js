@@ -187,7 +187,7 @@ class Engine {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
-        this.tileMap = game.tileMap.clone();
+        this.tileMap = _tile_js__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
@@ -266,9 +266,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Game {
-    constructor(script = "", tileMap = new _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap({w: 12, h: 16})) {
+    constructor(script = "", tileMap = null) {
         this.script = script;
-        this.tileMap = tileMap.clone();
+        this.tileMap = tileMap ? _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap.Copy(tileMap) : new _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap({w: 12, h: 16});
     }
     toData() {
         return new TextEncoder().encode(JSON.stringify(this));
@@ -393,16 +393,17 @@ class CharRenderer {
             }
         }
     }
-   draw(context, array, posX, posY, wrap, compact) {
+   draw(context, codePoints, colors, posX, posY, wrap, compact) {
+        console.assert(codePoints.length == colors.length)
         context.fillStyle = "white";
         let offsetX = 0;
         let offsetY = 0;
         let roundedX = Math.round(posX);
         let roundedY = Math.round(posY);
-        for (let i = 0; i < array.length; i++) {
-            let codepoint = array[i].codePoint;
-            const color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[array[i].color % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
-            const inverted = Math.floor(array[i].color / _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length) % 2 === 1
+        for (let i = 0; i < codePoints.length; i++) {
+            let codepoint = codePoints[i];
+            const color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[colors[i] % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
+            const inverted = Math.floor(colors[i] / _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }
@@ -530,11 +531,8 @@ class Sprite {
         this.#y = this.#getEntityYFromBody();
     }
     draw(context) {
-        let array = []
-        for (let c of this.char) {
-            array.push({ codePoint: c.codePointAt(0), color: this.color });
-        }
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, array, this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
+        const codePoints = [...this.char];
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
     }
 }
 
@@ -754,29 +752,37 @@ TileSet: but a tileset can also contain a TileMap which
 class TileMap {
     constructor(dim) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({codePoint: ' '.codePointAt(0), color: 0 });
+        this.tileData = {
+            codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
+            color: new Array(dim.w * dim.h,).fill(0)
+        };
     }
-    clone() {
-        let cloned = new TileMap(this.dim);
-        cloned.tiles = structuredClone(this.tiles);
-        return cloned;
+    static Copy(tileMap) {
+        let copied = new TileMap(tileMap.dim);
+        copied.tileData = structuredClone(tileMap.tileData);
+        return copied;
     }
-    setTile(coords, tileData) {
+    setTile(coords, newTileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
             const index = coords.y * this.dim.w + coords.x;
-            this.tiles[index] = Object.assign({}, this.tiles[index], tileData);
+            if (newTileData.hasOwn("codePoint")) {
+                this.tileData.codePoint[index] = newTileData.codePoint;
+            }
+            if (newTileData.hasOwn("color")) {
+                this.tileData.color[index] = newTileData.color;
+            }
         }
     }
     draw(ctx) {
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tiles.map(tile => ({ codePoint: tile.codePoint, color: tile.color }) ), 0, 0, this.dim.w, false);
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, this.dim.w, false);
     }
 }
 
 class MetaTileMap {
     constructor(dim, tileSet) {
         this.dim = dim;
-        this.tiles = Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
+        this.tiles = new Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
         this.tileSet = tileSet;
     }
     setTile(coords, tileId, transform) {
