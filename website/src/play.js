@@ -1,5 +1,4 @@
 import './style.css';
-import './manifest.json';
 import {correction, generate} from 'lean-qr'
 import {Game} from './game.js'
 import {Engine} from './engine.js'

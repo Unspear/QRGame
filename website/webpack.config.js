@@ -41,13 +41,6 @@ module.exports = {
         type: 'asset/resource',
       },
       {
-        test: /\.(json)$/i,
-        type: 'asset/resource',
-        generator: {
-          filename: '[name][ext]',
-        },
-      },
-      {
         resourceQuery: /raw/,
         type: 'asset/source',
       },
@@ -58,6 +51,7 @@ module.exports = {
       chunks: ["index"],
       template: 'src/index.html',
       favicon: 'src/icon.png',
+      manifest: 'src/manifest.json'
     }),
     new HtmlWebpackPlugin({
       chunks: ["play"],
