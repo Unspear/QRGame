@@ -9,7 +9,7 @@
     "build": "webpack --mode=development",
     "start": "http-server dist",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist --cname qr.unspear.com --nojekyll"
   },
   "author": "",
   "license": "ISC",
