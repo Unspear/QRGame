@@ -91,7 +91,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "4b70f1638b1d3c22d7f545fb3c708603"
   }, {
     "url": "edit.html",
-    "revision": "a2c30472462ab128e41fed5771e93bd3"
+    "revision": "70af1a70d6cbdc51b8f33256e4b70ee8"
   }, {
     "url": "icon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -100,7 +100,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "15e5ac190c8d27a2bc813b5f786dfa71"
   }, {
     "url": "index.html",
-    "revision": "f7e55c61605a7ad676d8805dcf377117"
+    "revision": "7442db4ba51ea55c3fb46cc73c901d8a"
   }, {
     "url": "manifest.json",
     "revision": "7a0c5ac3d5253d2d4f89acd16be32d7c"
@@ -109,7 +109,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "183620f09812fc8df8b360273ac95243"
   }, {
     "url": "play.html",
-    "revision": "7d3423a6906eeb9d19d21583ac94dbc8"
+    "revision": "c56bec502acfa392387aac0d9b08d3bb"
   }, {
     "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js-src_manifest_json.bundle.js",
     "revision": "e9ee9612798b626920d2aefd691ac654"
