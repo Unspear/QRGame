@@ -28,10 +28,10 @@ export class TileMap {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
             const index = coords.y * this.dim.w + coords.x;
-            if (newTileData.hasOwn("codePoint")) {
+            if (Object.hasOwn(newTileData, "codePoint")) {
                 this.tileData.codePoint[index] = newTileData.codePoint;
             }
-            if (newTileData.hasOwn("color")) {
+            if (Object.hasOwn(newTileData, "color")) {
                 this.tileData.color[index] = newTileData.color;
             }
         }
