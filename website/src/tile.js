@@ -37,7 +37,7 @@ export class TileMap {
         }
     }
     draw(ctx) {
-        charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, this.dim.w, false);
+        charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, 0, 0, this.dim.w, false);
     }
 }
 

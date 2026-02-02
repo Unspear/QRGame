@@ -21,24 +21,19 @@ class CharRenderer {
             }
         }
     }
-   draw(context, codePoints, colors, posX, posY, wrap, compact) {
+   draw(context, codePoints, colors, posX, posY, pivotX, pivotY, wrap, compact) {
         console.assert(codePoints.length == colors.length)
         context.fillStyle = "white";
+        // Find layout
+        let offsets = []
         let offsetX = 0;
         let offsetY = 0;
-        let roundedX = Math.round(posX);
-        let roundedY = Math.round(posY);
         for (let i = 0; i < codePoints.length; i++) {
             let codepoint = codePoints[i];
-            const color = PALETTE[colors[i] % PALETTE.length];
-            const inverted = Math.floor(colors[i] / PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }
             const data = this.spriteSheetData[codepoint];
-            const spriteSheetWidth = this.spriteSheet.width / CHAR_WIDTH;
-            const x = (data.index % spriteSheetWidth);
-            const y = Math.floor(data.index / spriteSheetWidth);
             const isFullWidth = !compact || data.isFullWidth;
             const width = isFullWidth ? CHAR_WIDTH : CHAR_WIDTH / 2;
             if (wrap > 0 && offsetX + width > wrap * CHAR_WIDTH)
@@ -46,6 +41,29 @@ class CharRenderer {
                 offsetX = 0;
                 offsetY += CHAR_WIDTH;
             }
+            offsets.push({ x: offsetX, y: offsetY });
+            // Update offset
+            offsetX += width
+        }
+        // Calc width and height
+        let width = wrap > 0 ? wrap * CHAR_WIDTH : offsetX;
+        let height = codePoints.length > 0 ? offsetY + CHAR_WIDTH : 0;
+        // Draw
+        let roundedX = Math.round(posX - width * pivotX);
+        let roundedY = Math.round(posY - height * pivotY);
+        const spriteSheetWidth = this.spriteSheet.width / CHAR_WIDTH;
+        for (let i = 0; i < codePoints.length; i++) {
+            let codepoint = codePoints[i];
+            let offset = offsets[i];
+            const color = PALETTE[colors[i] % PALETTE.length];
+            const inverted = Math.floor(colors[i] / PALETTE.length) % 2 === 1
+            if (!(codepoint in this.spriteSheetData)) {
+                codepoint = 0;// NUL character
+            }
+            const data = this.spriteSheetData[codepoint];
+            const x = (data.index % spriteSheetWidth);
+            const y = Math.floor(data.index / spriteSheetWidth);
+            const isFullWidth = !compact || data.isFullWidth;
             // https://stackoverflow.com/a/4231508
             this.dbctx.fillStyle = color;
             this.dbctx.globalCompositeOperation = "source-over";
@@ -56,17 +74,15 @@ class CharRenderer {
             else{
                 this.dbctx.globalCompositeOperation = "destination-atop";
             }
+            this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH, y * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, 0, 0, CHAR_WIDTH, CHAR_WIDTH);
             if (isFullWidth)
             {
-                this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH, y * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, 0, 0, CHAR_WIDTH, CHAR_WIDTH);
+                context.drawImage(this.drawBuffer, roundedX + offset.x, roundedY + offset.y);
             }
             else
             {
-                this.dbctx.drawImage(this.spriteSheet, x * CHAR_WIDTH + CHAR_WIDTH / 4, y * CHAR_WIDTH, CHAR_WIDTH / 2, CHAR_WIDTH, 0, 0, CHAR_WIDTH / 2, CHAR_WIDTH);
+                context.drawImage(this.drawBuffer, CHAR_WIDTH / 4, 0, CHAR_WIDTH / 2, CHAR_WIDTH, roundedX + offset.x, roundedY + offset.y, CHAR_WIDTH / 2, CHAR_WIDTH);
             }
-            context.drawImage(this.drawBuffer, roundedX + offsetX, roundedY + offsetY);
-            // Update offset
-            offsetX += width
         }
     }
 }

@@ -1,22 +1,7 @@
 import { Game } from './game.js'
 import charRenderer from './render.js'
 import { TileMap } from './tile.js'
-
-function getPointerPos(canvas, event) {
-    const canvasScaleX = canvas.offsetWidth / canvas.width;
-    const canvasScaleY = canvas.offsetHeight / canvas.height;
-    const x = Math.floor(event.offsetX / canvasScaleX)
-    const y = Math.floor(event.offsetY / canvasScaleY)
-    return { x: x, y: y };
-}
-
-function pixelToTile(coords) {
-    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
-}
-
-function clamp(number, min, max) {
-  return Math.max(min, Math.min(number, max));
-}
+import * as Util from './util.js'
 
 export class Editor {
     constructor(editorCanvas, editorCharInput, editorColorInput, editorInvertedInput) {
@@ -62,7 +47,7 @@ export class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
+        let coords = Util.pixelToTile(Util.getPointerPos(this.editorCanvas, event));
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;

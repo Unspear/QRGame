@@ -27,12 +27,6 @@ export class Sprite {
     #getBodyY() {
         return this.#y - CHAR_WIDTH * this.#py + CHAR_WIDTH * 0.5;
     }
-    #getSpriteX() {
-        return this.#x - CHAR_WIDTH * this.#px;
-    }
-    #getSpriteY() {
-        return this.#y - CHAR_WIDTH * this.#py;
-    }
     #getEntityXFromBody() {
         return this.body.position.x + CHAR_WIDTH * this.#px - CHAR_WIDTH * 0.5;
     }
@@ -67,7 +61,7 @@ export class Sprite {
         this.#y = this.#getEntityYFromBody();
     }
     draw(context) {
-        const codePoints = [...this.char];
-        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
+        const codePoints = [...this.char].map(c => c.codePointAt(0));
+        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact)
     }
 }

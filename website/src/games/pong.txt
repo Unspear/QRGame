@@ -1,0 +1,10 @@
+local top = createSprite('----', 8, 96, 16)
+local bottom = createSprite('----', 8, 96, 256-16)
+function drag(pos)
+  local x = math.min(math.max(pos.x, 16), 192-16)
+  if pos.y < 128 then
+    top.x = x
+  else
+    bottom.x = x 
+  end
+end

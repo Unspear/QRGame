@@ -4,6 +4,7 @@ import { SpriteDragConstraint } from './spriteDragConstraint.js'
 import { Sprite } from './sprite.js'
 import { FRAME_TIME, FRAME_TIME_MS } from './constants.js'
 import { TileMap } from './tile.js'
+import * as Util from './util.js'
 
 export class Engine {
     constructor(gameCanvas) {
@@ -14,7 +15,29 @@ export class Engine {
         this.spriteDragConstraint = SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
         Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         this.ctx = gameCanvas.getContext('2d');
+        this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
+            this.downPointers.add(event.pointerId);
+            if (this.luaDrag)
+            {
+                this.luaDrag(Util.getPointerPos(this.gameCanvas, event));
+            }
+            if (this.luaTap)
+            {
+                this.luaTap();
+            }
+        });
+        gameCanvas.addEventListener('pointermove', (event) => {
+            if (this.downPointers.has(event.pointerId))
+            {
+                if (this.luaDrag)
+                {
+                    this.luaDrag(Util.getPointerPos(this.gameCanvas, event));
+                }
+            }
+        });
+        gameCanvas.addEventListener('pointerup', (event) => {
+            this.downPointers.delete(event.pointerId);
             if (this.luaTap)
             {
                 this.luaTap();
@@ -43,6 +66,7 @@ export class Engine {
         // Get Lua References
         this.luaFrame = this.lua.global.get('frame');
         this.luaTap = this.lua.global.get('tap');
+        this.luaDrag = this.lua.global.get('drag');
         // Start
         requestAnimationFrame(this.#mainLoop.bind(this));
     }
