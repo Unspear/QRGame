@@ -25,6 +25,7 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true,
   },
   optimization: {
     splitChunks: {
@@ -94,7 +95,7 @@ module.exports = {
         },
         {
           src: path.resolve('src/icon-512.png'),
-          size: 256,
+          size: 512,
         }
       ]
     })
