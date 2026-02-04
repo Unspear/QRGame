@@ -173,10 +173,6 @@ class Engine {
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory();
-        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({});
-        this.matterEngine.gravity.scale = 0;
-        this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
-        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         this.ctx = gameCanvas.getContext('2d');
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
@@ -208,12 +204,17 @@ class Engine {
         this.game = game;
         this.sprites = [];
         this.tileMap = _tile_js__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
+        // Create physics engine
+        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({ 
+            gravity: { scale: 0 }
+        });
+        this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
+        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
         this.lua.global.set('createSprite', (char, color, x, y) => {
             let newSprite = new _sprite_js__WEBPACK_IMPORTED_MODULE_3__.Sprite(char, color, x, y);
-            matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, newSprite.body);
             this.sprites.push(newSprite);
             return newSprite;
         });
@@ -242,9 +243,12 @@ class Engine {
                     this.luaFrame();
                 }
                 // Physics
+                for (let sprite of this.sprites) {
+                    sprite.prePhysicsUpdate(this.matterEngine)
+                }
                 matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.update(this.matterEngine, _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS);
                 for (let sprite of this.sprites) {
-                    sprite.postPhysicsUpdate(this)
+                    sprite.postPhysicsUpdate(this.matterEngine)
                 }
                 // Rendering
                 this.ctx.beginPath();
@@ -508,7 +512,13 @@ class Sprite {
     #y;
     #px;
     #py;
-    #drag;
+    #physBody;
+    #physHasBody;
+    #physIsStatic;
+    #physIsSensor;
+    #physIsDrag;
+    #physVelX;
+    #physVelY;
     constructor(char, color, x, y) {
         this.char = char;
         this.color = color;
@@ -518,9 +528,13 @@ class Sprite {
         this.#py = 0.5;
         this.wrap = 0;
         this.compact = true;
-        this.body = matter_js__WEBPACK_IMPORTED_MODULE_2___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH);
-        this.body.isSensor = true;
-        this.drag = false;
+        this.#physBody = null;
+        this.#physHasBody = false;
+        this.#physIsStatic = false;
+        this.#physIsSensor = false;
+        this.#physIsDrag = false;
+        this.#physVelX = null;
+        this.#physVelY = null;
     }
     #getBodyX() {
         return this.#x - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
@@ -529,37 +543,130 @@ class Sprite {
         return this.#y - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
     #getEntityXFromBody() {
-        return this.body.position.x + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
+        return this.#physBody.position.x + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
     #getEntityYFromBody() {
-        return this.body.position.y + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
+        return this.#physBody.position.y + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
     set x(value) {
         this.#x = value;
-        matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
-        //Matter.Body.setVelocity(this.body, {x: 0, y: 0})
+        if (this.#physBody) {
+            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.#physBody, {x: this.#getBodyX(), y: this.#getBodyY()});
+            //Matter.Body.setVelocity(this.#physBody, {x: 0, y: 0})
+        }
     }
     get x() {
         return this.#x;
     }
     set y(value) {
         this.#y = value;
-        matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.body, {x: this.#getBodyX(), y: this.#getBodyY()});
-        //Matter.Body.setVelocity(this.body, {x: 0, y: 0})
+        if (this.#physBody) {
+            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.#physBody, {x: this.#getBodyX(), y: this.#getBodyY()});
+            //Matter.Body.setVelocity(this.#physBody, {x: 0, y: 0})
+        }
     }
     get y() {
         return this.#y;
     }
+    // Physics
+    set physics(value) {
+        this.#physHasBody = value;
+    }
+    set static(value) {
+        this.#physIsStatic = value
+        if (this.#physBody) {
+            this.#physBody.isStatic = value;
+        }
+    }
+    get static() {
+        return this.#physIsStatic;
+    }
+    set sensor(value) {
+        this.#physIsSensor = value
+        if (this.#physBody) {
+            this.#physBody.isSensor = value;
+        }
+    }
+    get sensor() {
+        return this.#physIsSensor;
+    }
     set drag(value) {
-        this.#drag = value;
-        this.body.plugin.drag = value;
+        this.#physIsDrag = value;
+        if (this.#physBody) {
+            this.#physBody.plugin.drag = value;
+        }
     }
     get drag() {
-        return this.#drag;
+        return this.#physIsDrag;
     }
-    postPhysicsUpdate() {
-        this.#x = this.#getEntityXFromBody();
-        this.#y = this.#getEntityYFromBody();
+    set velX(value) {
+        this.#physVelX = value;
+    }
+    get velX() {
+        if (this.#physHasBody === true) {
+            if (this.#physVelX !== null) {
+                return this.#physVelX;
+            }
+            if (this.#physBody !== null) {
+                return this.#physBody.velocity.x
+            }
+        }
+        return 0;
+    }
+    set velY(value) {
+        this.#physVelY = value;
+    }
+    get velY() {
+        if (this.#physHasBody === true) {
+            if (this.#physVelY !== null) {
+                return this.#physVelY;
+            }
+            if (this.#physBody !== null) {
+                return this.#physBody.velocity.y
+            }
+        }
+        return 0;
+    }
+    prePhysicsUpdate(matterEngine) {
+        // Check if the body needs to be created or destroyed
+        if (this.#physHasBody && this.#physBody === null) {
+            // Create Body
+            const options = {
+                inertia: Infinity,// Prevent rotation
+                restitution: 1.0,
+                frictionAir: 0.0,
+                friction: 1.0,
+                isSensor: this.#physIsSensor,
+                isStatic: this.#physIsStatic,
+                plugin: { drag: this.#physIsDrag }
+            }
+            this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_2___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, options);
+            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.add(matterEngine.world, this.#physBody);
+            if (this.#physVelX !== null || this.#physVelY !== null) {
+                if (this.#physVelX === null) {
+                    this.#physVelX = this.#physBody.velocity.x;
+                }
+                if (this.#physVelY === null) {
+                    this.#physVelY = this.#physBody.velocity.y;
+                }
+                const newVel = { x: this.#physVelX, y: this.#physVelY };
+                matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setVelocity(this.#physBody, newVel);
+                console.log(newVel);
+            }
+        }
+        else if (!this.#physHasBody && this.#physBody !== null) {
+            // Destory body
+            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.remove(matterEngine.world, this.#physBody);
+            this.#physBody = null;
+        }
+        this.#physVelX = null;
+        this.#physVelY = null;
+    }
+    postPhysicsUpdate(matterEngine) {
+        if (this.#physBody) {
+            this.#x = this.#getEntityXFromBody();
+            this.#y = this.#getEntityYFromBody();
+        }
     }
     draw(context) {
         const codePoints = [...this.char].map(c => c.codePointAt(0));

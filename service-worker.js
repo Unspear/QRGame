@@ -88,10 +88,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
     "url": "edit.bundle.js",
-    "revision": "8d6a76e11fac7d4e8c6a794f18997501"
+    "revision": "abf9484e5f6435d1eef40459a4ddc8e2"
   }, {
     "url": "edit.html",
-    "revision": "e9c2def866422cf8219ba84e6c4b44d4"
+    "revision": "08edb43940bd104bcbff04e2cea0f42b"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -109,13 +109,13 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "e99c6443cc46769db88af857f8d16228"
   }, {
     "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js",
-    "revision": "3435fb83800959e3a40f8690dabb8fc3"
+    "revision": "465bf70147cc82882e1912c5f488a0f5"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f.bundle.js",
     "revision": "0814596612f9bc742a187aef1029f06d"
   }, {
-    "url": "vendors-node_modules_fflate_esm_browser_js-node_modules_codemirror_legacy-modes_mode_lua_js-n-690802.bundle.js",
-    "revision": "9acbbe0e3666a9721a5f2b66b0f1fb40"
+    "url": "vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js",
+    "revision": "8167d382401d442b99c7d389b8b601d4"
   }], {});
 
 }));
