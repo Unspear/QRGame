@@ -36,12 +36,8 @@ export class Engine {
                 }
             }
         });
-        gameCanvas.addEventListener('pointerup', (event) => {
+        window.addEventListener('pointerup', (event) => {
             this.downPointers.delete(event.pointerId);
-            if (this.luaTap)
-            {
-                this.luaTap();
-            }
         });
     }
     async play(game) {
