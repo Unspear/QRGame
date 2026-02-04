@@ -88,10 +88,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
     "url": "edit.bundle.js",
-    "revision": "abf9484e5f6435d1eef40459a4ddc8e2"
+    "revision": "e02bb6368b38de2e2cfcbdf50c590314"
   }, {
     "url": "edit.html",
-    "revision": "08edb43940bd104bcbff04e2cea0f42b"
+    "revision": "e5b8cd0231494d0f846d809976bff407"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -103,19 +103,19 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "6b2d2c96fa6703dd600e152e6bb3ca84"
   }, {
     "url": "play.bundle.js",
-    "revision": "f8c47794452c8b6cfbbbfd7db531aa56"
+    "revision": "26f5573a02f25e62ddd54c6782e9c830"
   }, {
     "url": "play.html",
-    "revision": "e99c6443cc46769db88af857f8d16228"
+    "revision": "5e7c38bd25fb05cfb626a0002fd8e32d"
   }, {
     "url": "src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js",
-    "revision": "465bf70147cc82882e1912c5f488a0f5"
+    "revision": "25b344867b2cb176f29e34a633946714"
   }, {
-    "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f.bundle.js",
-    "revision": "0814596612f9bc742a187aef1029f06d"
+    "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-285647.bundle.js",
+    "revision": "d19e13b9c45b478987203d3403916382"
   }, {
-    "url": "vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js",
-    "revision": "8167d382401d442b99c7d389b8b601d4"
+    "url": "vendors-node_modules_fflate_esm_browser_js-node_modules_codemirror_legacy-modes_mode_lua_js-n-690802.bundle.js",
+    "revision": "9acbbe0e3666a9721a5f2b66b0f1fb40"
   }], {});
 
 }));

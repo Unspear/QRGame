@@ -161,6 +161,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants.js */ "./src/constants.js");
 /* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
 /* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
+/* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "./node_modules/sam-js/dist/samjs.esm.min.js");
+
 
 
 
@@ -172,6 +174,7 @@ __webpack_require__.r(__webpack_exports__);
 class Engine {
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
+        this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory();
         this.ctx = gameCanvas.getContext('2d');
         this.downPointers = new Set();
@@ -220,6 +223,9 @@ class Engine {
         });
         this.lua.global.set('destroySprite', (sprite) => {
             this.sprites = this.sprites.filter(s => s !== sprite);
+        });
+        this.lua.global.set('say', (string) => {
+            this.textToSpeech.speak(string);
         });
         // Load Script
         this.lua.doStringSync(this.game.script);

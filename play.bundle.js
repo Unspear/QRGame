@@ -481,7 +481,7 @@ __webpack_async_result__();
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/play.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-285647","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/play.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

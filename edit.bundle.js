@@ -2,6 +2,78 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/benchmark.js":
+/*!**************************!*\
+  !*** ./src/benchmark.js ***!
+  \**************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
+/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
+
+
+const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_1__["default"];
+
+const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
+
+class StreamCompressor {
+    constructor(algorithm) {
+        this.#algorithm = algorithm;
+    }
+    async compress(data) {
+        const stream = new Blob([data]).stream();
+        const compressedStream = stream.pipeThrough(new CompressionStream(this.#algorithm));
+        return await new Response(compressedStream).bytes();
+    }
+    async decompress(data) {
+        const stream = new Blob([data]).stream();
+        const decompressedStream = stream.pipeThrough(new DecompressionStream(this.#algorithm));
+        return await new Response(decompressedStream).bytes();
+    }
+    toString() {
+        return "web " + this.#algorithm;
+    }
+    #algorithm
+}
+
+const compressors = [
+    new StreamCompressor("deflate-raw"),
+    new StreamCompressor("gzip"),
+    new StreamCompressor("deflate"),
+];
+
+/* harmony default export */ async function __WEBPACK_DEFAULT_EXPORT__(game) {
+        console.log(JSON.stringify(game));
+        const gameData = game.toData();
+        const results = {};
+        results["raw"] = gameData.length;
+        for (const c of compressors) {
+            const compressed = await c.compress(gameData);
+            results[c.toString()] = compressed.length;
+        }
+        const fflateOpts = {level: 9, mem: 8};
+        const fflateOptsDict = {level: 9, mem: 8, dictionary: new TextEncoder().encode(LUA_KEYWORDS)};
+        results["fflate gzip"] = fflate__WEBPACK_IMPORTED_MODULE_0__.gzipSync(gameData, fflateOpts).length;
+        results["fflate gzip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.gzipSync(gameData, fflateOptsDict).length;
+        results["fflate zip"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zipSync(gameData, fflateOpts).length;
+        results["fflate zip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zipSync(gameData, fflateOptsDict).length;
+        results["fflate zlib"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zlibSync(gameData, fflateOpts).length;
+        results["fflate zlib w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zlibSync(gameData, fflateOptsDict).length;
+        results["fflate deflate"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOpts).length;
+        results["fflate deflate w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOptsDict).length;
+        results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
+        console.table(results);
+}
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } }, 1);
+
+/***/ }),
+
 /***/ "./src/edit.js":
 /*!*********************!*\
   !*** ./src/edit.js ***!
@@ -19,12 +91,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
 /* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
 /* harmony import */ var _editor_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./editor.js */ "./src/editor.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack_js__WEBPACK_IMPORTED_MODULE_10__]);
-var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_pack_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_async_dependencies_result__[0];
+/* harmony import */ var _benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./benchmark.js */ "./src/benchmark.js");
+/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
+/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_benchmark_js__WEBPACK_IMPORTED_MODULE_9__, _pack_js__WEBPACK_IMPORTED_MODULE_11__]);
+([_benchmark_js__WEBPACK_IMPORTED_MODULE_9__, _pack_js__WEBPACK_IMPORTED_MODULE_11__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -33,7 +105,7 @@ _pack_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_async_dependencies_result__[0
 
 
 
-// import benchmark from './benchmark.js';
+
 
 
 
@@ -91,7 +163,7 @@ function editorToGame() {
 const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
 // Engine
 const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
-let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_10__.urlToGame)();
+let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.urlToGame)();
 if (game === null) {
     game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(TEST_SCRIPT);
 }
@@ -105,16 +177,16 @@ const qrImageOptions = {
     on: [0, 0, 0, 255],
     off: [255, 255, 255, 255]
 }
-;(0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_10__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+;(0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
 
 // Buttons
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
-    (0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_10__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    //benchmark(engine.game);
+    (0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+    (0,_benchmark_js__WEBPACK_IMPORTED_MODULE_9__["default"])(engine.game);
 };
 urlButton.onclick = async function(){
-    navigator.clipboard.writeText((0,_pack_js__WEBPACK_IMPORTED_MODULE_10__.gameToUrl)(engine.game));
+    navigator.clipboard.writeText((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game));
 };
 qrButton.onclick = async function(){
     qrCanvas.toBlob(function(blob) { 
@@ -618,7 +690,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-d2477f","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/edit.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-285647","vendors-node_modules_fflate_esm_browser_js-node_modules_codemirror_legacy-modes_mode_lua_js-n-690802","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/edit.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
