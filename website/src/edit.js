@@ -23,6 +23,19 @@ const urlButton = document.getElementById('url-button');
 const qrButton = document.getElementById('qr-button');
 const qrCanvas = document.getElementById('qr-canvas');
 
+// Test Script: PONG
+
+const TEST_SCRIPT = `local top = createSprite('----', 8, 96, 16)
+local bottom = createSprite('----', 8, 96, 256-16)
+function drag(pos)
+  local x = math.min(math.max(pos.x, 16), 192-16)
+  if pos.y < 64 then
+    top.x = x
+  elseif pos.y > (256-64) then
+    bottom.x = x 
+  end
+end`;
+
 // Script Editor
 let scriptInput = new EditorView({
     extensions: [basicSetup, StreamLanguage.define(lua)],
@@ -45,7 +58,7 @@ const editor = new Editor(editorCanvas, editorCharInput, editorColorInput, edito
 const engine = new Engine(gameCanvas);
 let game = urlToGame();
 if (game === null) {
-    game = new Game();
+    game = new Game(TEST_SCRIPT);
 }
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
