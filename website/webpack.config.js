@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest')
 
 module.exports = {
   mode: 'development',
@@ -50,8 +51,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       chunks: ["index"],
       template: 'src/index.html',
-      favicon: 'src/icon.png',
-      manifest: 'src/manifest.json'
+      favicon: 'src/icon-16.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["play"],
@@ -60,7 +60,7 @@ module.exports = {
         isEditor: false,
       },
       filename: 'play.html',
-      favicon: 'src/icon.png',
+      favicon: 'src/icon-16.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["edit"],
@@ -69,7 +69,7 @@ module.exports = {
         isEditor: true,
       },
       filename: 'edit.html',
-      favicon: 'src/icon.png',
+      favicon: 'src/icon-16.png',
     }),
     new WorkboxPlugin.GenerateSW({
        // these options encourage the ServiceWorkers to get in there fast
@@ -77,5 +77,25 @@ module.exports = {
        clientsClaim: true,
        skipWaiting: true
      }),
+    new WebpackPwaManifest({
+    name: 'QR Game',
+    short_name: 'QR Game',
+    description: 'Description!',
+    background_color: '#ffffff',
+    icons: [
+      {
+        src: path.resolve('src/icon-16.png'),
+        size: 16,
+      },
+      {
+        src: path.resolve('src/icon-192.png'),
+        size: 192,
+      },
+      {
+        src: path.resolve('src/icon-512.png'),
+        size: 256,
+      }
+    ]
+  })
   ]
 };
