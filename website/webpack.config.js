@@ -78,24 +78,25 @@ module.exports = {
        skipWaiting: true
      }),
     new WebpackPwaManifest({
-    name: 'QR Game',
-    short_name: 'QR Game',
-    description: 'Description!',
-    background_color: '#ffffff',
-    icons: [
-      {
-        src: path.resolve('src/icon-16.png'),
-        size: 16,
-      },
-      {
-        src: path.resolve('src/icon-192.png'),
-        size: 192,
-      },
-      {
-        src: path.resolve('src/icon-512.png'),
-        size: 256,
-      }
-    ]
-  })
+      name: 'QR Game',
+      short_name: 'QR Game',
+      description: 'Description!',
+      background_color: '#ffffff',
+      publicPath: './',
+      icons: [
+        {
+          src: path.resolve('src/icon-16.png'),
+          size: 16,
+        },
+        {
+          src: path.resolve('src/icon-192.png'),
+          size: 192,
+        },
+        {
+          src: path.resolve('src/icon-512.png'),
+          size: 256,
+        }
+      ]
+    })
   ]
 };
