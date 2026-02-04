@@ -10,10 +10,6 @@ export class Engine {
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
         this.luaFactory = new LuaFactory();
-        this.matterEngine = Matter.Engine.create({});
-        this.matterEngine.gravity.scale = 0;
-        this.spriteDragConstraint = SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
-        Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         this.ctx = gameCanvas.getContext('2d');
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
@@ -45,12 +41,17 @@ export class Engine {
         this.game = game;
         this.sprites = [];
         this.tileMap = TileMap.Copy(game.tileMap);
+        // Create physics engine
+        this.matterEngine = Matter.Engine.create({ 
+            gravity: { scale: 0 }
+        });
+        this.spriteDragConstraint = SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
+        Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
         this.lua.global.set('createSprite', (char, color, x, y) => {
             let newSprite = new Sprite(char, color, x, y);
-            Matter.Composite.add(this.matterEngine.world, newSprite.body);
             this.sprites.push(newSprite);
             return newSprite;
         });
@@ -79,9 +80,12 @@ export class Engine {
                     this.luaFrame();
                 }
                 // Physics
+                for (let sprite of this.sprites) {
+                    sprite.prePhysicsUpdate(this.matterEngine)
+                }
                 Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
                 for (let sprite of this.sprites) {
-                    sprite.postPhysicsUpdate(this)
+                    sprite.postPhysicsUpdate(this.matterEngine)
                 }
                 // Rendering
                 this.ctx.beginPath();

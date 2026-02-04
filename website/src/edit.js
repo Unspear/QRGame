@@ -6,7 +6,7 @@ import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game.js'
 import {Engine} from './engine.js'
 import {Editor} from './editor.js'
-import benchmark from './benchmark.js';
+// import benchmark from './benchmark.js';
 import _ from './pwa.js'
 import {urlToGame, gameToUrl} from './pack.js'
 
@@ -25,8 +25,16 @@ const qrCanvas = document.getElementById('qr-canvas');
 
 // Test Script: PONG
 
-const TEST_SCRIPT = `local top = createSprite('----', 8, 96, 16)
-local bottom = createSprite('----', 8, 96, 256-16)
+const TEST_SCRIPT = `local top = createSprite('----', 8, 96, 32)
+top.physics = true
+top.static = true
+local bottom = createSprite('----', 8, 96, 256-32)
+bottom.physics = true
+bottom.static = true
+local ball = createSprite('O', 8, 96, 128)
+ball.physics = true
+ball.velY = 3.0
+ball.velX = 0.1
 function drag(pos)
   local x = math.min(math.max(pos.x, 16), 192-16)
   if pos.y < 64 then
@@ -76,7 +84,7 @@ generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOp
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
     generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    benchmark(engine.game);
+    //benchmark(engine.game);
 };
 urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));
