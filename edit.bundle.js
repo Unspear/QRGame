@@ -191,25 +191,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
 /* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
 /* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
 
 
 
 
-function getPointerPos(canvas, event) {
-    const canvasScaleX = canvas.offsetWidth / canvas.width;
-    const canvasScaleY = canvas.offsetHeight / canvas.height;
-    const x = Math.floor(event.offsetX / canvasScaleX)
-    const y = Math.floor(event.offsetY / canvasScaleY)
-    return { x: x, y: y };
-}
-
-function pixelToTile(coords) {
-    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
-}
-
-function clamp(number, min, max) {
-  return Math.max(min, Math.min(number, max));
-}
 
 class Editor {
     constructor(editorCanvas, editorCharInput, editorColorInput, editorInvertedInput) {
@@ -255,7 +241,7 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let coords = pixelToTile(getPointerPos(this.editorCanvas, event));
+        let coords = _util_js__WEBPACK_IMPORTED_MODULE_3__.pixelToTile(_util_js__WEBPACK_IMPORTED_MODULE_3__.getPointerPos(this.editorCanvas, event));
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;

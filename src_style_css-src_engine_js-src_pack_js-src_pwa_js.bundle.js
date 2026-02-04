@@ -160,6 +160,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sprite_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite.js */ "./src/sprite.js");
 /* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants.js */ "./src/constants.js");
 /* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
+
 
 
 
@@ -176,7 +178,29 @@ class Engine {
         this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
         matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         this.ctx = gameCanvas.getContext('2d');
+        this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
+            this.downPointers.add(event.pointerId);
+            if (this.luaDrag)
+            {
+                this.luaDrag(_util_js__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
+            }
+            if (this.luaTap)
+            {
+                this.luaTap();
+            }
+        });
+        gameCanvas.addEventListener('pointermove', (event) => {
+            if (this.downPointers.has(event.pointerId))
+            {
+                if (this.luaDrag)
+                {
+                    this.luaDrag(_util_js__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
+                }
+            }
+        });
+        gameCanvas.addEventListener('pointerup', (event) => {
+            this.downPointers.delete(event.pointerId);
             if (this.luaTap)
             {
                 this.luaTap();
@@ -205,6 +229,7 @@ class Engine {
         // Get Lua References
         this.luaFrame = this.lua.global.get('frame');
         this.luaTap = this.lua.global.get('tap');
+        this.luaDrag = this.lua.global.get('drag');
         // Start
         requestAnimationFrame(this.#mainLoop.bind(this));
     }
@@ -393,24 +418,19 @@ class CharRenderer {
             }
         }
     }
-   draw(context, codePoints, colors, posX, posY, wrap, compact) {
+   draw(context, codePoints, colors, posX, posY, pivotX, pivotY, wrap, compact) {
         console.assert(codePoints.length == colors.length)
         context.fillStyle = "white";
+        // Find layout
+        let offsets = []
         let offsetX = 0;
         let offsetY = 0;
-        let roundedX = Math.round(posX);
-        let roundedY = Math.round(posY);
         for (let i = 0; i < codePoints.length; i++) {
             let codepoint = codePoints[i];
-            const color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[colors[i] % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
-            const inverted = Math.floor(colors[i] / _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length) % 2 === 1
             if (!(codepoint in this.spriteSheetData)) {
                 codepoint = 0;// NUL character
             }
             const data = this.spriteSheetData[codepoint];
-            const spriteSheetWidth = this.spriteSheet.width / _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH;
-            const x = (data.index % spriteSheetWidth);
-            const y = Math.floor(data.index / spriteSheetWidth);
             const isFullWidth = !compact || data.isFullWidth;
             const width = isFullWidth ? _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH : _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 2;
             if (wrap > 0 && offsetX + width > wrap * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH)
@@ -418,6 +438,29 @@ class CharRenderer {
                 offsetX = 0;
                 offsetY += _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH;
             }
+            offsets.push({ x: offsetX, y: offsetY });
+            // Update offset
+            offsetX += width
+        }
+        // Calc width and height
+        let width = wrap > 0 ? wrap * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH : offsetX;
+        let height = codePoints.length > 0 ? offsetY + _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH : 0;
+        // Draw
+        let roundedX = Math.round(posX - width * pivotX);
+        let roundedY = Math.round(posY - height * pivotY);
+        const spriteSheetWidth = this.spriteSheet.width / _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH;
+        for (let i = 0; i < codePoints.length; i++) {
+            let codepoint = codePoints[i];
+            let offset = offsets[i];
+            const color = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE[colors[i] % _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length];
+            const inverted = Math.floor(colors[i] / _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE.length) % 2 === 1
+            if (!(codepoint in this.spriteSheetData)) {
+                codepoint = 0;// NUL character
+            }
+            const data = this.spriteSheetData[codepoint];
+            const x = (data.index % spriteSheetWidth);
+            const y = Math.floor(data.index / spriteSheetWidth);
+            const isFullWidth = !compact || data.isFullWidth;
             // https://stackoverflow.com/a/4231508
             this.dbctx.fillStyle = color;
             this.dbctx.globalCompositeOperation = "source-over";
@@ -428,17 +471,15 @@ class CharRenderer {
             else{
                 this.dbctx.globalCompositeOperation = "destination-atop";
             }
+            this.dbctx.drawImage(this.spriteSheet, x * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, y * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, 0, 0, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH);
             if (isFullWidth)
             {
-                this.dbctx.drawImage(this.spriteSheet, x * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, y * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, 0, 0, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH);
+                context.drawImage(this.drawBuffer, roundedX + offset.x, roundedY + offset.y);
             }
             else
             {
-                this.dbctx.drawImage(this.spriteSheet, x * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH + _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 4, y * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 2, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, 0, 0, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 2, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH);
+                context.drawImage(this.drawBuffer, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 4, 0, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 2, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, roundedX + offset.x, roundedY + offset.y, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH / 2, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH);
             }
-            context.drawImage(this.drawBuffer, roundedX + offsetX, roundedY + offsetY);
-            // Update offset
-            offsetX += width
         }
     }
 }
@@ -491,12 +532,6 @@ class Sprite {
     #getBodyY() {
         return this.#y - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
-    #getSpriteX() {
-        return this.#x - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px;
-    }
-    #getSpriteY() {
-        return this.#y - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py;
-    }
     #getEntityXFromBody() {
         return this.body.position.x + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
@@ -531,8 +566,8 @@ class Sprite {
         this.#y = this.#getEntityYFromBody();
     }
     draw(context) {
-        const codePoints = [...this.char];
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#getSpriteX(), this.#getSpriteY(), this.wrap, this.compact)
+        const codePoints = [...this.char].map(c => c.codePointAt(0));
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact)
     }
 }
 
@@ -775,7 +810,7 @@ class TileMap {
         }
     }
     draw(ctx) {
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, this.dim.w, false);
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, 0, 0, this.dim.w, false);
     }
 }
 
@@ -799,6 +834,38 @@ class TileSet {
         this.tiles = {};
     }
 }
+
+/***/ }),
+
+/***/ "./src/util.js":
+/*!*********************!*\
+  !*** ./src/util.js ***!
+  \*********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clamp: () => (/* binding */ clamp),
+/* harmony export */   getPointerPos: () => (/* binding */ getPointerPos),
+/* harmony export */   pixelToTile: () => (/* binding */ pixelToTile)
+/* harmony export */ });
+function getPointerPos(canvas, event) {
+    const canvasScaleX = canvas.offsetWidth / canvas.width;
+    const canvasScaleY = canvas.offsetHeight / canvas.height;
+    const x = Math.floor(event.offsetX / canvasScaleX)
+    const y = Math.floor(event.offsetY / canvasScaleY)
+    return { x: x, y: y };
+}
+
+function pixelToTile(coords) {
+    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
+}
+
+function clamp(number, min, max) {
+  return Math.max(min, Math.min(number, max));
+}
+
 
 /***/ }),
 
