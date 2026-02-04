@@ -5,10 +5,12 @@ import { Sprite } from './sprite.js'
 import { FRAME_TIME, FRAME_TIME_MS } from './constants.js'
 import { TileMap } from './tile.js'
 import * as Util from './util.js'
+import SamJs from 'sam-js'
 
 export class Engine {
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
+        this.textToSpeech = new SamJs();
         this.luaFactory = new LuaFactory();
         this.ctx = gameCanvas.getContext('2d');
         this.downPointers = new Set();
@@ -57,6 +59,9 @@ export class Engine {
         });
         this.lua.global.set('destroySprite', (sprite) => {
             this.sprites = this.sprites.filter(s => s !== sprite);
+        });
+        this.lua.global.set('say', (string) => {
+            this.textToSpeech.speak(string);
         });
         // Load Script
         this.lua.doStringSync(this.game.script);
