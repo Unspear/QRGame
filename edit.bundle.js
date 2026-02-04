@@ -122,6 +122,19 @@ const urlButton = document.getElementById('url-button');
 const qrButton = document.getElementById('qr-button');
 const qrCanvas = document.getElementById('qr-canvas');
 
+// Test Script: PONG
+
+const TEST_SCRIPT = `local top = createSprite('----', 8, 96, 16)
+local bottom = createSprite('----', 8, 96, 256-16)
+function drag(pos)
+  local x = math.min(math.max(pos.x, 16), 192-16)
+  if pos.y < 64 then
+    top.x = x
+  elseif pos.y > (256-64) then
+    bottom.x = x 
+  end
+end`;
+
 // Script Editor
 let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
     extensions: [codemirror__WEBPACK_IMPORTED_MODULE_2__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_3__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__.lua)],
@@ -144,7 +157,7 @@ const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas, 
 const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
 let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.urlToGame)();
 if (game === null) {
-    game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game();
+    game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(TEST_SCRIPT);
 }
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
