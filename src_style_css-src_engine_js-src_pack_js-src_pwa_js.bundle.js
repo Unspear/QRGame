@@ -208,6 +208,7 @@ class Engine {
         this.sprites = [];
         this.tileMap = _tile_js__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
         // Create physics engine
+        (matter_js__WEBPACK_IMPORTED_MODULE_1___default().Resolver)._restingThresh = 1;
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({ 
             gravity: { scale: 0 }
         });
@@ -223,6 +224,11 @@ class Engine {
         });
         this.lua.global.set('destroySprite', (sprite) => {
             this.sprites = this.sprites.filter(s => s !== sprite);
+        });
+        this.lua.global.set('copySprite', (sprite) => {
+            let newSprite = _sprite_js__WEBPACK_IMPORTED_MODULE_3__.Sprite.Copy(sprite);
+            this.sprites.push(newSprite);
+            return newSprite;
         });
         this.lua.global.set('say', (string) => {
             this.textToSpeech.speak(string);
@@ -519,12 +525,16 @@ class Sprite {
     #px;
     #py;
     #physBody;
-    #physHasBody;
+    #physWidth;
+    #physHeight;
     #physIsStatic;
     #physIsSensor;
     #physIsDrag;
     #physVelX;
     #physVelY;
+    #physWantsBody;
+    #physWantsWidth;
+    #physWantsHeight;
     constructor(char, color, x, y) {
         this.char = char;
         this.color = color;
@@ -535,12 +545,31 @@ class Sprite {
         this.wrap = 0;
         this.compact = true;
         this.#physBody = null;
-        this.#physHasBody = false;
+        this.#physWidth = _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
+        this.#physHeight = _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
         this.#physIsStatic = false;
         this.#physIsSensor = false;
         this.#physIsDrag = false;
         this.#physVelX = null;
         this.#physVelY = null;
+        this.#physWantsBody = false;
+        this.#physWantsWidth = _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
+        this.#physWantsHeight = _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
+    }
+    static Copy(sprite) {
+        let s = new Sprite(sprite.char, sprite.color, sprite.x, sprite.y);
+        s.px = sprite.px;
+        s.py = sprite.py;
+        s.wrap = sprite.wrap;
+        s.compact = sprite.compact;
+        s.physics = sprite.physics;
+        s.static = sprite.static;
+        s.sensor = sprite.sensor;
+        s.drag = sprite.drag;
+        s.width = sprite.width;
+        s.height = sprite.height;
+        // not doing velocity for now
+        return s;
     }
     #getBodyX() {
         return this.#x - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
@@ -574,9 +603,25 @@ class Sprite {
     get y() {
         return this.#y;
     }
+    // Set Pivot
+    set px(value) {
+        this.#px = value;
+    }
+    get px() {
+        return this.#px;
+    }
+    set py(value) {
+        this.#py = value;
+    }
+    get py() {
+        return this.#py;
+    }
     // Physics
     set physics(value) {
-        this.#physHasBody = value;
+        this.#physWantsBody = value;
+    }
+    get physics() {
+        return this.#physWantsBody;
     }
     set static(value) {
         this.#physIsStatic = value
@@ -609,7 +654,7 @@ class Sprite {
         this.#physVelX = value;
     }
     get velX() {
-        if (this.#physHasBody === true) {
+        if (this.#physWantsBody === true) {
             if (this.#physVelX !== null) {
                 return this.#physVelX;
             }
@@ -623,7 +668,7 @@ class Sprite {
         this.#physVelY = value;
     }
     get velY() {
-        if (this.#physHasBody === true) {
+        if (this.#physWantsBody === true) {
             if (this.#physVelY !== null) {
                 return this.#physVelY;
             }
@@ -633,21 +678,43 @@ class Sprite {
         }
         return 0;
     }
+    set width(value) {
+        this.#physWantsWidth = value;
+    }
+    get width() {
+        return this.#physWantsWidth;
+    }
+    set height(value) {
+        this.#physWantsHeight = value;
+    }
+    get height() {
+        return this.#physWantsHeight;
+    }
     prePhysicsUpdate(matterEngine) {
-        // Check if the body needs to be created or destroyed
-        if (this.#physHasBody && this.#physBody === null) {
+        // Remove body if wanted or width/height is wrong
+        if (this.#physBody !== null && (!this.#physWantsBody || this.#physWantsWidth !== this.#physWidth || this.#physWantsHeight !== this.#physHeight)) {
+            // Destroy body
+            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.remove(matterEngine.world, this.#physBody);
+            this.#physBody = null;
+        }
+        // Check if the body needs to be created
+        if (this.#physWantsBody && this.#physBody === null) {
             // Create Body
             const options = {
                 inertia: Infinity,// Prevent rotation
                 restitution: 1.0,
                 frictionAir: 0.0,
-                friction: 1.0,
+                friction: 0.0,
                 isSensor: this.#physIsSensor,
                 isStatic: this.#physIsStatic,
                 plugin: { drag: this.#physIsDrag }
             }
-            this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_2___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, options);
+            this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_2___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
+            this.#physWidth = this.#physWantsWidth;
+            this.#physHeight = this.#physWantsHeight;
             matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.add(matterEngine.world, this.#physBody);
+        }
+        if (this.#physBody) {
             if (this.#physVelX !== null || this.#physVelY !== null) {
                 if (this.#physVelX === null) {
                     this.#physVelX = this.#physBody.velocity.x;
@@ -657,13 +724,7 @@ class Sprite {
                 }
                 const newVel = { x: this.#physVelX, y: this.#physVelY };
                 matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setVelocity(this.#physBody, newVel);
-                console.log(newVel);
             }
-        }
-        else if (!this.#physHasBody && this.#physBody !== null) {
-            // Destory body
-            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.remove(matterEngine.world, this.#physBody);
-            this.#physBody = null;
         }
         this.#physVelX = null;
         this.#physVelY = null;
