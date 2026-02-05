@@ -187,7 +187,7 @@ export class Sprite {
                 inertia: Infinity,// Prevent rotation
                 restitution: 1.0,
                 frictionAir: 0.0,
-                friction: 1.0,
+                friction: 0.0,
                 isSensor: this.#physIsSensor,
                 isStatic: this.#physIsStatic,
                 plugin: { drag: this.#physIsDrag }
@@ -196,6 +196,8 @@ export class Sprite {
             this.#physWidth = this.#physWantsWidth;
             this.#physHeight = this.#physWantsHeight;
             Matter.Composite.add(matterEngine.world, this.#physBody);
+        }
+        if (this.#physBody) {
             if (this.#physVelX !== null || this.#physVelY !== null) {
                 if (this.#physVelX === null) {
                     this.#physVelX = this.#physBody.velocity.x;
@@ -205,7 +207,6 @@ export class Sprite {
                 }
                 const newVel = { x: this.#physVelX, y: this.#physVelY };
                 Matter.Body.setVelocity(this.#physBody, newVel);
-                console.log(newVel);
             }
         }
         this.#physVelX = null;

@@ -44,6 +44,7 @@ export class Engine {
         this.sprites = [];
         this.tileMap = TileMap.Copy(game.tileMap);
         // Create physics engine
+        Matter.Resolver._restingThresh = 1;
         this.matterEngine = Matter.Engine.create({ 
             gravity: { scale: 0 }
         });
