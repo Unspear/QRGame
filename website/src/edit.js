@@ -25,33 +25,32 @@ const qrCanvas = document.getElementById('qr-canvas');
 
 // Test Script: PONG
 
-const TEST_SCRIPT = `local left = createSprite('################', 11, 192, 128)
+const TEST_SCRIPT = `-- Walls
+local left = createSprite('################', 11, 192, 128)
 left.px = 1
 left.wrap = 0.5
 left.height = 256
 left.physics = true
 left.static = true
-local right = createSprite('################', 11, 0, 128)
+local right = copySprite(left)
 right.px = 0
-right.wrap = 0.5
-right.height = 256
-right.physics = true
-right.static = true
+right.x = 0
+-- Paddles
 local top = createSprite('----', 8, 96, 32)
 top.width = 32
 top.physics = true
 top.static = true
-local bottom = createSprite('----', 8, 96, 256-32)
-bottom.width = 32
-bottom.physics = true
-bottom.static = true
+local bottom = copySprite(top)
+bottom.y = 256 - 32
+-- Ball
 local ball = createSprite('O', 8, 96, 128)
 ball.width = 8
 ball.physics = true
 ball.velX = 3.0
 ball.velY = 0.1
+-- Control Paddles
 function drag(pos)
-  local x = math.min(math.max(pos.x, 16), 192-16)
+  local x = math.min(math.max(pos.x, 24), 192-24)
   if pos.y < 64 then
     top.x = x
   elseif pos.y > (256-64) then

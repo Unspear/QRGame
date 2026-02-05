@@ -39,6 +39,21 @@ export class Sprite {
         this.#physWantsWidth = CHAR_WIDTH;
         this.#physWantsHeight = CHAR_WIDTH;
     }
+    static Copy(sprite) {
+        let s = new Sprite(sprite.char, sprite.color, sprite.x, sprite.y);
+        s.px = sprite.px;
+        s.py = sprite.py;
+        s.wrap = sprite.wrap;
+        s.compact = sprite.compact;
+        s.physics = sprite.physics;
+        s.static = sprite.static;
+        s.sensor = sprite.sensor;
+        s.drag = sprite.drag;
+        s.width = sprite.width;
+        s.height = sprite.height;
+        // not doing velocity for now
+        return s;
+    }
     #getBodyX() {
         return this.#x - CHAR_WIDTH * this.#px + CHAR_WIDTH * 0.5;
     }
@@ -87,6 +102,9 @@ export class Sprite {
     // Physics
     set physics(value) {
         this.#physWantsBody = value;
+    }
+    get physics() {
+        return this.#physWantsBody;
     }
     set static(value) {
         this.#physIsStatic = value

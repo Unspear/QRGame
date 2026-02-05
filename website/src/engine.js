@@ -60,6 +60,11 @@ export class Engine {
         this.lua.global.set('destroySprite', (sprite) => {
             this.sprites = this.sprites.filter(s => s !== sprite);
         });
+        this.lua.global.set('copySprite', (sprite) => {
+            let newSprite = Sprite.Copy(sprite);
+            this.sprites.push(newSprite);
+            return newSprite;
+        });
         this.lua.global.set('say', (string) => {
             this.textToSpeech.speak(string);
         });
