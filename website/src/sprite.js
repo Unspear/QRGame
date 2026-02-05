@@ -8,12 +8,16 @@ export class Sprite {
     #px;
     #py;
     #physBody;
-    #physHasBody;
+    #physWidth;
+    #physHeight;
     #physIsStatic;
     #physIsSensor;
     #physIsDrag;
     #physVelX;
     #physVelY;
+    #physWantsBody;
+    #physWantsWidth;
+    #physWantsHeight;
     constructor(char, color, x, y) {
         this.char = char;
         this.color = color;
@@ -24,12 +28,16 @@ export class Sprite {
         this.wrap = 0;
         this.compact = true;
         this.#physBody = null;
-        this.#physHasBody = false;
+        this.#physWidth = CHAR_WIDTH;
+        this.#physHeight = CHAR_WIDTH;
         this.#physIsStatic = false;
         this.#physIsSensor = false;
         this.#physIsDrag = false;
         this.#physVelX = null;
         this.#physVelY = null;
+        this.#physWantsBody = false;
+        this.#physWantsWidth = CHAR_WIDTH;
+        this.#physWantsHeight = CHAR_WIDTH;
     }
     #getBodyX() {
         return this.#x - CHAR_WIDTH * this.#px + CHAR_WIDTH * 0.5;
@@ -63,9 +71,22 @@ export class Sprite {
     get y() {
         return this.#y;
     }
+    // Set Pivot
+    set px(value) {
+        this.#px = value;
+    }
+    get px() {
+        return this.#px;
+    }
+    set py(value) {
+        this.#py = value;
+    }
+    get py() {
+        return this.#py;
+    }
     // Physics
     set physics(value) {
-        this.#physHasBody = value;
+        this.#physWantsBody = value;
     }
     set static(value) {
         this.#physIsStatic = value
@@ -98,7 +119,7 @@ export class Sprite {
         this.#physVelX = value;
     }
     get velX() {
-        if (this.#physHasBody === true) {
+        if (this.#physWantsBody === true) {
             if (this.#physVelX !== null) {
                 return this.#physVelX;
             }
@@ -112,7 +133,7 @@ export class Sprite {
         this.#physVelY = value;
     }
     get velY() {
-        if (this.#physHasBody === true) {
+        if (this.#physWantsBody === true) {
             if (this.#physVelY !== null) {
                 return this.#physVelY;
             }
@@ -122,9 +143,27 @@ export class Sprite {
         }
         return 0;
     }
+    set width(value) {
+        this.#physWantsWidth = value;
+    }
+    get width() {
+        return this.#physWantsWidth;
+    }
+    set height(value) {
+        this.#physWantsHeight = value;
+    }
+    get height() {
+        return this.#physWantsHeight;
+    }
     prePhysicsUpdate(matterEngine) {
-        // Check if the body needs to be created or destroyed
-        if (this.#physHasBody && this.#physBody === null) {
+        // Remove body if wanted or width/height is wrong
+        if (this.#physBody !== null && (!this.#physWantsBody || this.#physWantsWidth !== this.#physWidth || this.#physWantsHeight !== this.#physHeight)) {
+            // Destroy body
+            Matter.Composite.remove(matterEngine.world, this.#physBody);
+            this.#physBody = null;
+        }
+        // Check if the body needs to be created
+        if (this.#physWantsBody && this.#physBody === null) {
             // Create Body
             const options = {
                 inertia: Infinity,// Prevent rotation
@@ -135,7 +174,9 @@ export class Sprite {
                 isStatic: this.#physIsStatic,
                 plugin: { drag: this.#physIsDrag }
             }
-            this.#physBody = Matter.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), CHAR_WIDTH, CHAR_WIDTH, options);
+            this.#physBody = Matter.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
+            this.#physWidth = this.#physWantsWidth;
+            this.#physHeight = this.#physWantsHeight;
             Matter.Composite.add(matterEngine.world, this.#physBody);
             if (this.#physVelX !== null || this.#physVelY !== null) {
                 if (this.#physVelX === null) {
@@ -148,11 +189,6 @@ export class Sprite {
                 Matter.Body.setVelocity(this.#physBody, newVel);
                 console.log(newVel);
             }
-        }
-        else if (!this.#physHasBody && this.#physBody !== null) {
-            // Destory body
-            Matter.Composite.remove(matterEngine.world, this.#physBody);
-            this.#physBody = null;
         }
         this.#physVelX = null;
         this.#physVelY = null;
