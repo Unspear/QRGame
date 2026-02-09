@@ -1,9 +1,10 @@
-html {
-    min-width: 200px;
-    font-family: Verdana;
-}
 body {
+    font-family: Verdana;
+    /*Put page into central column*/
     margin: 0px;
+    min-width: 200px;
+    margin-inline: auto;
+    width: min(calc(192px * 3), 100%);
 }
 #tab-content-code {
   max-width: 95%;
@@ -23,10 +24,6 @@ button {
     line-height: 1.5;
     text-wrap: nowrap;
     text-overflow: clip;
-}
-.tab-centred {
-    margin-inline: auto;
-    width: min(calc(192px * 3), 100%);
 }
 canvas {
     margin-inline: auto;
@@ -57,4 +54,12 @@ canvas {
 
 .tabs input[id="tab-code"]:checked ~ #tab-content-code {
 	display: block;
+}
+nav ul {
+    list-style-type:none;
+    margin: 0.5rem;
+    padding: 0;
+}
+nav li {
+    display: inline;
 }

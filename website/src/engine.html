@@ -7,8 +7,9 @@
     <title>QR Game</title>
   </head>
   <body>
+    <%= require('html-loader!./navbar.html').default %>
     <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <div class="tabs tab-centred">
+    <div class="tabs">
       <!-- Radio Buttons -->
       <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
       <label for="tab-play">Play</label>
@@ -27,12 +28,12 @@
       <% } %>
 
       <!-- Tab Content -->
-      <div class="tab-content tab-centred" id="tab-content-play">
+      <div class="tab-content" id="tab-content-play">
           <button id="reload-button">Reload Game</button>
           <canvas id="game-canvas" width="192" height="256"></canvas>
       </div>
 
-      <div class="tab-content tab-centred" id="tab-content-share">
+      <div class="tab-content" id="tab-content-share">
         <p>
           <button id="url-button">URL to Clipboard</button>
           <button id="qr-button">QR to Clipboard</button>
@@ -42,7 +43,7 @@
       
       <% if (isEditor) { %>
 
-      <div class="tab-content tab-centred" id="tab-content-edit">
+      <div class="tab-content" id="tab-content-edit">
           <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
           <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
           <br>
