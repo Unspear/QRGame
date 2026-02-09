@@ -1,2 +1,4 @@
 website/package-lock.json
 picotool/
+website/cmake-build/*
+website/src/compiled/*
