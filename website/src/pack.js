@@ -1,6 +1,5 @@
 import {Game} from './game.js'
-import brotliPromise from 'brotli-wasm';
-const brotli = await brotliPromise;
+import * as PPMd from "./compressor.js"
 
 // Import/Export
 export function urlToData() {
@@ -18,11 +17,11 @@ export function dataToUrl(data) {
     return URL.parse("play", window.location.origin+window.location.pathname)+"?"+params;
 }
 export function compressData(data) {
-    return brotli.compress(data, {quality: 11});
+    return PPMd.compress(data);
 }
 export function decompressData(data) {
     if (data === null) return null;
-    return brotli.decompress(data);
+    return PPMd.decompress(data);
 }
 export function urlToGame() {
     return Game.fromData(decompressData(urlToData()));

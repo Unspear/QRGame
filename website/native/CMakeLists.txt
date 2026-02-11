@@ -1,20 +1,21 @@
-add_executable(app main.cpp)
+add_executable(ppmd PPMd.cpp Model.cpp)
 
-set_target_properties(app PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+set_target_properties(ppmd PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
 target_link_options(
-  app
+  ppmd
   PRIVATE
   "SHELL:-sENVIRONMENT='web'"
   -sEXPORT_ES6
-  -sEXPORT_NAME=CppApp
-  -sMIN_WEBGL_VERSION=2
-  -sMAX_WEBGL_VERSION=2
+  -sEXPORT_NAME=PPMd
   -sALLOW_MEMORY_GROWTH=1
   -sINVOKE_RUN=0
+  -sMODULARIZE=1
+  -sFORCE_FILESYSTEM=1
+  -sEXPORTED_FUNCTIONS=_encode,_decode
   # RelWithDebInfo build flags, enable separate dwarf
   # to reduce wasm file size
-  $<$<CONFIG:RELWITHDEBINFO>:-gseparate-dwarf=${CMAKE_CURRENT_BINARY_DIR}/app.dwarf>
+  $<$<CONFIG:RELWITHDEBINFO>:-gseparate-dwarf=${CMAKE_CURRENT_BINARY_DIR}/ppmd.dwarf>
   $<$<CONFIG:RELWITHDEBINFO>:-g>
   $<$<CONFIG:RELWITHDEBINFO>:-O2>
   # Debug build flags
@@ -22,7 +23,7 @@ target_link_options(
   $<$<CONFIG:DEBUG>:-g>
   $<$<CONFIG:DEBUG>:-O0>
   # Exported Emscripten runtime methods
-  "SHELL:-sEXPORTED_RUNTIME_METHODS='[\"callMain\"]'")
+  "SHELL:-sEXPORTED_RUNTIME_METHODS=FS,ccall")
 
 # Custom command and target to copy our compiled WASM and JS
 # files from the C++ build directory into the web app's source
@@ -31,13 +32,13 @@ target_link_options(
 set(WEB_OUT_DIR ${PROJECT_SOURCE_DIR}/src/compiled)
 
 add_custom_command(
-  DEPENDS app
-  OUTPUT ${WEB_OUT_DIR}/app.js ${WEB_OUT_DIR}/app.wasm
+  DEPENDS ppmd
+  OUTPUT ${WEB_OUT_DIR}/ppmd.js ${WEB_OUT_DIR}/ppmd.wasm
   COMMAND cmake -E make_directory ${WEB_OUT_DIR}
-  COMMAND cmake -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/app.js
-          ${CMAKE_CURRENT_BINARY_DIR}/app.wasm ${WEB_OUT_DIR})
+  COMMAND cmake -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/ppmd.js
+          ${CMAKE_CURRENT_BINARY_DIR}/ppmd.wasm ${WEB_OUT_DIR})
 
 add_custom_target(
-  copy_wasm_to_app ALL
-  DEPENDS ${WEB_OUT_DIR}/app.js ${WEB_OUT_DIR}/app.wasm
+  copy_wasm_to_website ALL
+  DEPENDS ${WEB_OUT_DIR}/ppmd.js ${WEB_OUT_DIR}/ppmd.wasm
   COMMENT "Copying wasm build to ${WEB_OUT_DIR}")

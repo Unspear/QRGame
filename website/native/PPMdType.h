@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 
-#define _WIN32_ENVIRONMENT_
+//#define _WIN32_ENVIRONMENT_
 //#define _DOS32_ENVIRONMENT_
 //#define _POSIX_ENVIRONMENT_
-//#define _UNKNOWN_ENVIRONMENT_
+#define _UNKNOWN_ENVIRONMENT_
 #if defined(_WIN32_ENVIRONMENT_)+defined(_DOS32_ENVIRONMENT_)+defined(_POSIX_ENVIRONMENT_)+defined(_UNKNOWN_ENVIRONMENT_) != 1
 #error Only one environment must be defined
 #endif /* defined(_WIN32_ENVIRONMENT_)+defined(_DOS32_ENVIRONMENT_)+defined(_POSIX_ENVIRONMENT_)+defined(_UNKNOWN_ENVIRONMENT_) != 1 */
@@ -33,7 +33,7 @@ typedef unsigned int   UINT;
 const DWORD PPMdSignature=0x84ACAF8F, Variant='I';
 const int MAX_O=16;                         /* maximum allowed model order  */
 
-#define _USE_PREFETCHING                    /* for puzzling mainly          */
+// #define _USE_PREFETCHING                    /* for puzzling mainly          */
 
 #if !defined(_UNKNOWN_ENVIRONMENT_) && !defined(__GNUC__)
 #define _FASTCALL __fastcall

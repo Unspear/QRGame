@@ -184,11 +184,15 @@ struct ENV_FILE_FINDER {
     BOOL         findNext() { return FALSE; }
     void findStop() {}
 };
-#endif /* defined(__WIN32_ENVIRONMENT) */
+#endif /* defined(_UNKNOWN_ENVIRONMENT_) */
 
-static const char* const MTxt[] = { "Can`t open file %s\n",
-    "read/write error for files %s/%s\n", "Out of memory!\n",
-    "User break\n", "unknown command: %s\n", "unknown switch: %s\n",
+static const char* const MTxt[] = { 
+    "Can`t open file %s\n",
+    "read/write error for files %s/%s\n", 
+    "Out of memory!\n",
+    "User break\n", 
+    "unknown command: %s\n", 
+    "unknown switch: %s\n",
     "designed and written by Dmitry Shkarin <dmitry.shkarin@mtu-net.ru>\n"
     USAGE_STR
     "Switches (for encoding only):\n"
@@ -215,7 +219,7 @@ void _STDCALL PrintInfo(_PPMD_FILE* DecodedFile,_PPMD_FILE* EncodedFile)
     UINT n1=(8U*NEnc)/NDec;
     UINT n2=(100U*(8U*NEnc-NDec*n1)+NDec/2U)/NDec;
     if (n2 == 100) { n1++;                  n2=0; }
-    int RunTime=((clock()-StartClock) << 10)/int(CLK_TCK);
+    int RunTime=((clock()-StartClock) << 10)/int(CLOCKS_PER_SEC);
     UINT Speed=NDec/(RunTime+(RunTime == 0));
     UINT UsedMemory=GetUsedMemory() >> 10;
     UINT m1=UsedMemory >> 10;
@@ -355,7 +359,8 @@ int main(int argc, char *argv[])
     BOOL DeleteFile=FALSE;
     int i, MaxOrder=4, SASize=10;
     MR_METHOD MRMethod=MRM_RESTART;
-    printf("Fast PPMII compressor for textual data, variant %c, "__DATE__"\n",char(Variant));
+    // QR: No __DATE__ defined in emscripten, and printing isn't needed
+    //printf("Fast PPMII compressor for textual data, variant %c, "__DATE__"\n",char(Variant));
     if (argc < 3) { printf(MTxt[6],SASize,MAX_O,MaxOrder);      return -1; }
     switch ( toupper(argv[1][0]) ) {
         case 'E': EncodeFlag=TRUE;                              break;
@@ -395,4 +400,25 @@ int main(int argc, char *argv[])
     }
     StopSubAllocator();
     return 0;
+}
+
+extern "C" {
+    void encode(char* inputPath, char* outputPath) {
+        FILE* inputFile = fopen(inputPath, "rb");
+        FILE* outputFile = fopen(outputPath, "w+b");
+        StartSubAllocator(10);
+        EncodeFile(outputFile, inputFile, 4, MRM_RESTART);
+        StopSubAllocator();
+        fclose(inputFile);
+        fclose(outputFile);
+    }
+    void decode(char* inputPath, char* outputPath) {
+        FILE* inputFile = fopen(inputPath, "rb");
+        FILE* outputFile = fopen(outputPath, "w+b");
+        StartSubAllocator(10);
+        DecodeFile(outputFile, inputFile, 4, MRM_RESTART);
+        StopSubAllocator();
+        fclose(inputFile);
+        fclose(outputFile);
+    }
 }

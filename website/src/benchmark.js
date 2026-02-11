@@ -1,6 +1,7 @@
 import * as fflate from 'fflate'
 import brotliPromise from 'brotli-wasm';
 const brotli = await brotliPromise;
+import * as PPMd from "./compressor.js"
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 
@@ -50,5 +51,6 @@ export default async function(game) {
         results["fflate deflate"] = fflate.deflateSync(gameData, fflateOpts).length;
         results["fflate deflate w/dict"] = fflate.deflateSync(gameData, fflateOptsDict).length;
         results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
+        results["ppmd"] = PPMd.compress(gameData).length;
         console.table(results);
 }
