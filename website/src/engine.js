@@ -37,6 +37,9 @@ export class Engine {
         window.addEventListener('pointerup', (event) => {
             this.downPointers.delete(event.pointerId);
         });
+        gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
     }
     async play(game) {
         // Setup (should override any existing values)
