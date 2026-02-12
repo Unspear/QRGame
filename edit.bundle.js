@@ -15,9 +15,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
 /* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
+/* harmony import */ var _compressor_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./compressor.js */ "./src/compressor.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor_js__WEBPACK_IMPORTED_MODULE_2__]);
+var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+_compressor_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_async_dependencies_result__[0];
 
 
 const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_1__["default"];
+
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 
@@ -67,6 +72,7 @@ const compressors = [
         results["fflate deflate"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOpts).length;
         results["fflate deflate w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOptsDict).length;
         results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
+        results["ppmd"] = _compressor_js__WEBPACK_IMPORTED_MODULE_2__.compress(gameData).length;
         console.table(results);
 }
 __webpack_async_result__();
@@ -338,7 +344,7 @@ class Editor {
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			id: moduleId,
+/******/ 			// no module.id needed
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
@@ -539,6 +545,15 @@ class Editor {
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/get mini-css chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks
+/******/ 		__webpack_require__.miniCssF = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return undefined;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -725,17 +740,12 @@ class Editor {
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/nonce */
-/******/ 	(() => {
-/******/ 		__webpack_require__.nc = undefined;
-/******/ 	})();
-/******/ 	
 /************************************************************************/
 /******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-285647","vendors-node_modules_fflate_esm_browser_js-node_modules_codemirror_legacy-modes_mode_lua_js-n-690802","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/edit.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-0d8a77","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/edit.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

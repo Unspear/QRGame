@@ -5,10 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_brotli-wasm_index_web_js-node_modules_css-loader_dist_runtime_api_js-nod-285647.bundle.js"></script><script defer src="src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js"></script><script defer src="play.bundle.js"></script><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-0d8a77.bundle.js"></script><script defer src="src_style_css-src_engine_js-src_pack_js-src_pwa_js.bundle.js"></script><script defer src="play.bundle.js"></script><link href="d18af635b16961150e6d.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
+    <nav>
+    <ul>
+        <li><a href="index.html">Index</a></li>
+        <li><a href="play.html">Play</a></li>
+        <li><a href="edit.html">Edit</a></li>
+    </ul>
+</nav>
     <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <div class="tabs tab-centred">
+    <div class="tabs">
       <!-- Radio Buttons -->
       <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
       <label for="tab-play">Play</label>
@@ -19,12 +26,12 @@
       
 
       <!-- Tab Content -->
-      <div class="tab-content tab-centred" id="tab-content-play">
+      <div class="tab-content" id="tab-content-play">
           <button id="reload-button">Reload Game</button>
           <canvas id="game-canvas" width="192" height="256"></canvas>
       </div>
 
-      <div class="tab-content tab-centred" id="tab-content-share">
+      <div class="tab-content" id="tab-content-share">
         <p>
           <button id="url-button">URL to Clipboard</button>
           <button id="qr-button">QR to Clipboard</button>

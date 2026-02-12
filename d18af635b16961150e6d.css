@@ -1,0 +1,70 @@
+/*!*****************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./src/style.css ***!
+  \*****************************************************************/
+body {
+    font-family: Verdana;
+    /*Put page into central column*/
+    margin: 0px;
+    min-width: 200px;
+    margin-inline: auto;
+    width: min(calc(192px * 3), 100%);
+}
+#tab-content-code {
+  max-width: 95%;
+  margin-inline: auto;
+}
+p {
+    text-align: center;
+}
+.cm-editor {
+    outline: 2px solid grey;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+button {
+    width: 18ch;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    text-wrap: nowrap;
+    text-overflow: clip;
+}
+canvas {
+    margin-inline: auto;
+    display: block;
+    width: 100%;
+    image-rendering: pixelated;
+}
+#qr-canvas {
+    outline: 2px solid grey;
+    background: white;
+}
+
+.tabs .tab-content {
+	display: none;
+}
+
+.tabs input[id="tab-play"]:checked ~ #tab-content-play {
+	display: block;
+}
+
+.tabs input[id="tab-share"]:checked ~ #tab-content-share {
+	display: block;
+}
+
+.tabs input[id="tab-edit"]:checked ~ #tab-content-edit {
+	display: block;
+}
+
+.tabs input[id="tab-code"]:checked ~ #tab-content-code {
+	display: block;
+}
+nav ul {
+    list-style-type:none;
+    margin: 0.5rem;
+    padding: 0;
+}
+nav li {
+    display: inline;
+}
+
+/*# sourceMappingURL=d18af635b16961150e6d.css.map*/
