@@ -118,10 +118,6 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_ben
 // DOM
 
 const gameCanvas = document.getElementById('game-canvas');
-const editorCanvas = document.getElementById('editor-canvas');
-const editorCharInput = document.getElementById('editor-char-input');
-const editorColorInput = document.getElementById('editor-color-input');
-const editorInvertInput = document.getElementById('editor-invert-input');
 const codeContent = document.getElementById('tab-content-code');
 const reloadButton = document.getElementById('reload-button');
 const urlButton = document.getElementById('url-button');
@@ -145,7 +141,7 @@ function editorToGame() {
     return new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(scriptInput.state.doc.toString(), editor.tileMap);
 }
 // Editor
-const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
+const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor();
 // Engine
 const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
 let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.urlToGame)();
@@ -191,25 +187,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Editor: () => (/* binding */ Editor)
 /* harmony export */ });
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
-/* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
-/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
+/* harmony import */ var _camera_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.js */ "./src/camera.js");
+/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
+/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
+/* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
+
 
 
 
 
 
 class Editor {
-    constructor(editorCanvas, editorCharInput, editorColorInput, editorInvertedInput) {
-        this.editorCanvas = editorCanvas;
-        this.editorCharInput = editorCharInput;
-        this.editorColorInput = editorColorInput;
-        this.editorInvertedInput = editorInvertedInput;
-        this.ctx = editorCanvas.getContext('2d');
+    constructor() {
+        this.canvas = document.getElementById('editor-canvas');
+        this.charInput = document.getElementById('editor-char-input');;
+        this.colorInput = document.getElementById('editor-color-input');
+        this.invertedInput = document.getElementById('editor-invert-input');
+        this.leftButton = document.getElementById('left-button');
+        this.upButton = document.getElementById('up-button');
+        this.rightButton = document.getElementById('right-button');
+        this.downButton = document.getElementById('down-button');
+        this.ctx = this.canvas.getContext('2d');
         this.placingTiles = false;
+        this.camera = new _camera_js__WEBPACK_IMPORTED_MODULE_0__.Camera();
         // Place tile while pointer is held
-        editorCanvas.addEventListener('pointerdown', (event) => {
+        this.canvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
             this.setTileFromEvent(event);
             this.draw();
@@ -218,24 +221,29 @@ class Editor {
             this.placingTiles = false;
             this.draw();
         });
-        editorCanvas.addEventListener('pointermove', (event) => {
+        this.canvas.addEventListener('pointermove', (event) => {
             if (this.placingTiles) {
                 this.setTileFromEvent(event);
                 this.draw();
             }
         });
         // Nuke default touch behaviour (pull down screen to reload)
-        editorCanvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
-        editorCanvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
-        editorCanvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-        this.tileMap = new _tile_js__WEBPACK_IMPORTED_MODULE_2__.TileMap({ w: 12, h: 16 });
+        this.canvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+        this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
+        this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+        let that = this;
+        this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
+        this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
+        this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
+        this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
+        this.tileMap = new _tile_js__WEBPACK_IMPORTED_MODULE_3__.TileMap({ w: 32, h: 32 });
         this.draw();
     }
     setTileFromEvent(event) {
         // Get array of codepoints
-        let codePoints = [...this.editorCharInput.value].map(c => c.codePointAt(0));
-        let color = parseInt(this.editorColorInput.value);
-        const inverted = this.editorInvertedInput.checked;
+        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0));
+        let color = parseInt(this.colorInput.value);
+        const inverted = this.invertedInput.checked;
         if (inverted) {
             color += 8;
         }
@@ -244,18 +252,26 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let coords = _util_js__WEBPACK_IMPORTED_MODULE_3__.pixelToTile(_util_js__WEBPACK_IMPORTED_MODULE_3__.getPointerPos(this.editorCanvas, event));
+        let pixel = _util_js__WEBPACK_IMPORTED_MODULE_4__.getPointerPos(this.canvas, event);
+        let viewOffset = this.camera.getViewOffset();
+        pixel.x -= viewOffset.x;
+        pixel.y -= viewOffset.y;
+        let coords = _util_js__WEBPACK_IMPORTED_MODULE_4__.pixelToTile(pixel);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
         }
     }
+    updateCamera() {
+        this.camera.frame(1000.0);
+        this.draw();
+    }
     draw() {
         this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-        this.tileMap.draw(this.ctx);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.tileMap.draw(this.ctx, this.camera.getViewOffset());
     }
 }
 

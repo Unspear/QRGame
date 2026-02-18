@@ -91,10 +91,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "29025203e9a421448d0c98de0a310b9a"
+    "revision": "a62ca6ceb66311593f9a8c2b60caf12c"
   }, {
     "url": "edit.html",
-    "revision": "ca8ee05d2f52b011ac486a4565a2d051"
+    "revision": "66b48a1a17e4ef0d66fa7bb478b3d780"
   }, {
     "url": "ee4bb51207f4039a78af.wasm",
     "revision": null
@@ -115,10 +115,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "a9a64e781404034d02756e6e3fca0938"
   }, {
     "url": "src_engine_js.bundle.js",
-    "revision": "63f19cbe307d2f1649fc2ad6cd760f8b"
+    "revision": "763387aa7b49a82fa4f6f1293d47b95b"
   }, {
     "url": "src_style_css-src_pack_js-src_pwa_js.bundle.js",
-    "revision": "e11ad43122fc54b25461fa75a63d8136"
+    "revision": "cdfc4192fb99a339be6123210d63fa6b"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452.bundle.js",
     "revision": "b232f222aecb05ebb6bd14cd56091100"

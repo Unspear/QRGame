@@ -146,9 +146,9 @@ class Game {
         return new TextEncoder().encode(JSON.stringify(this));
     }
     static fromData(data) {
-        if (data === null) return null;
+        if (data === null) return new Game();
         const string = new TextDecoder().decode(data);
-        if (string.length === 0) return null;
+        if (string.length === 0) return new Game();
         const parsed = JSON.parse(string);
         return new Game(parsed.script, parsed.tileMap);
     }
@@ -405,8 +405,8 @@ class TileMap {
             }
         }
     }
-    draw(ctx) {
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, 0, 0, this.dim.w, false);
+    draw(ctx, viewOffset) {
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
 }
 

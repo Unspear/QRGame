@@ -1,5 +1,68 @@
 (self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_engine_js"],{
 
+/***/ "./src/camera.js":
+/*!***********************!*\
+  !*** ./src/camera.js ***!
+  \***********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Camera: () => (/* binding */ Camera)
+/* harmony export */ });
+class Camera {
+    #currentPos;
+    #targetPos;
+    #speed;
+    constructor() {
+        this.#currentPos = {x: 0, y: 0};
+        this.#targetPos = {x: 0, y: 0};
+        this.#speed = 256;
+    }
+    set x(value) {
+        this.#targetPos.x = value;
+    }
+    set y(value) {
+        this.#targetPos.y = value;
+    }
+    get x() {
+        return this.#targetPos.x;
+    }
+    get y() {
+        return this.#targetPos.y;
+    }
+    frame(deltaTime) {
+        let dX = this.#targetPos.x - this.#currentPos.x
+        let dY = this.#targetPos.y - this.#currentPos.y
+        let len = Math.sqrt(dX * dX + dY * dY);
+        if (len == 0) return;
+        dX /= len;
+        dY /= len;
+        let maxMove = this.#speed * deltaTime;
+        if (len > maxMove) {
+            // Move max distance
+            this.#currentPos.x += dX * maxMove;
+            this.#currentPos.y += dY * maxMove;
+        } else {
+            // Move to target
+            this.#currentPos.x = this.#targetPos.x;
+            this.#currentPos.y = this.#targetPos.y;
+        }
+    }
+    getTargetPos() {
+        return Object.assign({}, this.#targetPos);
+    }
+    getViewOffset() {
+        let offsetX = -this.#currentPos.x;
+        let offsetY = -this.#currentPos.y;
+        return {x: offsetX, y: offsetY};
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/engine.js":
 /*!***********************!*\
   !*** ./src/engine.js ***!
@@ -21,6 +84,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
 /* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
 /* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "./node_modules/sam-js/dist/samjs.esm.min.js");
+/* harmony import */ var _camera_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera.js */ "./src/camera.js");
+
 
 
 
@@ -69,6 +134,7 @@ class Engine {
         this.game = game;
         this.sprites = [];
         this.tileMap = _tile_js__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
+        this.camera = new _camera_js__WEBPACK_IMPORTED_MODULE_8__.Camera();
         // Create physics engine
         (matter_js__WEBPACK_IMPORTED_MODULE_1___default().Resolver)._restingThresh = 1;
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({ 
@@ -95,6 +161,7 @@ class Engine {
         this.lua.global.set('say', (string) => {
             this.textToSpeech.speak(string);
         });
+        this.lua.global.set('camera', this.camera);
         // Load Script
         this.lua.doStringSync(this.game.script);
         // Get Lua References
@@ -116,6 +183,7 @@ class Engine {
                 {
                     this.luaFrame();
                 }
+                this.camera.frame(_constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME)
                 // Physics
                 for (let sprite of this.sprites) {
                     sprite.prePhysicsUpdate(this.matterEngine)
@@ -130,10 +198,11 @@ class Engine {
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
                 // Draw Tilemap
-                this.tileMap.draw(this.ctx);
+                let viewOffset = this.camera.getViewOffset();
+                this.tileMap.draw(this.ctx, viewOffset);
                 // Draw Sprites
                 for (let sprite of this.sprites) {
-                    sprite.draw(this.ctx)
+                    sprite.draw(this.ctx, viewOffset)
                 }
             }
             if (elapsed > _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS * 5) {
@@ -385,9 +454,9 @@ class Sprite {
             this.#y = this.#getEntityYFromBody();
         }
     }
-    draw(context) {
+    draw(context, viewOffset) {
         const codePoints = [...this.char].map(c => c.codePointAt(0));
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact)
+        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }
 }
 
