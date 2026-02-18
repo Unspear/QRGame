@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="index.bundle.js"></script><link href="d18af635b16961150e6d.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="src_style_css-src_pack_js-src_pwa_js.bundle.js"></script><script defer src="index.bundle.js"></script><link href="d18af635b16961150e6d.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
     <nav>
     <ul>
@@ -17,8 +17,11 @@
     <h1>QR Game</h1>
     QR Game is a platform that supports the creation of games which can fit inside a QR code!
     <br>
-    <a href="play">Open Player</a>
+    <select name="games" id="games">
+      <option value="none">None</option>
+      <option value="pong">Pong</option>
+    </select>
     <br>
-    <a href="edit">Open Editor</a>
+    <button id="play-button">Play</button><button id="edit-button">Edit</button>
   </body>
 </html>

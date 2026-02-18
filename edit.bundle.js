@@ -128,72 +128,6 @@ const urlButton = document.getElementById('url-button');
 const qrButton = document.getElementById('qr-button');
 const qrCanvas = document.getElementById('qr-canvas');
 
-// Test Script: PONG
-
-const TEST_SCRIPT = `-- Walls
-local left = createSprite('################', 11, 0, 128)
-left.width = 8
-left.px = 0
-left.wrap = 0.5
-left.height = 256
-left.physics = true
-left.static = true
-local right = copySprite(left)
-right.px = 1
-right.x = 192
--- Paddles
-local top = createSprite('----', 8, 96, 32)
-top.width = 32
-top.physics = true
-top.static = true
-local bottom = copySprite(top)
-bottom.y = 256 - 32
--- Ball
-local ball = createSprite('O', 8, 96, 128)
-ball.width = 8
-ball.physics = true
--- Control Paddles
-function drag(pos)
-  local x = math.min(math.max(pos.x, 24), 192-24)
-  if pos.y < 64 then
-    top.x = x
-  elseif pos.y > (256-64) then
-    bottom.x = x 
-  end
-end
--- Score
-top.score = 0
-bottom.score = 0
-local topScore = createSprite('', 12, 16, 8)
-topScore.px = 0
-topScore.py = 0
-local bottomScore = createSprite('', 12, 192-16, 256-8)
-bottomScore.px = 1
-bottomScore.py = 1
--- Update score and reset ball
-function newRound()
-    topScore.char = tostring(top.score)
-    bottomScore.char = tostring(bottom.score)
-    ball.x = 96
-    local dirY = math.random(0, 1)*2-1
-    ball.y = 128-dirY*64
-    ball.velY = dirY*3
-    ball.velX = (math.random(0, 1)*2-1)*1.5
-end
-newRound()
--- Frame
-function frame()
-    if ball.y < 0 then
-        top.score = top.score + 1
-        newRound()
-    end
-    if ball.y > 256 then
-        bottom.score = bottom.score + 1
-        newRound()
-    end
-end
-`;
-
 // Script Editor
 let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
     extensions: [codemirror__WEBPACK_IMPORTED_MODULE_2__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_3__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__.lua)],
@@ -215,9 +149,6 @@ const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor(editorCanvas, 
 // Engine
 const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
 let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.urlToGame)();
-if (game === null) {
-    game = new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(TEST_SCRIPT);
-}
 gameToEditor(game);
 // (could load the game directly here but want to make sure the editor works properly)
 engine.play(editorToGame());
@@ -745,7 +676,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-0d8a77","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452","src_style_css-src_engine_js-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/edit.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-b166e9","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452","src_style_css-src_pack_js-src_pwa_js","src_engine_js"], () => (__webpack_require__("./src/edit.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
