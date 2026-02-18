@@ -13,10 +13,6 @@ import {urlToGame, gameToUrl} from './pack.js'
 // DOM
 
 const gameCanvas = document.getElementById('game-canvas');
-const editorCanvas = document.getElementById('editor-canvas');
-const editorCharInput = document.getElementById('editor-char-input');
-const editorColorInput = document.getElementById('editor-color-input');
-const editorInvertInput = document.getElementById('editor-invert-input');
 const codeContent = document.getElementById('tab-content-code');
 const reloadButton = document.getElementById('reload-button');
 const urlButton = document.getElementById('url-button');
@@ -40,7 +36,7 @@ function editorToGame() {
     return new Game(scriptInput.state.doc.toString(), editor.tileMap);
 }
 // Editor
-const editor = new Editor(editorCanvas, editorCharInput, editorColorInput, editorInvertInput);
+const editor = new Editor();
 // Engine
 const engine = new Engine(gameCanvas);
 let game = urlToGame();

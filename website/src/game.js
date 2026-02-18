@@ -9,9 +9,9 @@ export class Game {
         return new TextEncoder().encode(JSON.stringify(this));
     }
     static fromData(data) {
-        if (data === null) return null;
+        if (data === null) return new Game();
         const string = new TextDecoder().decode(data);
-        if (string.length === 0) return null;
+        if (string.length === 0) return new Game();
         const parsed = JSON.parse(string);
         return new Game(parsed.script, parsed.tileMap);
     }

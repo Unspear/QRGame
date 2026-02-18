@@ -36,8 +36,22 @@ export class TileMap {
             }
         }
     }
-    draw(ctx) {
-        charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, 0, 0, 0, 0, this.dim.w, false);
+    draw(ctx, viewPos = {x: 0, y: 0}, viewDim = {w: 12, h: 16}) {
+        let codePoints = [];
+        let colors = [];
+        for (let y = viewPos.y; y < (viewPos.y + viewDim.h); y++) {
+            for (let x = viewPos.x; x < (viewPos.x + viewDim.w); x++) {
+                if (x < 0 || x >= this.dim.w || y < 0 || y >= this.dim.h) {
+                    codePoints.push(32);
+                    colors.push(0);
+                } else {
+                    const index = y * this.dim.w + x;
+                    codePoints.push(this.tileData.codePoint[index]);
+                    colors.push(this.tileData.color[index]);
+                }
+            }
+        }
+        charRenderer.draw(ctx, codePoints, colors, 0, 0, 0, 0, viewDim.w, false);
     }
 }
 
