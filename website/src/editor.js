@@ -1,3 +1,4 @@
+import { Camera } from './camera.js';
 import { Game } from './game.js'
 import charRenderer from './render.js'
 import { TileMap } from './tile.js'
@@ -15,7 +16,7 @@ export class Editor {
         this.downButton = document.getElementById('down-button');
         this.ctx = this.canvas.getContext('2d');
         this.placingTiles = false;
-        this.viewPos = {x: 0, y: 0};
+        this.camera = new Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
@@ -37,10 +38,10 @@ export class Editor {
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
-        this.leftButton.onclick = function(){that.viewPos.x -= 4; that.draw();};
-        this.upButton.onclick = function(){that.viewPos.y -= 4; that.draw();};
-        this.rightButton.onclick = function(){that.viewPos.x += 4; that.draw();};
-        this.downButton.onclick = function(){that.viewPos.y += 4; that.draw();};
+        this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
+        this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
+        this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
+        this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
         this.tileMap = new TileMap({ w: 32, h: 32 });
         this.draw();
     }
@@ -57,19 +58,25 @@ export class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let coords = Util.pixelToTile(Util.getPointerPos(this.canvas, event));
-        coords.x += this.viewPos.x;
-        coords.y += this.viewPos.y;
+        let pixel = Util.getPointerPos(this.canvas, event);
+        let viewOffset = this.camera.getViewOffset();
+        pixel.x -= viewOffset.x;
+        pixel.y -= viewOffset.y;
+        let coords = Util.pixelToTile(pixel);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
         }
+    }
+    updateCamera() {
+        this.camera.frame(1000.0);
+        this.draw();
     }
     draw() {
         this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.tileMap.draw(this.ctx, this.viewPos);
+        this.tileMap.draw(this.ctx, this.camera.getViewOffset());
     }
 }

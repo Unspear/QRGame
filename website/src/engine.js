@@ -6,6 +6,7 @@ import { FRAME_TIME, FRAME_TIME_MS } from './constants.js'
 import { TileMap } from './tile.js'
 import * as Util from './util.js'
 import SamJs from 'sam-js'
+import { Camera } from './camera.js'
 
 export class Engine {
     constructor(gameCanvas) {
@@ -46,6 +47,7 @@ export class Engine {
         this.game = game;
         this.sprites = [];
         this.tileMap = TileMap.Copy(game.tileMap);
+        this.camera = new Camera();
         // Create physics engine
         Matter.Resolver._restingThresh = 1;
         this.matterEngine = Matter.Engine.create({ 
@@ -72,6 +74,7 @@ export class Engine {
         this.lua.global.set('say', (string) => {
             this.textToSpeech.speak(string);
         });
+        this.lua.global.set('camera', this.camera);
         // Load Script
         this.lua.doStringSync(this.game.script);
         // Get Lua References
@@ -93,6 +96,7 @@ export class Engine {
                 {
                     this.luaFrame();
                 }
+                this.camera.frame(FRAME_TIME)
                 // Physics
                 for (let sprite of this.sprites) {
                     sprite.prePhysicsUpdate(this.matterEngine)
@@ -107,10 +111,11 @@ export class Engine {
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
                 // Draw Tilemap
-                this.tileMap.draw(this.ctx);
+                let viewOffset = this.camera.getViewOffset();
+                this.tileMap.draw(this.ctx, viewOffset);
                 // Draw Sprites
                 for (let sprite of this.sprites) {
-                    sprite.draw(this.ctx)
+                    sprite.draw(this.ctx, viewOffset)
                 }
             }
             if (elapsed > FRAME_TIME_MS * 5) {

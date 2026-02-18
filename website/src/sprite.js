@@ -218,8 +218,8 @@ export class Sprite {
             this.#y = this.#getEntityYFromBody();
         }
     }
-    draw(context) {
+    draw(context, viewOffset) {
         const codePoints = [...this.char].map(c => c.codePointAt(0));
-        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact)
+        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }
 }
