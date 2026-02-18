@@ -10,11 +10,11 @@ export function urlToData() {
     if (compressed.length === 0) return null;
     return compressed;
 }
-export function dataToUrl(data) {
+export function dataToUrl(data, page) {
     const base64 = data.toBase64({ alphabet: "base64url", omitPadding: true });
     const params = new URLSearchParams();
     params.set("s", base64);
-    return URL.parse("play", window.location.origin+window.location.pathname)+"?"+params;
+    return URL.parse(page, window.location.origin+window.location.pathname)+"?"+params;
 }
 export function compressData(data) {
     return PPMd.compress(data);
@@ -26,6 +26,6 @@ export function decompressData(data) {
 export function urlToGame() {
     return Game.fromData(decompressData(urlToData()));
 }
-export function gameToUrl(game) {
-    return dataToUrl(compressData(game.toData()));
+export function gameToUrl(game, page = "play") {
+    return dataToUrl(compressData(game.toData()), page);
 }
