@@ -6,6 +6,8 @@
   },
   "private": true,
   "scripts": {
+    "//": "Single ampersand is used because the mkdir will fail if it already exists, this may not work right on UNIX",
+    "buildcpp": "mkdir cmake-build & cd cmake-build & emcmake cmake .. -DCMAKE_BUILD_TYPE=Release & cmake --build . & cd ..",
     "build": "webpack --mode=development",
     "start": "http-server dist",
     "predeploy": "npm run build",
