@@ -1,4 +1,6 @@
--- Walls
+import { Game } from "../game";
+
+let script = `-- Walls
 local left = createSprite('################', 11, 0, 128)
 left.width = 8
 left.px = 0
@@ -59,4 +61,8 @@ function frame()
         bottom.score = bottom.score + 1
         newRound()
     end
-end
+end`
+
+export default function (): Game {
+    return new Game(script);
+}

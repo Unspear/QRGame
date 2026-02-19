@@ -9,11 +9,13 @@ module.exports = {
   devtool: 'source-map',
   target: 'web',
   entry: {
-    index: './src/index.js',
-    play: './src/play.js',
-    edit: './src/edit.js'
+    index: './src/index.ts',
+    play: './src/play.ts',
+    edit: './src/edit.ts'
   },
   resolve: {
+    // Add '.ts' and '.tsx' as resolvable extensions.
+    extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
     fallback: {
       path: false,
       fs: false,
@@ -35,6 +37,14 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader"
+      },
+      {
+        test: /\.js$/,
+        loader: "source-map-loader"
+      },
       {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
