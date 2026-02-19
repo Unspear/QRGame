@@ -1,4 +1,4 @@
-import charRenderer from './render.js'
+import charRenderer from './render'
 import { CHAR_WIDTH, PALETTE } from './constants';
 import Matter from 'matter-js'
 

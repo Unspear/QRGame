@@ -1,6 +1,6 @@
 import './style.css';
 import './pwa.js'
-import {Game} from './game.js'
+import {Game} from './game'
 import {gameToUrl} from './pack.js'
 import makePong from './games/pong'
 

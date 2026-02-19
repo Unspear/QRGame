@@ -1,4 +1,4 @@
-import {Game} from './game.js'
+import {Game} from './game'
 import * as PPMd from "./compressor.js"
 
 // Import/Export

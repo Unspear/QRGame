@@ -1,6 +1,6 @@
 import './style.css';
 import {correction, generate, ImageDataOptions} from 'lean-qr'
-import {Game} from './game.js'
+import {Game} from './game'
 import {Engine} from './engine.js'
 import './pwa.js'
 import {urlToGame, gameToUrl} from './pack.js'

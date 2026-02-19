@@ -1,6 +1,5 @@
-import charRenderer from './render.js'
-import { CHAR_WIDTH, PALETTE } from './constants';
-import Matter from 'matter-js'
+import charRenderer from './render'
+import { Dimensions, Point } from './util';
 
 /**
 TileMap: An arragement of tiles (referenced from a TileSet). Does NOT have an inherent position.
@@ -11,20 +10,30 @@ TileSet: but a tileset can also contain a TileMap which
 - TileMap
  */
 
+type NewTileData = {
+    codePoint?: number;
+    color?: number;
+}
+
 export class TileMap {
-    constructor(dim) {
+    dim: Dimensions;
+    tileData: {
+        codePoint: number[],
+        color: number[]
+    }
+    constructor(dim: Dimensions) {
         this.dim = dim;
         this.tileData = {
             codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
             color: new Array(dim.w * dim.h,).fill(0)
         };
     }
-    static Copy(tileMap) {
+    static Copy(tileMap: TileMap) {
         let copied = new TileMap(tileMap.dim);
         copied.tileData = structuredClone(tileMap.tileData);
         return copied;
     }
-    setTile(coords, newTileData) {
+    setTile(coords: Point, newTileData: NewTileData) {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
             const index = coords.y * this.dim.w + coords.x;
@@ -36,11 +45,11 @@ export class TileMap {
             }
         }
     }
-    draw(ctx, viewOffset) {
+    draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
 }
-
+/**
 export class MetaTileMap {
     constructor(dim, tileSet) {
         this.dim = dim;
@@ -60,4 +69,4 @@ export class TileSet {
     constructor(count, dim, tileSet) {
         this.tiles = {};
     }
-}
+} */

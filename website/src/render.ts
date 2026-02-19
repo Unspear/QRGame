@@ -2,7 +2,16 @@ import Chars from './chars.png';
 import CharsText from './chars.txt?raw'
 import { CHAR_WIDTH, PALETTE } from './constants';
 
+type SpriteSheetEntry = {
+  index: number;
+  isFullWidth: boolean;
+};
+
 class CharRenderer {
+    drawBuffer: HTMLCanvasElement;
+    dbctx: CanvasRenderingContext2D;
+    spriteSheet: HTMLImageElement;
+    spriteSheetData: Record<number, SpriteSheetEntry>;
    constructor() {
         this.drawBuffer = document.createElement('canvas');
         this.drawBuffer.width = CHAR_WIDTH;
@@ -21,7 +30,7 @@ class CharRenderer {
             }
         }
     }
-   draw(context, codePoints, colors, posX, posY, pivotX, pivotY, wrap, compact) {
+   draw(context: CanvasRenderingContext2D, codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean) {
         console.assert(codePoints.length == colors.length)
         context.fillStyle = "white";
         // Find layout

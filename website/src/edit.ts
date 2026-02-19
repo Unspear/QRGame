@@ -3,7 +3,7 @@ import {EditorView, basicSetup} from 'codemirror'
 import {StreamLanguage} from '@codemirror/language'
 import {lua} from '@codemirror/legacy-modes/mode/lua'
 import {correction, generate, ImageDataOptions} from 'lean-qr'
-import {Game} from './game.js'
+import {Game} from './game'
 import {Engine} from './engine.js'
 import {Editor} from './editor.js'
 import benchmark from './benchmark.js';

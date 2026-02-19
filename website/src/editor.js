@@ -1,8 +1,8 @@
 import { Camera } from './camera.js';
-import { Game } from './game.js'
-import charRenderer from './render.js'
-import { TileMap } from './tile.js'
-import * as Util from './util.js'
+import { Game } from './game'
+import charRenderer from './render'
+import { TileMap } from './tile'
+import * as Util from './util'
 
 export class Editor {
     constructor() {
