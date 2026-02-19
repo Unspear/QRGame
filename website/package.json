@@ -10,6 +10,7 @@
     "buildcpp": "mkdir cmake-build & cd cmake-build & emcmake cmake .. -DCMAKE_BUILD_TYPE=Release & cmake --build . & cd ..",
     "build": "webpack --mode=development",
     "start": "http-server dist",
+    "test": "npm run build && npm run start",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist --cname qr.unspear.com --nojekyll"
   },
