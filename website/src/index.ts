@@ -1,7 +1,7 @@
 import './style.css';
-import './pwa.js'
+import './pwa'
 import {Game} from './game'
-import {gameToUrl} from './pack.js'
+import {gameToUrl} from './pack'
 import makePong from './games/pong'
 
 const playButton = document.getElementById('play-button') as HTMLButtonElement;

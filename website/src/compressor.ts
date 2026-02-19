@@ -1,7 +1,7 @@
 import PPMd from "./compiled/ppmd.js";
-var MyPPMd = await PPMd({});
+var MyPPMd: any = await PPMd({});
 
-export function compress(data) {
+export function compress(data: Uint8Array): Uint8Array {
     // Will destroy contents if it already exists (which is what we want)
     var inputFile = MyPPMd.FS.open("plain.txt", "w+");
     MyPPMd.FS.write(inputFile, data, 0, data.length, 0)
@@ -11,7 +11,7 @@ export function compress(data) {
     return MyPPMd.FS.readFile("encoded.pmd");
 }
 
-export function decompress(data) {
+export function decompress(data: Uint8Array): Uint8Array {
     // Will destroy contents if it already exists (which is what we want)
     var inputFile = MyPPMd.FS.open("encoded.pmd", "w+");
     MyPPMd.FS.write(inputFile, data, 0, data.length, 0)

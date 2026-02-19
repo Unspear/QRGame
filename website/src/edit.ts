@@ -7,8 +7,8 @@ import {Game} from './game'
 import {Engine} from './engine.js'
 import {Editor} from './editor.js'
 import benchmark from './benchmark.js';
-import './pwa.js'
-import {urlToGame, gameToUrl} from './pack.js'
+import './pwa'
+import {urlToGame, gameToUrl} from './pack'
 
 // DOM
 

@@ -1,7 +1,7 @@
 import * as fflate from 'fflate'
 import brotliPromise from 'brotli-wasm';
 const brotli = await brotliPromise;
-import * as PPMd from "./compressor.js"
+import * as PPMd from "./compressor"
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 

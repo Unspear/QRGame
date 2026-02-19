@@ -2,8 +2,8 @@ import './style.css';
 import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
 import {Engine} from './engine.js'
-import './pwa.js'
-import {urlToGame, gameToUrl} from './pack.js'
+import './pwa'
+import {urlToGame, gameToUrl} from './pack'
 
 // DOM
 const gameCanvas = document.getElementById('game-canvas') as HTMLCanvasElement;
