@@ -5,8 +5,8 @@ import {lua} from '@codemirror/legacy-modes/mode/lua'
 import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
 import {Engine} from './engine'
-import {Editor} from './editor.js'
-import benchmark from './benchmark.js';
+import {Editor} from './editor'
+import benchmark from './benchmark';
 import './pwa'
 import {urlToGame, gameToUrl} from './pack'
 

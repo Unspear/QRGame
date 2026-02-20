@@ -5,8 +5,8 @@ import { Sprite } from './sprite'
 import { FRAME_TIME, FRAME_TIME_MS } from './constants'
 import { TileMap } from './tile'
 import * as Util from './util'
-import 'sam-js'
-import { Camera } from './camera.js'
+import SamJs from 'sam-js'
+import { Camera } from './camera'
 import { Game } from './game'
 
 export class Engine {

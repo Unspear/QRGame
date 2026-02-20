@@ -1,4 +1,4 @@
-import { Camera } from './camera.js';
+import { Camera } from './camera';
 import { Game } from './game'
 import charRenderer from './render'
 import { TileMap } from './tile'
