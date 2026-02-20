@@ -12,14 +12,14 @@ export class Sprite {
     #y: number;
     #px: number;
     #py: number;
-    #physBody: Matter.Body;
+    #physBody: Matter.Body | null;
     #physWidth: number;
     #physHeight : number;
     #physIsStatic: boolean;
     #physIsSensor: boolean;
     #physIsDrag: boolean;
-    #physVelX: number;
-    #physVelY: number;
+    #physVelX: number | null;
+    #physVelY: number | null;
     #physWantsBody: boolean;
     #physWantsWidth: number;
     #physWantsHeight: number;
@@ -64,12 +64,6 @@ export class Sprite {
     }
     #getBodyY() {
         return this.#y - CHAR_WIDTH * this.#py + CHAR_WIDTH * 0.5;
-    }
-    #getEntityXFromBody() {
-        return this.#physBody.position.x + CHAR_WIDTH * this.#px - CHAR_WIDTH * 0.5;
-    }
-    #getEntityYFromBody() {
-        return this.#physBody.position.y + CHAR_WIDTH * this.#py - CHAR_WIDTH * 0.5;
     }
     set x(value) {
         this.#x = value;
@@ -219,12 +213,12 @@ export class Sprite {
     }
     postPhysicsUpdate(matterEngine: Matter.Engine) {
         if (this.#physBody) {
-            this.#x = this.#getEntityXFromBody();
-            this.#y = this.#getEntityYFromBody();
+            this.#x = this.#physBody.position.x + CHAR_WIDTH * this.#px - CHAR_WIDTH * 0.5;
+            this.#y = this.#physBody.position.y + CHAR_WIDTH * this.#py - CHAR_WIDTH * 0.5;
         }
     }
     draw(context: CanvasRenderingContext2D, viewOffset: Point) {
-        const codePoints = [...this.char].map(c => c.codePointAt(0));
+        const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
         charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }
 }

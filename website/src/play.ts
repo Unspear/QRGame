@@ -38,8 +38,12 @@ urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));
 };
 qrButton.onclick = async function(){
-    qrCanvas.toBlob(function(blob) { 
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([item]); 
+    qrCanvas.toBlob(function(blob) {
+        if (blob !== null) {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]); 
+        } else {
+            throw "Blob was null, could not copy QR Image to clipboard";
+        }
     });
 }

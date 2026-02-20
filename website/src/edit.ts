@@ -13,7 +13,7 @@ import {urlToGame, gameToUrl} from './pack'
 // DOM
 
 const gameCanvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-const codeContent = document.getElementById('tab-content-code');
+const codeContent = document.getElementById('tab-content-code') as HTMLElement;
 const reloadButton = document.getElementById('reload-button') as HTMLButtonElement;
 const urlButton = document.getElementById('url-button') as HTMLButtonElement;
 const qrButton = document.getElementById('qr-button') as HTMLButtonElement;
@@ -62,8 +62,12 @@ urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));
 };
 qrButton.onclick = async function(){
-    qrCanvas.toBlob(function(blob) { 
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([item]); 
+    qrCanvas.toBlob(function(blob) {
+        if (blob !== null) {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]); 
+        } else {
+            throw "Blob was null, could not copy QR Image to clipboard";
+        }
     });
 }

@@ -15,21 +15,21 @@ export class Engine {
     luaFactory: LuaFactory;
     ctx: CanvasRenderingContext2D;
     downPointers: Set<number>;
-    luaDrag: (point: Util.Point) => void;
-    luaTap: () => void;
-    game: Game;
-    sprites: Sprite[];
-    tileMap: TileMap;
-    camera: Camera;
-    matterEngine: Matter.Engine;
-    spriteDragConstraint: SpriteDragConstraint;
-    lua: LuaEngine;
-    luaFrame: () => void;
+    luaDrag!: (point: Util.Point) => void;
+    luaTap!: () => void;
+    game!: Game;
+    sprites!: Sprite[];
+    tileMap!: TileMap;
+    camera!: Camera;
+    matterEngine!: Matter.Engine;
+    spriteDragConstraint!: SpriteDragConstraint;
+    lua!: LuaEngine;
+    luaFrame!: () => void;
     constructor(gameCanvas: HTMLCanvasElement) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
         this.luaFactory = new LuaFactory();
-        this.ctx = gameCanvas.getContext('2d');
+        this.ctx = gameCanvas.getContext('2d')!;
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);
@@ -143,5 +143,5 @@ export class Engine {
         }
         requestAnimationFrame((t) => this.#mainLoop(t));
     }
-    #previousTimestamp: DOMHighResTimeStamp;
+    #previousTimestamp: DOMHighResTimeStamp | undefined;
 }

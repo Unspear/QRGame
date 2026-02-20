@@ -4,7 +4,6 @@ export class SpriteDragConstraint {
     type: string;
     mouse: Matter.Mouse;
     element: HTMLCanvasElement;
-    body: Matter.Body;
     constraint: Matter.Constraint;
     collisionFilter: {
         category: number,
@@ -15,7 +14,6 @@ export class SpriteDragConstraint {
         this.type = 'spriteDragConstraint';
         this.mouse = Matter.Mouse.create(canvas);
         this.element = canvas;
-        this.body = null;
         this.constraint = Matter.Constraint.create({ 
             label: 'Sprite Drag Constraint',
             pointA: this.mouse.position,
@@ -41,20 +39,20 @@ export class SpriteDragConstraint {
     }
 
     #update(bodies: Matter.Body[]) {
-        let body = null;
-        if (this.mouse.button === 0) {
-            if (!this.constraint.bodyB) {
-                for (var i = 0; i < bodies.length; i++) {
-                    body = bodies[i];
+        if (this.mouse.button === 0) {// If button down
+            if (!this.constraint.bodyB) {// If there is no body constrained
+                for (let body of bodies) {
+                    // Broad phase
                     if (body.plugin.drag 
                             && Matter.Bounds.contains(body.bounds, this.mouse.position) 
                             && Matter.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
-                        
+                        // Narrow phase
                         for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
                             var part = body.parts[j];
                             if (Matter.Vertices.contains(part.vertices, this.mouse.position)) {
+                                // Start drag
                                 this.constraint.pointA = this.mouse.position;
-                                this.constraint.bodyB = this.body = body;
+                                this.constraint.bodyB = body;
                                 this.constraint.pointB = { x: this.mouse.position.x - body.position.x, y: this.mouse.position.y - body.position.y };
                                 //this.constraint.angleB = body.angle;
                                 
@@ -66,16 +64,13 @@ export class SpriteDragConstraint {
                         }
                     }
                 }
-            } else {
+            } else {// If there is a body constrained
                 Matter.Sleeping.set(this.constraint.bodyB, false);
                 this.constraint.pointA = this.mouse.position;
             }
-        } else {
-            this.constraint.bodyB = this.body = null;
-            this.constraint.pointB = null;
-
-            if (body)
-                Matter.Events.trigger(this, 'enddrag', { mouse: this.mouse, body: body });
+        } else if (this.constraint.bodyB) {// If button released and a body is being dragged
+            Matter.Events.trigger(this, 'enddrag', { mouse: this.mouse, body: this.constraint.bodyB });
+            this.constraint.bodyB = null;
         }
     };
 

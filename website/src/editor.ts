@@ -26,7 +26,7 @@ export class Editor {
         this.upButton = document.getElementById('up-button') as HTMLButtonElement;
         this.rightButton = document.getElementById('right-button') as HTMLButtonElement;
         this.downButton = document.getElementById('down-button') as HTMLButtonElement;
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d')!;
         this.placingTiles = false;
         this.camera = new Camera();
         // Place tile while pointer is held

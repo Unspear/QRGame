@@ -16,7 +16,7 @@ class CharRenderer {
         this.drawBuffer = document.createElement('canvas');
         this.drawBuffer.width = CHAR_WIDTH;
         this.drawBuffer.height = CHAR_WIDTH;
-        this.dbctx = this.drawBuffer.getContext('2d');
+        this.dbctx = this.drawBuffer.getContext('2d')!;
         this.spriteSheet = new Image();
         this.spriteSheet.src = Chars;
         this.spriteSheetData = {};
