@@ -1,7 +1,7 @@
 import './style.css';
 import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
-import {Engine} from './engine.js'
+import {Engine} from './engine'
 import './pwa'
 import {urlToGame, gameToUrl} from './pack'
 

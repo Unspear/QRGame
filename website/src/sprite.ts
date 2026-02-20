@@ -1,24 +1,29 @@
 import charRenderer from './render'
 import { CHAR_WIDTH, PALETTE } from './constants';
-import Matter from 'matter-js'
+import * as Matter from 'matter-js'
+import { Point } from './util';
 
 export class Sprite {
-    #x;
-    #y;
-    #px;
-    #py;
-    #physBody;
-    #physWidth;
-    #physHeight;
-    #physIsStatic;
-    #physIsSensor;
-    #physIsDrag;
-    #physVelX;
-    #physVelY;
-    #physWantsBody;
-    #physWantsWidth;
-    #physWantsHeight;
-    constructor(char, color, x, y) {
+    char: string;
+    color: number;
+    wrap: number;
+    compact: boolean;
+    #x: number;
+    #y: number;
+    #px: number;
+    #py: number;
+    #physBody: Matter.Body;
+    #physWidth: number;
+    #physHeight : number;
+    #physIsStatic: boolean;
+    #physIsSensor: boolean;
+    #physIsDrag: boolean;
+    #physVelX: number;
+    #physVelY: number;
+    #physWantsBody: boolean;
+    #physWantsWidth: number;
+    #physWantsHeight: number;
+    constructor(char: string, color: number, x: number, y: number) {
         this.char = char;
         this.color = color;
         this.#x = x;
@@ -39,7 +44,7 @@ export class Sprite {
         this.#physWantsWidth = CHAR_WIDTH;
         this.#physWantsHeight = CHAR_WIDTH;
     }
-    static Copy(sprite) {
+    static Copy(sprite: Sprite) {
         let s = new Sprite(sprite.char, sprite.color, sprite.x, sprite.y);
         s.px = sprite.px;
         s.py = sprite.py;
@@ -173,7 +178,7 @@ export class Sprite {
     get height() {
         return this.#physWantsHeight;
     }
-    prePhysicsUpdate(matterEngine) {
+    prePhysicsUpdate(matterEngine: Matter.Engine) {
         // Remove body if wanted or width/height is wrong
         if (this.#physBody !== null && (!this.#physWantsBody || this.#physWantsWidth !== this.#physWidth || this.#physWantsHeight !== this.#physHeight)) {
             // Destroy body
@@ -212,13 +217,13 @@ export class Sprite {
         this.#physVelX = null;
         this.#physVelY = null;
     }
-    postPhysicsUpdate(matterEngine) {
+    postPhysicsUpdate(matterEngine: Matter.Engine) {
         if (this.#physBody) {
             this.#x = this.#getEntityXFromBody();
             this.#y = this.#getEntityYFromBody();
         }
     }
-    draw(context, viewOffset) {
+    draw(context: CanvasRenderingContext2D, viewOffset: Point) {
         const codePoints = [...this.char].map(c => c.codePointAt(0));
         charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }

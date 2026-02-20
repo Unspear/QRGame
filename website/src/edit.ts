@@ -4,7 +4,7 @@ import {StreamLanguage} from '@codemirror/language'
 import {lua} from '@codemirror/legacy-modes/mode/lua'
 import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
-import {Engine} from './engine.js'
+import {Engine} from './engine'
 import {Editor} from './editor.js'
 import benchmark from './benchmark.js';
 import './pwa'
