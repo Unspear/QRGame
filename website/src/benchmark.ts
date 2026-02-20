@@ -2,19 +2,20 @@ import * as fflate from 'fflate'
 import brotliPromise from 'brotli-wasm';
 const brotli = await brotliPromise;
 import * as PPMd from "./compressor"
+import { Game } from './game';
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 
 class StreamCompressor {
-    constructor(algorithm) {
+    constructor(algorithm: CompressionFormat) {
         this.#algorithm = algorithm;
     }
-    async compress(data) {
+    async compress(data: Uint8Array<ArrayBuffer>) {
         const stream = new Blob([data]).stream();
         const compressedStream = stream.pipeThrough(new CompressionStream(this.#algorithm));
         return await new Response(compressedStream).bytes();
     }
-    async decompress(data) {
+    async decompress(data: Uint8Array<ArrayBuffer>) {
         const stream = new Blob([data]).stream();
         const decompressedStream = stream.pipeThrough(new DecompressionStream(this.#algorithm));
         return await new Response(decompressedStream).bytes();
@@ -31,21 +32,26 @@ const compressors = [
     new StreamCompressor("deflate"),
 ];
 
-export default async function(game) {
+export default async function(game: Game) {
         console.log(JSON.stringify(game));
         const gameData = game.toData();
-        const results = {};
+        const results: Record<string, number> = {};
         results["raw"] = gameData.length;
         for (const c of compressors) {
             const compressed = await c.compress(gameData);
             results[c.toString()] = compressed.length;
         }
-        const fflateOpts = {level: 9, mem: 8};
-        const fflateOptsDict = {level: 9, mem: 8, dictionary: new TextEncoder().encode(LUA_KEYWORDS)};
+        const fflateOpts: fflate.DeflateOptions = {
+            level: 9, 
+            mem: 8
+        };
+        const fflateOptsDict: fflate.DeflateOptions = {
+            level: 9,
+            mem: 8,
+            dictionary: new TextEncoder().encode(LUA_KEYWORDS)
+        };
         results["fflate gzip"] = fflate.gzipSync(gameData, fflateOpts).length;
         results["fflate gzip w/dict"] = fflate.gzipSync(gameData, fflateOptsDict).length;
-        results["fflate zip"] = fflate.zipSync(gameData, fflateOpts).length;
-        results["fflate zip w/dict"] = fflate.zipSync(gameData, fflateOptsDict).length;
         results["fflate zlib"] = fflate.zlibSync(gameData, fflateOpts).length;
         results["fflate zlib w/dict"] = fflate.zlibSync(gameData, fflateOptsDict).length;
         results["fflate deflate"] = fflate.deflateSync(gameData, fflateOpts).length;

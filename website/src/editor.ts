@@ -5,15 +5,27 @@ import { TileMap } from './tile'
 import * as Util from './util'
 
 export class Editor {
+    canvas: HTMLCanvasElement;
+    charInput: HTMLInputElement;
+    colorInput: HTMLInputElement;
+    invertedInput: HTMLInputElement;
+    leftButton: HTMLButtonElement;
+    upButton: HTMLButtonElement;
+    rightButton: HTMLButtonElement;
+    downButton: HTMLButtonElement;
+    ctx: CanvasRenderingContext2D;
+    placingTiles: boolean;
+    camera: Camera;
+    tileMap: TileMap;
     constructor() {
-        this.canvas = document.getElementById('editor-canvas');
-        this.charInput = document.getElementById('editor-char-input');;
-        this.colorInput = document.getElementById('editor-color-input');
-        this.invertedInput = document.getElementById('editor-invert-input');
-        this.leftButton = document.getElementById('left-button');
-        this.upButton = document.getElementById('up-button');
-        this.rightButton = document.getElementById('right-button');
-        this.downButton = document.getElementById('down-button');
+        this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
+        this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
+        this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
+        this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
+        this.leftButton = document.getElementById('left-button') as HTMLButtonElement;
+        this.upButton = document.getElementById('up-button') as HTMLButtonElement;
+        this.rightButton = document.getElementById('right-button') as HTMLButtonElement;
+        this.downButton = document.getElementById('down-button') as HTMLButtonElement;
         this.ctx = this.canvas.getContext('2d');
         this.placingTiles = false;
         this.camera = new Camera();
@@ -45,7 +57,7 @@ export class Editor {
         this.tileMap = new TileMap({ w: 32, h: 32 });
         this.draw();
     }
-    setTileFromEvent(event) {
+    setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
         let codePoints = [...this.charInput.value].map(c => c.codePointAt(0));
         let color = parseInt(this.colorInput.value);

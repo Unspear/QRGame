@@ -1,7 +1,9 @@
+import { Point } from "./util";
+
 export class Camera {
-    #currentPos;
-    #targetPos;
-    #speed;
+    #currentPos: Point;
+    #targetPos: Point;
+    #speed: number;
     constructor() {
         this.#currentPos = {x: 0, y: 0};
         this.#targetPos = {x: 0, y: 0};
@@ -19,7 +21,7 @@ export class Camera {
     get y() {
         return this.#targetPos.y;
     }
-    frame(deltaTime) {
+    frame(deltaTime: number) {
         let dX = this.#targetPos.x - this.#currentPos.x
         let dY = this.#targetPos.y - this.#currentPos.y
         let len = Math.sqrt(dX * dX + dY * dY);
@@ -37,10 +39,10 @@ export class Camera {
             this.#currentPos.y = this.#targetPos.y;
         }
     }
-    getTargetPos() {
+    getTargetPos(): Point {
         return Object.assign({}, this.#targetPos);
     }
-    getViewOffset() {
+    getViewOffset(): Point {
         let offsetX = -this.#currentPos.x;
         let offsetY = -this.#currentPos.y;
         return {x: offsetX, y: offsetY};
