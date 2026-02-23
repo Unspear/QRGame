@@ -3,8 +3,21 @@ import brotliPromise from 'brotli-wasm';
 const brotli = await brotliPromise;
 import * as PPMd from "./compressor"
 import { Game } from './game';
+import { packGame } from './pack';
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
+
+function basicGameToData(game: Game): Uint8Array<ArrayBuffer> {
+    return new TextEncoder().encode(JSON.stringify(game));
+}
+
+function basicGameFromData(data: AllowSharedBufferSource): Game {
+    if (data === null) return new Game();
+    const string = new TextDecoder().decode(data);
+    if (string.length === 0) return new Game();
+    const parsed = JSON.parse(string);
+    return new Game(parsed.script, parsed.tileMap);
+}
 
 class StreamCompressor {
     constructor(algorithm: CompressionFormat) {
@@ -34,7 +47,7 @@ const compressors = [
 
 export default async function(game: Game) {
         console.log(JSON.stringify(game));
-        const gameData = game.toData();
+        const gameData = basicGameToData(game);
         const results: Record<string, number> = {};
         results["raw"] = gameData.length;
         for (const c of compressors) {
@@ -58,5 +71,6 @@ export default async function(game: Game) {
         results["fflate deflate w/dict"] = fflate.deflateSync(gameData, fflateOptsDict).length;
         results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
         results["ppmd"] = PPMd.compress(gameData).length;
+        results["packGame"] = packGame(game).length;
         console.table(results);
 }

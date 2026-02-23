@@ -48,6 +48,78 @@ export class TileMap {
     draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
+    /*getIndex(x: number, y: number): number {
+        return y * this.dim.w + x;
+    }
+    getPaethPrediction(data: number[], x: number, y: number): number {
+        if (y > 0) {
+            if (x > 0){// Full Paeth
+                const n = data[this.getIndex(x, y - 1)];
+                const e = data[this.getIndex(x - 1, y)];
+                const ne = data[this.getIndex(x - 1, y - 1)];
+                if (n === ne) {
+                    return e;
+                }
+                if (e === ne) {
+                    return n;
+                }
+                return ne;
+            }
+            else {// Only north
+                return data[this.getIndex(x, y - 1)];
+            }
+        }
+        else {
+            if (x > 0){// Only east
+                return data[this.getIndex(x - 1, y)];
+            }
+            else {// First value, so no prediction is possible, 0 is the best guess we can make
+                return 0;
+            }
+        }
+    }
+    paethEncode(data: number[], paethValue: number): number[] {
+        let encoded: number[] = [];
+        let usedPaeth = 0;
+        for (let y = 0; y < this.dim.h; y++) {
+            for (let x = 0; x < this.dim.w; x++) {
+                const value = data[this.getIndex(x, y)];
+                const prediction = this.getPaethPrediction(data, x, y);
+                if (value === prediction) {
+                    encoded.push(paethValue);
+                    usedPaeth += 1;
+                }
+                else
+                {
+                    encoded.push(value);
+                }
+            }
+        }
+        console.log('used prediction: %d out of %d', usedPaeth, encoded.length);
+        return encoded;
+    }
+    paethDecode(encoded: number[], paethValue: number): number[] {
+        let decoded: number[] = [];
+        for (let y = 0; y < this.dim.h; y++) {
+            for (let x = 0; x < this.dim.w; x++) {
+                const value = encoded[this.getIndex(x, y)];
+                if (value === paethValue) {
+                    decoded.push(this.getPaethPrediction(decoded, x, y));
+                }
+                else
+                {
+                    decoded.push(value);
+                }
+            }
+        }
+        return decoded;
+    }
+    // 1 in unicode is an unused control character
+    // Hypothetically someone could shove it into the tiledata
+    // but if they did it would just be replaced by a predicted character, not break anything
+    static PAETH_VALUE_CODE_POINT: number = 1;
+    // There are 8 colors plus another 8 for inversions so 16 is the first unused index
+    static PAETH_VALUE_COLOR: number = 16;*/
 }
 /**
 export class MetaTileMap {

@@ -1,5 +1,70 @@
 import {Game} from './game'
 import * as PPMd from "./compressor"
+import { TileMap } from './tile';
+
+export class Packer {
+    #buffer: ArrayBuffer;
+    #view: DataView;
+    #offset: number;
+    constructor() {
+        this.#buffer = new ArrayBuffer(10240);
+        this.#view = new DataView(this.#buffer);
+        this.#offset = 0;
+    }
+    getUint8Array(): Uint8Array {
+        return new Uint8Array(this.#buffer, 0, this.#offset);
+    }
+    packUint8(value: number): void {
+        this.#view.setUint8(this.#offset, value);
+        this.#offset += 1;
+    }
+    packUint16(value: number): void {
+        this.#view.setUint16(this.#offset, value);
+        this.#offset += 2;
+    }
+    packString(value: string): void {
+        const encoded = new TextEncoder().encode(value);
+        this.packUint8Array(encoded);
+    }
+    packUint8Array(value: Uint8Array): void {
+        value = PPMd.compress(value);
+        this.packUint16(value.byteLength);
+        for (const val of value) {
+            this.packUint8(val);
+        }
+    }
+}
+
+export class Unpacker {
+    #view: DataView;
+    #offset: number;
+    constructor(data: Uint8Array) {
+        this.#view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+        this.#offset = 0;
+    }
+    unpackUint8(): number {
+        const value = this.#view.getUint8(this.#offset);
+        this.#offset += 1;
+        return value;
+    }
+    unpackUint16(): number {
+        const value = this.#view.getUint16(this.#offset);
+        this.#offset += 2;
+        return value;
+    }
+    unpackString(): string {
+        const value = this.unpackUint8Array();
+        return new TextDecoder().decode(value);
+    }
+    unpackUint8Array(): Uint8Array {
+        const byteLength = this.unpackUint16();
+        let value = new Uint8Array(byteLength);
+        for (let i = 0; i < byteLength; i++) {
+            value[i] = this.unpackUint8();
+        }
+        return PPMd.decompress(value);
+    }
+}
 
 // Import/Export
 // https://stackoverflow.com/a/12713326
@@ -17,19 +82,37 @@ export function dataToUrl(data: Uint8Array, page: string) {
     params.set("s", base64);
     return URL.parse(page, window.location.origin+window.location.pathname)+"?"+params;
 }
-export function compressData(data: Uint8Array): Uint8Array {
-    return PPMd.compress(data);
+
+export function packGame(game: Game): Uint8Array {
+    const packer = new Packer();
+    packer.packString(game.script);
+    packer.packUint16(game.tileMap.dim.w);
+    packer.packUint16(game.tileMap.dim.h);
+    packer.packString(String.fromCodePoint(...game.tileMap.tileData.codePoint));
+    packer.packUint8Array(Uint8Array.from(game.tileMap.tileData.color));
+    return packer.getUint8Array();
 }
-export function decompressData(data: Uint8Array): Uint8Array {
-    return PPMd.decompress(data);
+
+export function unpackGame(data: Uint8Array): Game {
+    const unpacker = new Unpacker(data);
+    const script = unpacker.unpackString();
+    const tileMapDimW = unpacker.unpackUint16();
+    const tileMapDimH = unpacker.unpackUint16();
+    const tileMapCodePoints = unpacker.unpackString();
+    const tileMapColors = unpacker.unpackUint8Array();
+    const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH});
+    tileMap.tileData.codePoint = [...tileMapCodePoints].map(c => c.codePointAt(0) ?? 0);
+    tileMap.tileData.color = [...tileMapColors];
+    return new Game(script, tileMap);
 }
+
 export function urlToGame() {
     let urlData = urlToData();
     if (urlData === null) {
         return new Game();
     }
-    return Game.fromData(decompressData(urlData));
+    return unpackGame(urlData);
 }
 export function gameToUrl(game: Game, page = "play") {
-    return dataToUrl(compressData(game.toData()), page);
+    return dataToUrl(packGame(game), page);
 }
