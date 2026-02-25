@@ -11,7 +11,8 @@ module.exports = {
   entry: {
     index: './src/index.ts',
     play: './src/play.ts',
-    edit: './src/edit.ts'
+    edit: './src/edit.ts',
+    test: './src/test.ts'
   },
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
@@ -84,6 +85,12 @@ module.exports = {
         isEditor: true,
       },
       filename: 'edit.html',
+      favicon: 'src/icon-16.png',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["test"],
+      template: 'src/test.html',
+      filename: 'test.html',
       favicon: 'src/icon-16.png',
     }),
     new WorkboxPlugin.GenerateSW({
