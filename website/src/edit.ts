@@ -6,7 +6,6 @@ import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
 import {Engine} from './engine'
 import {Editor} from './editor'
-import benchmark from './benchmark';
 import './pwa'
 import {urlToGame, gameToUrl} from './pack'
 
@@ -56,7 +55,6 @@ generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOp
 reloadButton.onclick = async function(){
     engine.play(editorToGame());
     generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    benchmark(engine.game);
 };
 urlButton.onclick = async function(){
     navigator.clipboard.writeText(gameToUrl(engine.game));
