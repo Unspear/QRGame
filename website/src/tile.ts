@@ -1,5 +1,7 @@
+import Matter from 'matter-js';
 import charRenderer from './render'
 import { Dimensions, Point } from './util';
+import { CHAR_WIDTH } from './constants';
 
 /**
 TileMap: An arragement of tiles (referenced from a TileSet). Does NOT have an inherent position.
@@ -63,6 +65,23 @@ export class TileMap {
     }
     draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
+    }
+    createBodies(matterEngine: Matter.Engine) {
+        const options = {
+            restitution: 1.0,
+            frictionAir: 0.0,
+            friction: 0.0,
+            isStatic: true
+        };
+        for (let y = 0; y < this.dim.h; y++) {
+            for (let x = 0; x < this.dim.w; x++) {
+                const tile: SingleTileData = this.getTile({x: x, y: y})!;
+                if (tile.codePoint == "#".codePointAt(0)) {
+                    const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
+                    Matter.Composite.add(matterEngine.world, physBody);
+                }
+            }
+        }
     }
     /*getPaethPrediction(data: number[], x: number, y: number): number {
         if (y > 0) {
