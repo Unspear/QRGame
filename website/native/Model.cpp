@@ -900,7 +900,11 @@ void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int M
 	StartModelRare(MaxOrder, MRMethod);
 	PPM_CONTEXT* MinContext = MaxContext;
 	for (BYTE ns = MinContext->NumStats;;) {
-		(ns) ? (MinContext->decodeSymbol1(decoder)) : (MinContext->decodeBinSymbol(decoder));
+		if (ns) {
+			MinContext->decodeSymbol1(decoder);
+		} else {
+			MinContext->decodeBinSymbol(decoder);
+		}
 		decoder.RemoveSubrange();
 		while (!FoundState) {
 			decoder.Normalize(EncodedFile);
