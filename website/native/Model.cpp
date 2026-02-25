@@ -57,15 +57,15 @@ static struct PPM_CONTEXT {// Notes:
 	} _PACK_ATTR* Stats;//  ABCD    context
 
 	PPM_CONTEXT* Suffix;//   BCD    suffix
-	inline void encodeBinSymbol(int symbol);//   BCDE   successor
-	inline void encodeSymbol1(int symbol);// other orders:
-	inline void encodeSymbol2(int symbol);//   BCD    context
-	inline void decodeBinSymbol();//    CD    suffix
-	inline void decodeSymbol1();//   BCDE   successor
-	inline void decodeSymbol2();
+	inline void encodeBinSymbol(Encoder& encoder, int symbol);//   BCDE   successor
+	inline void encodeSymbol1(Encoder& encoder, int symbol);// other orders:
+	inline void encodeSymbol2(Encoder& encoder, int symbol);//   BCD    context
+	inline void decodeBinSymbol(Decoder& decoder);//    CD    suffix
+	inline void decodeSymbol1(Decoder& decoder);//   BCDE   successor
+	inline void decodeSymbol2(Decoder& decoder);
 	inline void update1(STATE* p);
 	inline void update2(STATE* p);
-	inline SEE2_CONTEXT* makeEscFreq2();
+	inline SEE2_CONTEXT* makeEscFreq2(Coder& coder);
 	void rescale();
 	void refresh(int OldNU, BOOL Scale);
 	PPM_CONTEXT* cutOff(int Order);
@@ -626,22 +626,22 @@ RESTART_MODEL:
 static const BYTE ExpEscape[16] = {25, 14, 9, 7, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2};
 #define GET_MEAN(SUMM, SHIFT, ROUND) ((SUMM + (1 << (SHIFT - ROUND))) >> (SHIFT))
 
-inline void PPM_CONTEXT::encodeBinSymbol(int symbol) {
+inline void PPM_CONTEXT::encodeBinSymbol(Encoder& encoder, int symbol) {
 	BYTE indx = NS2BSIndx[Suffix->NumStats] + PrevSuccess + Flags;
 	STATE& rs = oneState();
 	WORD& bs = BinSumm[QTable[rs.Freq - 1]][indx + ((RunLength >> 26) & 0x20)];
 	if (rs.Symbol == symbol) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		ariSubRange.LowCount = 0;
-		ariSubRange.HighCount = bs;
+		encoder.ariSubRange.LowCount = 0;
+		encoder.ariSubRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		ariSubRange.LowCount = bs;
+		encoder.ariSubRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		ariSubRange.HighCount = BIN_SCALE;
+		encoder.ariSubRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -649,22 +649,22 @@ inline void PPM_CONTEXT::encodeBinSymbol(int symbol) {
 	}
 }
 
-inline void PPM_CONTEXT::decodeBinSymbol() {
+inline void PPM_CONTEXT::decodeBinSymbol(Decoder& decoder) {
 	BYTE indx = NS2BSIndx[Suffix->NumStats] + PrevSuccess + Flags;
 	STATE& rs = oneState();
 	WORD& bs = BinSumm[QTable[rs.Freq - 1]][indx + ((RunLength >> 26) & 0x20)];
-	if (ariGetCurrentShiftCount(TOT_BITS) < bs) {
+	if (decoder.GetCurrentShiftCount(TOT_BITS) < bs) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		ariSubRange.LowCount = 0;
-		ariSubRange.HighCount = bs;
+		decoder.ariSubRange.LowCount = 0;
+		decoder.ariSubRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		ariSubRange.LowCount = bs;
+		decoder.ariSubRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		ariSubRange.HighCount = BIN_SCALE;
+		decoder.ariSubRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -684,19 +684,19 @@ inline void PPM_CONTEXT::update1(STATE* p) {
 	}
 }
 
-inline void PPM_CONTEXT::encodeSymbol1(int symbol) {
+inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 	UINT LoCnt, i = Stats->Symbol;
 	STATE* p = Stats;
-	ariSubRange.scale = SummFreq;
+	encoder.ariSubRange.scale = SummFreq;
 	if (i == symbol) {
-		PrevSuccess = (2 * (ariSubRange.HighCount = p->Freq) >= ariSubRange.scale);
+		PrevSuccess = (2 * (encoder.ariSubRange.HighCount = p->Freq) >= encoder.ariSubRange.scale);
 		(FoundState = p)->Freq += 4;
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (p->Freq > MAX_FREQ) {
 			rescale();
 		}
-		ariSubRange.LowCount = 0;
+		encoder.ariSubRange.LowCount = 0;
 		return;
 	}
 	LoCnt = p->Freq;
@@ -708,34 +708,34 @@ inline void PPM_CONTEXT::encodeSymbol1(int symbol) {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			ariSubRange.LowCount = LoCnt;
+			encoder.ariSubRange.LowCount = LoCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			ariSubRange.HighCount = ariSubRange.scale;
+			encoder.ariSubRange.HighCount = encoder.ariSubRange.scale;
 			return;
 		}
 	}
-	ariSubRange.HighCount = (ariSubRange.LowCount = LoCnt) + p->Freq;
+	encoder.ariSubRange.HighCount = (encoder.ariSubRange.LowCount = LoCnt) + p->Freq;
 	update1(p);
 }
 
-inline void PPM_CONTEXT::decodeSymbol1() {
+inline void PPM_CONTEXT::decodeSymbol1(Decoder& decoder) {
 	UINT i, count, HiCnt = Stats->Freq;
 	STATE* p = Stats;
-	ariSubRange.scale = SummFreq;
-	if ((count = ariGetCurrentCount()) < HiCnt) {
-		PrevSuccess = (2 * (ariSubRange.HighCount = HiCnt) >= ariSubRange.scale);
+	decoder.ariSubRange.scale = SummFreq;
+	if ((count = decoder.GetCurrentCount()) < HiCnt) {
+		PrevSuccess = (2 * (decoder.ariSubRange.HighCount = HiCnt) >= decoder.ariSubRange.scale);
 		(FoundState = p)->Freq = (HiCnt += 4);
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (HiCnt > MAX_FREQ) {
 			rescale();
 		}
-		ariSubRange.LowCount = 0;
+		decoder.ariSubRange.LowCount = 0;
 		return;
 	}
 	i = NumStats;
@@ -745,18 +745,18 @@ inline void PPM_CONTEXT::decodeSymbol1() {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			ariSubRange.LowCount = HiCnt;
+			decoder.ariSubRange.LowCount = HiCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			ariSubRange.HighCount = ariSubRange.scale;
+			decoder.ariSubRange.HighCount = decoder.ariSubRange.scale;
 			return;
 		}
 	}
-	ariSubRange.LowCount = (ariSubRange.HighCount = HiCnt) - p->Freq;
+	decoder.ariSubRange.LowCount = (decoder.ariSubRange.HighCount = HiCnt) - p->Freq;
 	update1(p);
 }
 
@@ -770,7 +770,7 @@ inline void PPM_CONTEXT::update2(STATE* p) {
 	RunLength = InitRL;
 }
 
-inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2() {
+inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2(Coder& coder) {
 	BYTE* pb = (BYTE*)Stats;
 	UINT t = 2 * NumStats;
 	PrefetchData(pb);
@@ -782,16 +782,16 @@ inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2() {
 		t = Suffix->NumStats;
 		psee2c = SEE2Cont[QTable[NumStats + 2] - 3] + (SummFreq > 11 * (NumStats + 1));
 		psee2c += 2 * (2 * NumStats < t + NumMasked) + Flags;
-		ariSubRange.scale = psee2c->getMean();
+		coder.ariSubRange.scale = psee2c->getMean();
 	} else {
 		psee2c = &DummySEE2Cont;
-		ariSubRange.scale = 1;
+		coder.ariSubRange.scale = 1;
 	}
 	return psee2c;
 }
 
-inline void PPM_CONTEXT::encodeSymbol2(int symbol) {
-	SEE2_CONTEXT* psee2c = makeEscFreq2();
+inline void PPM_CONTEXT::encodeSymbol2(Encoder& encoder, int symbol) {
+	SEE2_CONTEXT* psee2c = makeEscFreq2(encoder);
 	UINT Sym, LoCnt = 0, i = NumStats - NumMasked;
 	STATE *p1, *p = Stats - 1;
 	do {
@@ -805,13 +805,13 @@ inline void PPM_CONTEXT::encodeSymbol2(int symbol) {
 		}
 		LoCnt += p->Freq;
 	} while (--i);
-	ariSubRange.HighCount = (ariSubRange.scale += (ariSubRange.LowCount = LoCnt));
-	psee2c->Summ += ariSubRange.scale;
+	encoder.ariSubRange.HighCount = (encoder.ariSubRange.scale += (encoder.ariSubRange.LowCount = LoCnt));
+	psee2c->Summ += encoder.ariSubRange.scale;
 	NumMasked = NumStats;
 	return;
 SYMBOL_FOUND:
-	ariSubRange.LowCount = LoCnt;
-	ariSubRange.HighCount = (LoCnt += p->Freq);
+	encoder.ariSubRange.LowCount = LoCnt;
+	encoder.ariSubRange.HighCount = (LoCnt += p->Freq);
 	for (p1 = p; --i;) {
 		do {
 			Sym = p1[1].Symbol;
@@ -819,13 +819,13 @@ SYMBOL_FOUND:
 		} while (CharMask[Sym] == EscCount);
 		LoCnt += p1->Freq;
 	}
-	ariSubRange.scale += LoCnt;
+	encoder.ariSubRange.scale += LoCnt;
 	psee2c->update();
 	update2(p);
 }
 
-inline void PPM_CONTEXT::decodeSymbol2() {
-	SEE2_CONTEXT* psee2c = makeEscFreq2();
+inline void PPM_CONTEXT::decodeSymbol2(Decoder& decoder) {
+	SEE2_CONTEXT* psee2c = makeEscFreq2(decoder);
 	UINT Sym, count, HiCnt = 0, i = NumStats - NumMasked;
 	STATE *ps[256], **pps = ps, *p = Stats - 1;
 	do {
@@ -836,27 +836,27 @@ inline void PPM_CONTEXT::decodeSymbol2() {
 		HiCnt += p->Freq;
 		*pps++ = p;
 	} while (--i);
-	ariSubRange.scale += HiCnt;
-	count = ariGetCurrentCount();
+	decoder.ariSubRange.scale += HiCnt;
+	count = decoder.GetCurrentCount();
 	p = *(pps = ps);
 	if (count < HiCnt) {
 		HiCnt = 0;
 		while ((HiCnt += p->Freq) <= count) {
 			p = *++pps;
 		}
-		ariSubRange.LowCount = (ariSubRange.HighCount = HiCnt) - p->Freq;
+		decoder.ariSubRange.LowCount = (decoder.ariSubRange.HighCount = HiCnt) - p->Freq;
 		psee2c->update();
 		update2(p);
 	} else {
-		ariSubRange.LowCount = HiCnt;
-		ariSubRange.HighCount = ariSubRange.scale;
+		decoder.ariSubRange.LowCount = HiCnt;
+		decoder.ariSubRange.HighCount = decoder.ariSubRange.scale;
 		i = NumStats - NumMasked;
 		NumMasked = NumStats;
 		do {
 			CharMask[(*pps)->Symbol] = EscCount;
 			pps++;
 		} while (--i);
-		psee2c->Summ += ariSubRange.scale;
+		psee2c->Summ += decoder.ariSubRange.scale;
 	}
 }
 
@@ -869,20 +869,20 @@ inline void ClearMask(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile) {
 }
 
 void _STDCALL EncodeFile(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile, int MaxOrder, MR_METHOD MRMethod) {
-	ariInitEncoder();
+	Encoder encoder;
 	StartModelRare(MaxOrder, MRMethod);
 	for (PPM_CONTEXT* MinContext;;) {
 		BYTE ns = (MinContext = MaxContext)->NumStats;
 		int c = _PPMD_E_GETC(DecodedFile);
 		if (ns) {
-			MinContext->encodeSymbol1(c);
-			ariEncodeSymbol();
+			MinContext->encodeSymbol1(encoder, c);
+			encoder.EncodeSymbol();
 		} else {
-			MinContext->encodeBinSymbol(c);
-			ariShiftEncodeSymbol(TOT_BITS);
+			MinContext->encodeBinSymbol(encoder, c);
+			encoder.ShiftEncodeSymbol(TOT_BITS);
 		}
 		while (!FoundState) {
-			ARI_ENC_NORMALIZE(EncodedFile);
+			encoder.Normalize(EncodedFile);
 			do {
 				OrderFall++;
 				MinContext = MinContext->Suffix;
@@ -890,8 +890,8 @@ void _STDCALL EncodeFile(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile, int M
 					goto STOP_ENCODING;
 				}
 			} while (MinContext->NumStats == NumMasked);
-			MinContext->encodeSymbol2(c);
-			ariEncodeSymbol();
+			MinContext->encodeSymbol2(encoder, c);
+			encoder.EncodeSymbol();
 		}
 		if (!OrderFall && (BYTE*)FoundState->Successor >= UnitsStart) {
 			PrefetchData(MaxContext = FoundState->Successor);
@@ -902,22 +902,22 @@ void _STDCALL EncodeFile(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile, int M
 				ClearMask(EncodedFile, DecodedFile);
 			}
 		}
-		ARI_ENC_NORMALIZE(EncodedFile);
+		encoder.Normalize(EncodedFile);
 	}
 STOP_ENCODING:
-	ARI_FLUSH_ENCODER(EncodedFile);
+	encoder.Flush(EncodedFile);
 	//PrintInfo(DecodedFile, EncodedFile);
 }
 
 void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int MaxOrder, MR_METHOD MRMethod) {
-	ARI_INIT_DECODER(EncodedFile);
+	Decoder decoder(EncodedFile);
 	StartModelRare(MaxOrder, MRMethod);
 	PPM_CONTEXT* MinContext = MaxContext;
 	for (BYTE ns = MinContext->NumStats;;) {
-		(ns) ? (MinContext->decodeSymbol1()) : (MinContext->decodeBinSymbol());
-		ariRemoveSubrange();
+		(ns) ? (MinContext->decodeSymbol1(decoder)) : (MinContext->decodeBinSymbol(decoder));
+		decoder.RemoveSubrange();
 		while (!FoundState) {
-			ARI_DEC_NORMALIZE(EncodedFile);
+			decoder.Normalize(EncodedFile);
 			do {
 				OrderFall++;
 				MinContext = MinContext->Suffix;
@@ -925,8 +925,8 @@ void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int M
 					goto STOP_DECODING;
 				}
 			} while (MinContext->NumStats == NumMasked);
-			MinContext->decodeSymbol2();
-			ariRemoveSubrange();
+			MinContext->decodeSymbol2(decoder);
+			decoder.RemoveSubrange();
 		}
 		_PPMD_D_PUTC(FoundState->Symbol, DecodedFile);
 		if (!OrderFall && (BYTE*)FoundState->Successor >= UnitsStart) {
@@ -939,7 +939,7 @@ void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int M
 			}
 		}
 		ns = (MinContext = MaxContext)->NumStats;
-		ARI_DEC_NORMALIZE(EncodedFile);
+		decoder.Normalize(EncodedFile);
 	}
 STOP_DECODING:
 	return;

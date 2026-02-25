@@ -54,71 +54,30 @@ public:
  }
 };
 *****************************************************************************/
+#include "PPMdType.h"
 
-static struct SUBRANGE {
-	DWORD LowCount, HighCount, scale;
-} ariSubRange;
+struct Coder {
+	enum { TOP = 1 << 24, BOT = 1 << 15 };
+	struct SUBRANGE {
+		DWORD LowCount, HighCount, scale;
+	} ariSubRange;
+	DWORD ariLow = 0;
+	DWORD ariCode = 0; 
+	DWORD ariRange = DWORD(-1);
+};
 
-enum { TOP = 1 << 24, BOT = 1 << 15 };
+struct Encoder : Coder {
+	Encoder();
+	void Normalize(FILE* stream);
+	void EncodeSymbol();
+	void ShiftEncodeSymbol(UINT SHIFT);
+	void Flush(FILE* stream);
+};
 
-static DWORD ariLow, ariCode, ariRange;
-
-inline void ariInitEncoder() {
-	ariLow = 0;
-	ariRange = DWORD(-1);
-}
-
-#define ARI_ENC_NORMALIZE(stream) \
-	{ \
-		while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) { \
-			_PPMD_E_PUTC(ariLow >> 24, stream); \
-			ariRange <<= 8; \
-			ariLow <<= 8; \
-		} \
-	}
-
-inline void ariEncodeSymbol() {
-	ariLow += ariSubRange.LowCount * (ariRange /= ariSubRange.scale);
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
-}
-
-inline void ariShiftEncodeSymbol(UINT SHIFT) {
-	ariLow += ariSubRange.LowCount * (ariRange >>= SHIFT);
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
-}
-
-#define ARI_FLUSH_ENCODER(stream) \
-	{ \
-		for (UINT i = 0; i < 4; i++) { \
-			_PPMD_E_PUTC(ariLow >> 24, stream); \
-			ariLow <<= 8; \
-		} \
-	}
-#define ARI_INIT_DECODER(stream) \
-	{ \
-		ariLow = ariCode = 0; \
-		ariRange = DWORD(-1); \
-		for (UINT i = 0; i < 4; i++) \
-			ariCode = (ariCode << 8) | _PPMD_D_GETC(stream); \
-	}
-#define ARI_DEC_NORMALIZE(stream) \
-	{ \
-		while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) { \
-			ariCode = (ariCode << 8) | _PPMD_D_GETC(stream); \
-			ariRange <<= 8; \
-			ariLow <<= 8; \
-		} \
-	}
-
-inline UINT ariGetCurrentCount() {
-	return (ariCode - ariLow) / (ariRange /= ariSubRange.scale);
-}
-
-inline UINT ariGetCurrentShiftCount(UINT SHIFT) {
-	return (ariCode - ariLow) / (ariRange >>= SHIFT);
-}
-
-inline void ariRemoveSubrange() {
-	ariLow += ariRange * ariSubRange.LowCount;
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
-}
+struct Decoder : Coder {
+	Decoder(FILE* stream);
+	void Normalize(FILE* stream);
+	UINT GetCurrentCount();
+	UINT GetCurrentShiftCount(UINT SHIFT);
+	void RemoveSubrange();
+};

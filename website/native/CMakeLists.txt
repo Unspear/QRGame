@@ -1,4 +1,4 @@
-add_executable(ppmd Model.cpp)
+add_executable(ppmd Model.cpp Coder.cpp)
 
 set_target_properties(ppmd PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
