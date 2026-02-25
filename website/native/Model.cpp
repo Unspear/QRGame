@@ -633,15 +633,15 @@ inline void PPM_CONTEXT::encodeBinSymbol(int symbol) {
 	if (rs.Symbol == symbol) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		SubRange.LowCount = 0;
-		SubRange.HighCount = bs;
+		ariSubRange.LowCount = 0;
+		ariSubRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		SubRange.LowCount = bs;
+		ariSubRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		SubRange.HighCount = BIN_SCALE;
+		ariSubRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -656,15 +656,15 @@ inline void PPM_CONTEXT::decodeBinSymbol() {
 	if (ariGetCurrentShiftCount(TOT_BITS) < bs) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		SubRange.LowCount = 0;
-		SubRange.HighCount = bs;
+		ariSubRange.LowCount = 0;
+		ariSubRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		SubRange.LowCount = bs;
+		ariSubRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		SubRange.HighCount = BIN_SCALE;
+		ariSubRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -687,16 +687,16 @@ inline void PPM_CONTEXT::update1(STATE* p) {
 inline void PPM_CONTEXT::encodeSymbol1(int symbol) {
 	UINT LoCnt, i = Stats->Symbol;
 	STATE* p = Stats;
-	SubRange.scale = SummFreq;
+	ariSubRange.scale = SummFreq;
 	if (i == symbol) {
-		PrevSuccess = (2 * (SubRange.HighCount = p->Freq) >= SubRange.scale);
+		PrevSuccess = (2 * (ariSubRange.HighCount = p->Freq) >= ariSubRange.scale);
 		(FoundState = p)->Freq += 4;
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (p->Freq > MAX_FREQ) {
 			rescale();
 		}
-		SubRange.LowCount = 0;
+		ariSubRange.LowCount = 0;
 		return;
 	}
 	LoCnt = p->Freq;
@@ -708,34 +708,34 @@ inline void PPM_CONTEXT::encodeSymbol1(int symbol) {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			SubRange.LowCount = LoCnt;
+			ariSubRange.LowCount = LoCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			SubRange.HighCount = SubRange.scale;
+			ariSubRange.HighCount = ariSubRange.scale;
 			return;
 		}
 	}
-	SubRange.HighCount = (SubRange.LowCount = LoCnt) + p->Freq;
+	ariSubRange.HighCount = (ariSubRange.LowCount = LoCnt) + p->Freq;
 	update1(p);
 }
 
 inline void PPM_CONTEXT::decodeSymbol1() {
 	UINT i, count, HiCnt = Stats->Freq;
 	STATE* p = Stats;
-	SubRange.scale = SummFreq;
+	ariSubRange.scale = SummFreq;
 	if ((count = ariGetCurrentCount()) < HiCnt) {
-		PrevSuccess = (2 * (SubRange.HighCount = HiCnt) >= SubRange.scale);
+		PrevSuccess = (2 * (ariSubRange.HighCount = HiCnt) >= ariSubRange.scale);
 		(FoundState = p)->Freq = (HiCnt += 4);
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (HiCnt > MAX_FREQ) {
 			rescale();
 		}
-		SubRange.LowCount = 0;
+		ariSubRange.LowCount = 0;
 		return;
 	}
 	i = NumStats;
@@ -745,18 +745,18 @@ inline void PPM_CONTEXT::decodeSymbol1() {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			SubRange.LowCount = HiCnt;
+			ariSubRange.LowCount = HiCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			SubRange.HighCount = SubRange.scale;
+			ariSubRange.HighCount = ariSubRange.scale;
 			return;
 		}
 	}
-	SubRange.LowCount = (SubRange.HighCount = HiCnt) - p->Freq;
+	ariSubRange.LowCount = (ariSubRange.HighCount = HiCnt) - p->Freq;
 	update1(p);
 }
 
@@ -782,10 +782,10 @@ inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2() {
 		t = Suffix->NumStats;
 		psee2c = SEE2Cont[QTable[NumStats + 2] - 3] + (SummFreq > 11 * (NumStats + 1));
 		psee2c += 2 * (2 * NumStats < t + NumMasked) + Flags;
-		SubRange.scale = psee2c->getMean();
+		ariSubRange.scale = psee2c->getMean();
 	} else {
 		psee2c = &DummySEE2Cont;
-		SubRange.scale = 1;
+		ariSubRange.scale = 1;
 	}
 	return psee2c;
 }
@@ -805,13 +805,13 @@ inline void PPM_CONTEXT::encodeSymbol2(int symbol) {
 		}
 		LoCnt += p->Freq;
 	} while (--i);
-	SubRange.HighCount = (SubRange.scale += (SubRange.LowCount = LoCnt));
-	psee2c->Summ += SubRange.scale;
+	ariSubRange.HighCount = (ariSubRange.scale += (ariSubRange.LowCount = LoCnt));
+	psee2c->Summ += ariSubRange.scale;
 	NumMasked = NumStats;
 	return;
 SYMBOL_FOUND:
-	SubRange.LowCount = LoCnt;
-	SubRange.HighCount = (LoCnt += p->Freq);
+	ariSubRange.LowCount = LoCnt;
+	ariSubRange.HighCount = (LoCnt += p->Freq);
 	for (p1 = p; --i;) {
 		do {
 			Sym = p1[1].Symbol;
@@ -819,7 +819,7 @@ SYMBOL_FOUND:
 		} while (CharMask[Sym] == EscCount);
 		LoCnt += p1->Freq;
 	}
-	SubRange.scale += LoCnt;
+	ariSubRange.scale += LoCnt;
 	psee2c->update();
 	update2(p);
 }
@@ -836,7 +836,7 @@ inline void PPM_CONTEXT::decodeSymbol2() {
 		HiCnt += p->Freq;
 		*pps++ = p;
 	} while (--i);
-	SubRange.scale += HiCnt;
+	ariSubRange.scale += HiCnt;
 	count = ariGetCurrentCount();
 	p = *(pps = ps);
 	if (count < HiCnt) {
@@ -844,19 +844,19 @@ inline void PPM_CONTEXT::decodeSymbol2() {
 		while ((HiCnt += p->Freq) <= count) {
 			p = *++pps;
 		}
-		SubRange.LowCount = (SubRange.HighCount = HiCnt) - p->Freq;
+		ariSubRange.LowCount = (ariSubRange.HighCount = HiCnt) - p->Freq;
 		psee2c->update();
 		update2(p);
 	} else {
-		SubRange.LowCount = HiCnt;
-		SubRange.HighCount = SubRange.scale;
+		ariSubRange.LowCount = HiCnt;
+		ariSubRange.HighCount = ariSubRange.scale;
 		i = NumStats - NumMasked;
 		NumMasked = NumStats;
 		do {
 			CharMask[(*pps)->Symbol] = EscCount;
 			pps++;
 		} while (--i);
-		psee2c->Summ += SubRange.scale;
+		psee2c->Summ += ariSubRange.scale;
 	}
 }
 

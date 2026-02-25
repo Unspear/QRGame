@@ -57,68 +57,68 @@ public:
 
 static struct SUBRANGE {
 	DWORD LowCount, HighCount, scale;
-} SubRange;
+} ariSubRange;
 
 enum { TOP = 1 << 24, BOT = 1 << 15 };
 
-static DWORD low, code, range;
+static DWORD ariLow, ariCode, ariRange;
 
 inline void ariInitEncoder() {
-	low = 0;
-	range = DWORD(-1);
+	ariLow = 0;
+	ariRange = DWORD(-1);
 }
 
 #define ARI_ENC_NORMALIZE(stream) \
 	{ \
-		while ((low ^ (low + range)) < TOP || range < BOT && ((range = -low & (BOT - 1)), 1)) { \
-			_PPMD_E_PUTC(low >> 24, stream); \
-			range <<= 8; \
-			low <<= 8; \
+		while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) { \
+			_PPMD_E_PUTC(ariLow >> 24, stream); \
+			ariRange <<= 8; \
+			ariLow <<= 8; \
 		} \
 	}
 
 inline void ariEncodeSymbol() {
-	low += SubRange.LowCount * (range /= SubRange.scale);
-	range *= SubRange.HighCount - SubRange.LowCount;
+	ariLow += ariSubRange.LowCount * (ariRange /= ariSubRange.scale);
+	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
 }
 
 inline void ariShiftEncodeSymbol(UINT SHIFT) {
-	low += SubRange.LowCount * (range >>= SHIFT);
-	range *= SubRange.HighCount - SubRange.LowCount;
+	ariLow += ariSubRange.LowCount * (ariRange >>= SHIFT);
+	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
 }
 
 #define ARI_FLUSH_ENCODER(stream) \
 	{ \
 		for (UINT i = 0; i < 4; i++) { \
-			_PPMD_E_PUTC(low >> 24, stream); \
-			low <<= 8; \
+			_PPMD_E_PUTC(ariLow >> 24, stream); \
+			ariLow <<= 8; \
 		} \
 	}
 #define ARI_INIT_DECODER(stream) \
 	{ \
-		low = code = 0; \
-		range = DWORD(-1); \
+		ariLow = ariCode = 0; \
+		ariRange = DWORD(-1); \
 		for (UINT i = 0; i < 4; i++) \
-			code = (code << 8) | _PPMD_D_GETC(stream); \
+			ariCode = (ariCode << 8) | _PPMD_D_GETC(stream); \
 	}
 #define ARI_DEC_NORMALIZE(stream) \
 	{ \
-		while ((low ^ (low + range)) < TOP || range < BOT && ((range = -low & (BOT - 1)), 1)) { \
-			code = (code << 8) | _PPMD_D_GETC(stream); \
-			range <<= 8; \
-			low <<= 8; \
+		while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) { \
+			ariCode = (ariCode << 8) | _PPMD_D_GETC(stream); \
+			ariRange <<= 8; \
+			ariLow <<= 8; \
 		} \
 	}
 
 inline UINT ariGetCurrentCount() {
-	return (code - low) / (range /= SubRange.scale);
+	return (ariCode - ariLow) / (ariRange /= ariSubRange.scale);
 }
 
 inline UINT ariGetCurrentShiftCount(UINT SHIFT) {
-	return (code - low) / (range >>= SHIFT);
+	return (ariCode - ariLow) / (ariRange >>= SHIFT);
 }
 
 inline void ariRemoveSubrange() {
-	low += range * SubRange.LowCount;
-	range *= SubRange.HighCount - SubRange.LowCount;
+	ariLow += ariRange * ariSubRange.LowCount;
+	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
 }
