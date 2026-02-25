@@ -4,52 +4,52 @@ Encoder::Encoder() {
 }
 
 void Encoder::Normalize(FILE* stream) {
-	while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) {
-        _PPMD_E_PUTC(ariLow >> 24, stream);
-        ariRange <<= 8;
-        ariLow <<= 8;
+	while ((low ^ (low + range)) < TOP || range < BOT && ((range = -low & (BOT - 1)), 1)) {
+        _PPMD_E_PUTC(low >> 24, stream);
+        range <<= 8;
+        low <<= 8;
     }
 }
 void Encoder::EncodeSymbol() {
-    ariLow += ariSubRange.LowCount * (ariRange /= ariSubRange.scale);
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
+    low += subRange.LowCount * (range /= subRange.scale);
+	range *= subRange.HighCount - subRange.LowCount;
 }
 
 void Encoder::ShiftEncodeSymbol(UINT SHIFT) {
-    ariLow += ariSubRange.LowCount * (ariRange >>= SHIFT);
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
+    low += subRange.LowCount * (range >>= SHIFT);
+	range *= subRange.HighCount - subRange.LowCount;
 }
 
 void Encoder::Flush(FILE* stream) {
     for (UINT i = 0; i < 4; i++) {
-        _PPMD_E_PUTC(ariLow >> 24, stream);
-        ariLow <<= 8;
+        _PPMD_E_PUTC(low >> 24, stream);
+        low <<= 8;
     }
 }
 
 Decoder::Decoder(FILE* stream) {
     for (UINT i = 0; i < 4; i++) {
-        ariCode = (ariCode << 8) | _PPMD_D_GETC(stream);
+        code = (code << 8) | _PPMD_D_GETC(stream);
     }
 }
 
 void Decoder::Normalize(FILE* stream) {
-    while ((ariLow ^ (ariLow + ariRange)) < TOP || ariRange < BOT && ((ariRange = -ariLow & (BOT - 1)), 1)) {
-        ariCode = (ariCode << 8) | _PPMD_D_GETC(stream);
-        ariRange <<= 8;
-        ariLow <<= 8;
+    while ((low ^ (low + range)) < TOP || range < BOT && ((range = -low & (BOT - 1)), 1)) {
+        code = (code << 8) | _PPMD_D_GETC(stream);
+        range <<= 8;
+        low <<= 8;
     }
 }
 
 UINT Decoder::GetCurrentCount() {
-	return (ariCode - ariLow) / (ariRange /= ariSubRange.scale);
+	return (code - low) / (range /= subRange.scale);
 }
 
 UINT Decoder::GetCurrentShiftCount(UINT SHIFT) {
-	return (ariCode - ariLow) / (ariRange >>= SHIFT);
+	return (code - low) / (range >>= SHIFT);
 }
 
 void Decoder::RemoveSubrange() {
-    ariLow += ariRange * ariSubRange.LowCount;
-	ariRange *= ariSubRange.HighCount - ariSubRange.LowCount;
+    low += range * subRange.LowCount;
+	range *= subRange.HighCount - subRange.LowCount;
 }

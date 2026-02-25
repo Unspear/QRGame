@@ -57,13 +57,14 @@ public:
 #include "PPMdType.h"
 
 struct Coder {
-	enum { TOP = 1 << 24, BOT = 1 << 15 };
 	struct SUBRANGE {
 		DWORD LowCount, HighCount, scale;
-	} ariSubRange;
-	DWORD ariLow = 0;
-	DWORD ariCode = 0; 
-	DWORD ariRange = DWORD(-1);
+	} subRange;
+protected:
+	enum { TOP = 1 << 24, BOT = 1 << 15 };
+	DWORD low = 0;
+	DWORD code = 0; 
+	DWORD range = DWORD(-1);
 };
 
 struct Encoder : Coder {

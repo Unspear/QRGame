@@ -633,15 +633,15 @@ inline void PPM_CONTEXT::encodeBinSymbol(Encoder& encoder, int symbol) {
 	if (rs.Symbol == symbol) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		encoder.ariSubRange.LowCount = 0;
-		encoder.ariSubRange.HighCount = bs;
+		encoder.subRange.LowCount = 0;
+		encoder.subRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		encoder.ariSubRange.LowCount = bs;
+		encoder.subRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		encoder.ariSubRange.HighCount = BIN_SCALE;
+		encoder.subRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -656,15 +656,15 @@ inline void PPM_CONTEXT::decodeBinSymbol(Decoder& decoder) {
 	if (decoder.GetCurrentShiftCount(TOT_BITS) < bs) {
 		FoundState = &rs;
 		rs.Freq += (rs.Freq < 196);
-		decoder.ariSubRange.LowCount = 0;
-		decoder.ariSubRange.HighCount = bs;
+		decoder.subRange.LowCount = 0;
+		decoder.subRange.HighCount = bs;
 		bs += INTERVAL - GET_MEAN(bs, PERIOD_BITS, 2);
 		PrevSuccess = 1;
 		RunLength++;
 	} else {
-		decoder.ariSubRange.LowCount = bs;
+		decoder.subRange.LowCount = bs;
 		bs -= GET_MEAN(bs, PERIOD_BITS, 2);
-		decoder.ariSubRange.HighCount = BIN_SCALE;
+		decoder.subRange.HighCount = BIN_SCALE;
 		InitEsc = ExpEscape[bs >> 10];
 		CharMask[rs.Symbol] = EscCount;
 		NumMasked = PrevSuccess = 0;
@@ -687,16 +687,16 @@ inline void PPM_CONTEXT::update1(STATE* p) {
 inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 	UINT LoCnt, i = Stats->Symbol;
 	STATE* p = Stats;
-	encoder.ariSubRange.scale = SummFreq;
+	encoder.subRange.scale = SummFreq;
 	if (i == symbol) {
-		PrevSuccess = (2 * (encoder.ariSubRange.HighCount = p->Freq) >= encoder.ariSubRange.scale);
+		PrevSuccess = (2 * (encoder.subRange.HighCount = p->Freq) >= encoder.subRange.scale);
 		(FoundState = p)->Freq += 4;
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (p->Freq > MAX_FREQ) {
 			rescale();
 		}
-		encoder.ariSubRange.LowCount = 0;
+		encoder.subRange.LowCount = 0;
 		return;
 	}
 	LoCnt = p->Freq;
@@ -708,34 +708,34 @@ inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			encoder.ariSubRange.LowCount = LoCnt;
+			encoder.subRange.LowCount = LoCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			encoder.ariSubRange.HighCount = encoder.ariSubRange.scale;
+			encoder.subRange.HighCount = encoder.subRange.scale;
 			return;
 		}
 	}
-	encoder.ariSubRange.HighCount = (encoder.ariSubRange.LowCount = LoCnt) + p->Freq;
+	encoder.subRange.HighCount = (encoder.subRange.LowCount = LoCnt) + p->Freq;
 	update1(p);
 }
 
 inline void PPM_CONTEXT::decodeSymbol1(Decoder& decoder) {
 	UINT i, count, HiCnt = Stats->Freq;
 	STATE* p = Stats;
-	decoder.ariSubRange.scale = SummFreq;
+	decoder.subRange.scale = SummFreq;
 	if ((count = decoder.GetCurrentCount()) < HiCnt) {
-		PrevSuccess = (2 * (decoder.ariSubRange.HighCount = HiCnt) >= decoder.ariSubRange.scale);
+		PrevSuccess = (2 * (decoder.subRange.HighCount = HiCnt) >= decoder.subRange.scale);
 		(FoundState = p)->Freq = (HiCnt += 4);
 		SummFreq += 4;
 		RunLength += PrevSuccess;
 		if (HiCnt > MAX_FREQ) {
 			rescale();
 		}
-		decoder.ariSubRange.LowCount = 0;
+		decoder.subRange.LowCount = 0;
 		return;
 	}
 	i = NumStats;
@@ -745,18 +745,18 @@ inline void PPM_CONTEXT::decodeSymbol1(Decoder& decoder) {
 			if (Suffix) {
 				PrefetchData(Suffix);
 			}
-			decoder.ariSubRange.LowCount = HiCnt;
+			decoder.subRange.LowCount = HiCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
 			do {
 				CharMask[(--p)->Symbol] = EscCount;
 			} while (--i);
-			decoder.ariSubRange.HighCount = decoder.ariSubRange.scale;
+			decoder.subRange.HighCount = decoder.subRange.scale;
 			return;
 		}
 	}
-	decoder.ariSubRange.LowCount = (decoder.ariSubRange.HighCount = HiCnt) - p->Freq;
+	decoder.subRange.LowCount = (decoder.subRange.HighCount = HiCnt) - p->Freq;
 	update1(p);
 }
 
@@ -782,10 +782,10 @@ inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2(Coder& coder) {
 		t = Suffix->NumStats;
 		psee2c = SEE2Cont[QTable[NumStats + 2] - 3] + (SummFreq > 11 * (NumStats + 1));
 		psee2c += 2 * (2 * NumStats < t + NumMasked) + Flags;
-		coder.ariSubRange.scale = psee2c->getMean();
+		coder.subRange.scale = psee2c->getMean();
 	} else {
 		psee2c = &DummySEE2Cont;
-		coder.ariSubRange.scale = 1;
+		coder.subRange.scale = 1;
 	}
 	return psee2c;
 }
@@ -805,13 +805,13 @@ inline void PPM_CONTEXT::encodeSymbol2(Encoder& encoder, int symbol) {
 		}
 		LoCnt += p->Freq;
 	} while (--i);
-	encoder.ariSubRange.HighCount = (encoder.ariSubRange.scale += (encoder.ariSubRange.LowCount = LoCnt));
-	psee2c->Summ += encoder.ariSubRange.scale;
+	encoder.subRange.HighCount = (encoder.subRange.scale += (encoder.subRange.LowCount = LoCnt));
+	psee2c->Summ += encoder.subRange.scale;
 	NumMasked = NumStats;
 	return;
 SYMBOL_FOUND:
-	encoder.ariSubRange.LowCount = LoCnt;
-	encoder.ariSubRange.HighCount = (LoCnt += p->Freq);
+	encoder.subRange.LowCount = LoCnt;
+	encoder.subRange.HighCount = (LoCnt += p->Freq);
 	for (p1 = p; --i;) {
 		do {
 			Sym = p1[1].Symbol;
@@ -819,7 +819,7 @@ SYMBOL_FOUND:
 		} while (CharMask[Sym] == EscCount);
 		LoCnt += p1->Freq;
 	}
-	encoder.ariSubRange.scale += LoCnt;
+	encoder.subRange.scale += LoCnt;
 	psee2c->update();
 	update2(p);
 }
@@ -836,7 +836,7 @@ inline void PPM_CONTEXT::decodeSymbol2(Decoder& decoder) {
 		HiCnt += p->Freq;
 		*pps++ = p;
 	} while (--i);
-	decoder.ariSubRange.scale += HiCnt;
+	decoder.subRange.scale += HiCnt;
 	count = decoder.GetCurrentCount();
 	p = *(pps = ps);
 	if (count < HiCnt) {
@@ -844,19 +844,19 @@ inline void PPM_CONTEXT::decodeSymbol2(Decoder& decoder) {
 		while ((HiCnt += p->Freq) <= count) {
 			p = *++pps;
 		}
-		decoder.ariSubRange.LowCount = (decoder.ariSubRange.HighCount = HiCnt) - p->Freq;
+		decoder.subRange.LowCount = (decoder.subRange.HighCount = HiCnt) - p->Freq;
 		psee2c->update();
 		update2(p);
 	} else {
-		decoder.ariSubRange.LowCount = HiCnt;
-		decoder.ariSubRange.HighCount = decoder.ariSubRange.scale;
+		decoder.subRange.LowCount = HiCnt;
+		decoder.subRange.HighCount = decoder.subRange.scale;
 		i = NumStats - NumMasked;
 		NumMasked = NumStats;
 		do {
 			CharMask[(*pps)->Symbol] = EscCount;
 			pps++;
 		} while (--i);
-		psee2c->Summ += decoder.ariSubRange.scale;
+		psee2c->Summ += decoder.subRange.scale;
 	}
 }
 
