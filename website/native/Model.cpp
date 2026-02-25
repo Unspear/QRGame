@@ -201,7 +201,7 @@ void PPM_CONTEXT::refresh(int OldNU, BOOL Scale) {
 	SummFreq += (EscFreq = (EscFreq + Scale) >> Scale);
 }
 
-#define P_CALL(F) (PrefetchData(p->Successor), p->Successor = p->Successor->F(Order + 1))
+#define P_CALL(F) (p->Successor = p->Successor->F(Order + 1))
 
 PPM_CONTEXT* PPM_CONTEXT::cutOff(int Order) {
 	int i, tmp;
@@ -223,7 +223,6 @@ PPM_CONTEXT* PPM_CONTEXT::cutOff(int Order) {
 			return NULL;
 		}
 	}
-	PrefetchData(Stats);
 	Stats = (STATE*)MoveUnitsUp(Stats, tmp = (NumStats + 2) >> 1);
 	for (p = Stats + (i = NumStats); p >= Stats; p--) {
 		if ((BYTE*)p->Successor < UnitsStart) {
@@ -269,7 +268,6 @@ PPM_CONTEXT* PPM_CONTEXT::removeBinConts(int Order) {
 			return this;
 		}
 	}
-	PrefetchData(Stats);
 	for (p = Stats + NumStats; p >= Stats; p--) {
 		if ((BYTE*)p->Successor >= UnitsStart && Order < MaxOrder) {
 			P_CALL(removeBinConts);
@@ -705,9 +703,6 @@ inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 	while ((++p)->Symbol != symbol) {
 		LoCnt += p->Freq;
 		if (--i == 0) {
-			if (Suffix) {
-				PrefetchData(Suffix);
-			}
 			encoder.subRange.LowCount = LoCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
@@ -742,9 +737,6 @@ inline void PPM_CONTEXT::decodeSymbol1(Decoder& decoder) {
 	PrevSuccess = 0;
 	while ((HiCnt += (++p)->Freq) <= count) {
 		if (--i == 0) {
-			if (Suffix) {
-				PrefetchData(Suffix);
-			}
 			decoder.subRange.LowCount = HiCnt;
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
@@ -771,12 +763,7 @@ inline void PPM_CONTEXT::update2(STATE* p) {
 }
 
 inline SEE2_CONTEXT* PPM_CONTEXT::makeEscFreq2(Coder& coder) {
-	BYTE* pb = (BYTE*)Stats;
 	UINT t = 2 * NumStats;
-	PrefetchData(pb);
-	PrefetchData(pb + t);
-	PrefetchData(pb += 2 * t);
-	PrefetchData(pb + t);
 	SEE2_CONTEXT* psee2c;
 	if (NumStats != 0xFF) {
 		t = Suffix->NumStats;
@@ -894,10 +881,9 @@ void _STDCALL EncodeFile(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile, int M
 			encoder.EncodeSymbol();
 		}
 		if (!OrderFall && (BYTE*)FoundState->Successor >= UnitsStart) {
-			PrefetchData(MaxContext = FoundState->Successor);
+			MaxContext = FoundState->Successor;
 		} else {
 			UpdateModel(MinContext);
-			PrefetchData(MaxContext);
 			if (EscCount == 0) {
 				ClearMask(EncodedFile, DecodedFile);
 			}
@@ -930,10 +916,9 @@ void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int M
 		}
 		_PPMD_D_PUTC(FoundState->Symbol, DecodedFile);
 		if (!OrderFall && (BYTE*)FoundState->Successor >= UnitsStart) {
-			PrefetchData(MaxContext = FoundState->Successor);
+			MaxContext = FoundState->Successor;
 		} else {
 			UpdateModel(MinContext);
-			PrefetchData(MaxContext);
 			if (EscCount == 0) {
 				ClearMask(EncodedFile, DecodedFile);
 			}

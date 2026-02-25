@@ -33,8 +33,6 @@ typedef unsigned int UINT;
 const DWORD PPMdSignature = 0x84ACAF8F, Variant = 'I';
 const int MAX_O = 16; /* maximum allowed model order  */
 
-// #define _USE_PREFETCHING                    /* for puzzling mainly          */
-
 #if !defined(_UNKNOWN_ENVIRONMENT_) && !defined(__GNUC__)
 #define _FASTCALL __fastcall
 #define _STDCALL __stdcall

@@ -53,12 +53,6 @@ static BYTE Indx2Units[N_INDEXES], Units2Indx[128];// constants
 static DWORD GlueCount, SubAllocatorSize = 0;
 static BYTE *HeapStart, *pText, *UnitsStart, *LoUnit, *HiUnit;
 
-inline void PrefetchData(void* Addr) {
-#if defined(_USE_PREFETCHING)
-	BYTE PrefetchByte = *(volatile BYTE*)Addr;
-#endif /* defined(_USE_PREFETCHING) */
-}
-
 inline void BLK_NODE::insert(void* pv, int NU) {
 	MEM_BLK* p = (MEM_BLK*)pv;
 	link(p);
