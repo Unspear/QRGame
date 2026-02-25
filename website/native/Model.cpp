@@ -5,9 +5,11 @@
  *  Contents: PPMII model description and encoding/decoding routines        *
  ****************************************************************************/
 #include <string.h>
-#include "PPMd.h"
+#include "PPMdType.h"
 #include "Coder.hpp"
 #include "SubAlloc.hpp"
+
+enum MR_METHOD { MRM_RESTART, MRM_CUT_OFF, MRM_FREEZE };
 
 enum {
 	UP_FREQ = 5,
@@ -862,7 +864,7 @@ inline void ClearMask(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile) {
 	EscCount = 1;
 	memset(CharMask, 0, sizeof(CharMask));
 	if (++PrintCount == 0) {
-		PrintInfo(DecodedFile, EncodedFile);
+		//PrintInfo(DecodedFile, EncodedFile);
 	}
 }
 
@@ -904,7 +906,7 @@ void _STDCALL EncodeFile(_PPMD_FILE* EncodedFile, _PPMD_FILE* DecodedFile, int M
 	}
 STOP_ENCODING:
 	ARI_FLUSH_ENCODER(EncodedFile);
-	PrintInfo(DecodedFile, EncodedFile);
+	//PrintInfo(DecodedFile, EncodedFile);
 }
 
 void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int MaxOrder, MR_METHOD MRMethod) {
@@ -940,5 +942,28 @@ void _STDCALL DecodeFile(_PPMD_FILE* DecodedFile, _PPMD_FILE* EncodedFile, int M
 		ARI_DEC_NORMALIZE(EncodedFile);
 	}
 STOP_DECODING:
-	PrintInfo(DecodedFile, EncodedFile);
+	return;
+	//PrintInfo(DecodedFile, EncodedFile);
+}
+
+extern "C" {
+void encode(char* inputPath, char* outputPath) {
+	FILE* inputFile = fopen(inputPath, "rb");
+	FILE* outputFile = fopen(outputPath, "w+b");
+	StartSubAllocator(10);
+	EncodeFile(outputFile, inputFile, 4, MRM_RESTART);
+	StopSubAllocator();
+	fclose(inputFile);
+	fclose(outputFile);
+}
+
+void decode(char* inputPath, char* outputPath) {
+	FILE* inputFile = fopen(inputPath, "rb");
+	FILE* outputFile = fopen(outputPath, "w+b");
+	StartSubAllocator(10);
+	DecodeFile(outputFile, inputFile, 4, MRM_RESTART);
+	StopSubAllocator();
+	fclose(inputFile);
+	fclose(outputFile);
+}
 }
