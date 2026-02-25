@@ -30,7 +30,7 @@ export class TileMap {
             color: new Array(dim.w * dim.h,).fill(0)
         };
     }
-    static Copy(tileMap: TileMap) {
+    static Copy(tileMap: TileMap): TileMap {
         let copied = new TileMap(tileMap.dim);
         copied.tileData = structuredClone(tileMap.tileData);
         return copied;

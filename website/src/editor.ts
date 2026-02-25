@@ -16,11 +16,13 @@ export class Editor {
     upButton: HTMLButtonElement;
     rightButton: HTMLButtonElement;
     downButton: HTMLButtonElement;
+    exportButton: HTMLButtonElement;
+    importButton: HTMLButtonElement
     ctx: CanvasRenderingContext2D;
     placingTiles: boolean;
     camera: Camera;
     tileMap: TileMap;
-    constructor() {
+    constructor(tileMap: TileMap | null) {
         this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
         this.widthInput = document.getElementById('tilemap-width') as HTMLInputElement;
         this.heightInput = document.getElementById('tilemap-height') as HTMLInputElement;
@@ -32,6 +34,8 @@ export class Editor {
         this.upButton = document.getElementById('up-button') as HTMLButtonElement;
         this.rightButton = document.getElementById('right-button') as HTMLButtonElement;
         this.downButton = document.getElementById('down-button') as HTMLButtonElement;
+        this.exportButton = document.getElementById('export-button') as HTMLButtonElement;
+        this.importButton = document.getElementById('import-button') as HTMLButtonElement;
         this.ctx = this.canvas.getContext('2d')!;
         this.placingTiles = false;
         this.camera = new Camera();
@@ -76,7 +80,25 @@ export class Editor {
         this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
         this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
         this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
-        this.tileMap = new TileMap(that.getAndValidateDimensionsFromInput());
+        this.exportButton.onclick = function(){
+            let serialised = JSON.stringify(that.tileMap);
+            navigator.clipboard.writeText(serialised);
+        };
+        this.importButton.onclick = async function(){
+            try {
+                let serialised = JSON.parse(await navigator.clipboard.readText());
+                that.tileMap = TileMap.Copy(serialised as TileMap);
+            } catch(err) {
+                alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
+            }
+        }
+        if (tileMap === null) {
+            this.tileMap = new TileMap(this.getAndValidateDimensionsFromInput());
+        } else {
+            this.tileMap = tileMap;
+            this.widthInput.valueAsNumber = tileMap.dim.w;
+            this.heightInput.valueAsNumber = tileMap.dim.h;
+        }
         this.draw();
     }
     getAndValidateDimensionsFromInput(): Util.Dimensions {

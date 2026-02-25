@@ -23,23 +23,20 @@ let scriptInput = new EditorView({
     extensions: [basicSetup, StreamLanguage.define(lua)],
     parent: codeContent
 })
-function gameToEditor(game: Game) {
-    const transaction = scriptInput.state.update({changes: {
-        from: 0, 
-        to: scriptInput.state.doc.length, 
-        insert: game.script
-    }});
-    scriptInput.update([transaction]);
-}
+
 function editorToGame() {
     return new Game(scriptInput.state.doc.toString(), editor.tileMap);
 }
 // Editor
-const editor = new Editor();
-// Engine
-const engine = new Engine(gameCanvas);
 let game = urlToGame();
-gameToEditor(game);
+const transaction = scriptInput.state.update({changes: {
+    from: 0, 
+    to: scriptInput.state.doc.length, 
+    insert: game.script
+}});
+scriptInput.update([transaction]);
+const editor = new Editor(game.tileMap);
+const engine = new Engine(gameCanvas);
 // (could load the game directly here but want to make sure the editor works properly)
 engine.play(editorToGame());
 const qrGenerateOptions = {
