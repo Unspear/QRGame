@@ -103,3 +103,28 @@ benchmarkButton.onclick = async function (){
     // Remove button
     benchmarkButton.remove();
 };
+const ppmdButton = document.getElementById('ppmd-button') as HTMLButtonElement;
+const ppmdParagraph = document.getElementById('ppmd-paragraph') as HTMLParagraphElement;
+function testPPMd(data: Uint8Array): boolean {
+    let dataOut = PPMd.decompress(PPMd.compress(data));
+    if (data.byteLength !== dataOut.byteLength) {
+        return false;
+    }
+    for (let i = 0; i < data.byteLength; i++) {
+        if (data[i] != dataOut[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+ppmdButton.onclick = async function(){
+    const zeroBytes = testPPMd(new Uint8Array(10240));
+    const pong = testPPMd(basicGameToData(library["pong"]));
+    const randomBytesArray = new Uint8Array(10240);
+    for (let i = 0; i < randomBytesArray.byteLength; i++) {
+        randomBytesArray[i] = Math.floor(Math.random() * 256);
+    }
+    const randomBytes = testPPMd(randomBytesArray);
+    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Pong: ${pong} <br> Random Bytes: ${randomBytes}`
+    ppmdButton.remove();
+}
