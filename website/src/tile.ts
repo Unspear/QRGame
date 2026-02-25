@@ -10,7 +10,7 @@ TileSet: but a tileset can also contain a TileMap which
 - TileMap
  */
 
-type NewTileData = {
+type SingleTileData = {
     codePoint?: number;
     color?: number;
 }
@@ -33,25 +33,38 @@ export class TileMap {
         copied.tileData = structuredClone(tileMap.tileData);
         return copied;
     }
-    setTile(coords: Point, newTileData: NewTileData) {
+    getIndex(coords: Point): number | null {
         if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h)
         {
-            const index = coords.y * this.dim.w + coords.x;
-            if (newTileData.codePoint !== undefined) {
-                this.tileData.codePoint[index] = newTileData.codePoint;
-            }
-            if (newTileData.color !== undefined) {
-                this.tileData.color[index] = newTileData.color;
-            }
+            return coords.y * this.dim.w + coords.x;
+        }
+        return null;
+    }
+    getTile(coords: Point): SingleTileData | null {
+        const index = this.getIndex(coords);
+        if (index === null)
+        {
+            return null;
+        }
+        return {codePoint: this.tileData.codePoint[index], color: this.tileData.color[index]};
+    }
+    setTile(coords: Point, newTileData: SingleTileData) {
+        const index = this.getIndex(coords);
+        if (index === null)
+        {
+            return;
+        }
+        if (newTileData.codePoint !== undefined) {
+            this.tileData.codePoint[index] = newTileData.codePoint;
+        }
+        if (newTileData.color !== undefined) {
+            this.tileData.color[index] = newTileData.color;
         }
     }
     draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
-    /*getIndex(x: number, y: number): number {
-        return y * this.dim.w + x;
-    }
-    getPaethPrediction(data: number[], x: number, y: number): number {
+    /*getPaethPrediction(data: number[], x: number, y: number): number {
         if (y > 0) {
             if (x > 0){// Full Paeth
                 const n = data[this.getIndex(x, y - 1)];

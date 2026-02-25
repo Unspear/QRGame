@@ -6,6 +6,9 @@ import * as Util from './util'
 
 export class Editor {
     canvas: HTMLCanvasElement;
+    widthInput: HTMLInputElement;
+    heightInput: HTMLInputElement;
+    changeSizeButton: HTMLButtonElement;
     charInput: HTMLInputElement;
     colorInput: HTMLInputElement;
     invertedInput: HTMLInputElement;
@@ -19,6 +22,9 @@ export class Editor {
     tileMap: TileMap;
     constructor() {
         this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
+        this.widthInput = document.getElementById('tilemap-width') as HTMLInputElement;
+        this.heightInput = document.getElementById('tilemap-height') as HTMLInputElement;
+        this.changeSizeButton = document.getElementById('tilemap-change-size') as HTMLButtonElement;
         this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
         this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
         this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
@@ -50,12 +56,36 @@ export class Editor {
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
+        this.changeSizeButton.onclick = function(){
+            // Make new tilemap with new size and copy data
+            const newDim = that.getAndValidateDimensionsFromInput();
+            const newTileMap = new TileMap(newDim);
+            for (let y = 0; y < newDim.h; y++) {
+                for (let x = 0; x < newDim.w; x++) {
+                    const coords = {x: x, y: y};
+                    const getTileResult = that.tileMap.getTile(coords);
+                    if (getTileResult !== null) {
+                        newTileMap.setTile(coords, getTileResult);
+                    }
+                }
+            }
+            that.tileMap = newTileMap;
+            that.draw();
+        };
         this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
         this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
         this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
         this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
-        this.tileMap = new TileMap({ w: 32, h: 32 });
+        this.tileMap = new TileMap(that.getAndValidateDimensionsFromInput());
         this.draw();
+    }
+    getAndValidateDimensionsFromInput(): Util.Dimensions {
+        const newDim = {w: this.widthInput.valueAsNumber, h: this.heightInput.valueAsNumber};
+        newDim.w = Util.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
+        newDim.h = Util.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
+        this.widthInput.valueAsNumber = newDim.w;
+        this.heightInput.valueAsNumber = newDim.h;
+        return newDim;
     }
     setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
