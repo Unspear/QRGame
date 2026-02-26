@@ -5,33 +5,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-b166e9.bundle.js"></script><script defer src="src_style_css-src_pack_js-src_pwa_js.bundle.js"></script><script defer src="src_engine_js.bundle.js"></script><script defer src="play.bundle.js"></script><link href="d18af635b16961150e6d.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="3de0dbada69323d7b522.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
     <nav>
-    <ul>
-        <li><a href="index.html">Index</a></li>
-        <li><a href="play.html">Play</a></li>
-        <li><a href="edit.html">Edit</a></li>
-    </ul>
+    <div>
+        <a href="index.html">Index</a>
+        <a href="play.html">Play</a>
+        <a href="edit.html">Edit</a>
+        <a href="test.html">Test</a>
+    </div>
 </nav>
     <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <div class="tabs">
+    <my-tabs name="tab">
       <!-- Radio Buttons -->
-      <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
-      <label for="tab-play">Play</label>
-
-      <input type="radio" name="tab" id="tab-share" autocomplete="off">
-      <label for="tab-share">Share</label>
-
-      
-
+      <div class="tabs">
+        <div tabHeader="play">Play</div>
+        
+        <div tabHeader="share" style="flex-grow: 0;"><img src="./icon-16.png"></div>
+      </div>
       <!-- Tab Content -->
-      <div class="tab-content" id="tab-content-play">
-          <button id="reload-button">Reload Game</button>
+      <div tabContent="play" id="tab-content-play">
+          <button class="square-button" id="play-pause-button">⏯</button>
+          <button class="square-button" id="reload-button">↻</button>
           <canvas id="game-canvas" width="192" height="256"></canvas>
       </div>
 
-      <div class="tab-content" id="tab-content-share">
+      <div tabContent="share" id="tab-content-share">
         <p>
           <button id="url-button">URL to Clipboard</button>
           <button id="qr-button">QR to Clipboard</button>

@@ -2,56 +2,131 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/games/pong.txt?raw":
-/*!********************************!*\
-  !*** ./src/games/pong.txt?raw ***!
-  \********************************/
-/***/ ((module) => {
+/***/ "./src/games/pong.ts":
+/*!***************************!*\
+  !*** ./src/games/pong.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-module.exports = "-- Walls\r\nlocal left = createSprite('################', 11, 0, 128)\r\nleft.width = 8\r\nleft.px = 0\r\nleft.wrap = 0.5\r\nleft.height = 256\r\nleft.physics = true\r\nleft.static = true\r\nlocal right = copySprite(left)\r\nright.px = 1\r\nright.x = 192\r\n-- Paddles\r\nlocal top = createSprite('----', 8, 96, 32)\r\ntop.width = 32\r\ntop.physics = true\r\ntop.static = true\r\nlocal bottom = copySprite(top)\r\nbottom.y = 256 - 32\r\n-- Ball\r\nlocal ball = createSprite('O', 8, 96, 128)\r\nball.width = 8\r\nball.physics = true\r\n-- Control Paddles\r\nfunction drag(pos)\r\n  local x = math.min(math.max(pos.x, 24), 192-24)\r\n  if pos.y < 64 then\r\n    top.x = x\r\n  elseif pos.y > (256-64) then\r\n    bottom.x = x \r\n  end\r\nend\r\n-- Score\r\ntop.score = 0\r\nbottom.score = 0\r\nlocal topScore = createSprite('', 12, 16, 8)\r\ntopScore.px = 0\r\ntopScore.py = 0\r\nlocal bottomScore = createSprite('', 12, 192-16, 256-8)\r\nbottomScore.px = 1\r\nbottomScore.py = 1\r\n-- Update score and reset ball\r\nfunction newRound()\r\n    topScore.char = tostring(top.score)\r\n    bottomScore.char = tostring(bottom.score)\r\n    ball.x = 96\r\n    local dirY = math.random(0, 1)*2-1\r\n    ball.y = 128-dirY*64\r\n    ball.velY = dirY*3\r\n    ball.velX = (math.random(0, 1)*2-1)*1.5\r\nend\r\nnewRound()\r\n-- Frame\r\nfunction frame()\r\n    if ball.y < 0 then\r\n        top.score = top.score + 1\r\n        newRound()\r\n    end\r\n    if ball.y > 256 then\r\n        bottom.score = bottom.score + 1\r\n        newRound()\r\n    end\r\nend";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tile */ "./src/tile.ts");
+
+
+let script = `-- Paddles
+local top = createSprite('----', 8, 96, 32)
+top.width = 32
+top.physics = true
+top.static = true
+local bottom = copySprite(top)
+bottom.y = 256 - 32
+-- Ball
+local ball = createSprite('⬤', 4, 96, 128)
+ball.width = 16
+ball.physics = true
+-- Control Paddles
+function drag(pos)
+  local x = math.min(math.max(pos.x, 32), 192-32)
+  if pos.y < 64 then
+    top.x = x
+  elseif pos.y > (256-64) then
+    bottom.x = x 
+  end
+end
+-- Score
+top.score = 0
+bottom.score = 0
+local topScore = createSprite('', 12, 20, 4)
+topScore.px = 0
+topScore.py = 0
+local bottomScore = createSprite('', 12, 192-20, 256-4)
+bottomScore.px = 1
+bottomScore.py = 1
+-- Update score and reset ball
+function newRound()
+    topScore.char = tostring(top.score)
+    bottomScore.char = tostring(bottom.score)
+    ball.x = 96
+    local dirY = math.random(0, 1)*2-1
+    ball.y = 128-dirY*64
+    ball.velY = dirY*3
+    ball.velX = (math.random(0, 1)*2-1)*1.5
+end
+newRound()
+-- Frame
+function frame()
+    if ball.y < 0 then
+        top.score = top.score + 1
+        newRound()
+    end
+    if ball.y > 256 then
+        bottom.score = bottom.score + 1
+        newRound()
+    end
+end`;
+let tiles = '{"dim":{"w":12,"h":16},"tileData":{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,1,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9]}}';
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap.Copy(JSON.parse(tiles)));
+}
+
 
 /***/ }),
 
-/***/ "./src/index.js":
+/***/ "./src/index.ts":
 /*!**********************!*\
-  !*** ./src/index.js ***!
+  !*** ./src/index.ts ***!
   \**********************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ "./src/style.css");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
-/* harmony import */ var _games_pong_txt_raw__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./games/pong.txt?raw */ "./src/games/pong.txt?raw");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack_js__WEBPACK_IMPORTED_MODULE_3__]);
+/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+/* harmony import */ var _library__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./library */ "./src/library.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_1__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_pack_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_async_dependencies_result__[0];
-
-
-
+_pack__WEBPACK_IMPORTED_MODULE_1__ = __webpack_async_dependencies_result__[0];
 
 
 
 const playButton = document.getElementById('play-button');
 const editButton = document.getElementById('edit-button');
 const gamesSelect = document.getElementById('games');
+playButton.onclick = function () {
+    window.location.href = (0,_pack__WEBPACK_IMPORTED_MODULE_1__.gameToUrl)(_library__WEBPACK_IMPORTED_MODULE_2__["default"][gamesSelect.value], "play");
+};
+editButton.onclick = function () {
+    window.location.href = (0,_pack__WEBPACK_IMPORTED_MODULE_1__.gameToUrl)(_library__WEBPACK_IMPORTED_MODULE_2__["default"][gamesSelect.value], "edit");
+};
 
-const games = {
-    "none" : new _game_js__WEBPACK_IMPORTED_MODULE_2__.Game(""),
-    "pong" : new _game_js__WEBPACK_IMPORTED_MODULE_2__.Game(_games_pong_txt_raw__WEBPACK_IMPORTED_MODULE_4__)
-}
-
-playButton.onclick = function(){
-    window.location.href = (0,_pack_js__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(games[gamesSelect.value], "play");
-}
-editButton.onclick = function(){
-    window.location.href = (0,_pack_js__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(games[gamesSelect.value], "edit");
-}
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/library.ts":
+/*!************************!*\
+  !*** ./src/library.ts ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _games_pong__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/pong */ "./src/games/pong.ts");
+
+
+const games = {
+    "none": new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
+    "pong": (0,_games_pong__WEBPACK_IMPORTED_MODULE_1__["default"])()
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
+
 
 /***/ })
 
@@ -327,7 +402,7 @@ __webpack_async_result__();
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","src_style_css-src_pack_js-src_pwa_js"], () => (__webpack_require__("./src/index.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","src_page_js-src_pack_ts"], () => (__webpack_require__("./src/index.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

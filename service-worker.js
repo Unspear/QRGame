@@ -78,56 +78,68 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
   workbox.precacheAndRoute([{
+    "url": "3de0dbada69323d7b522.css",
+    "revision": null
+  }, {
     "url": "3f53db599ee755d90efd.wasm",
     "revision": null
   }, {
-    "url": "4e0303d7a30105b9103f.png",
+    "url": "84576ba241a5e4a9a110.wasm",
     "revision": null
   }, {
     "url": "_9995.bundle.js",
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
-    "url": "d18af635b16961150e6d.css",
+    "url": "c2701bfe48f352bd883e.wasm",
+    "revision": null
+  }, {
+    "url": "d8a5c13deffe5116d1ad.png",
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "a62ca6ceb66311593f9a8c2b60caf12c"
+    "revision": "331172086835964bdbf742cc21e92d44"
   }, {
     "url": "edit.html",
-    "revision": "66b48a1a17e4ef0d66fa7bb478b3d780"
-  }, {
-    "url": "ee4bb51207f4039a78af.wasm",
-    "revision": null
+    "revision": "2365f044ee32dcfc6a8f01f0ad284212"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "index.bundle.js",
-    "revision": "6baf0950f4ad8b670dbd6a5cb8ac1384"
+    "revision": "ba9a8942a1f417e9f32dbf2678fd7359"
   }, {
     "url": "index.html",
-    "revision": "7d43ee20ad4d75e75075d22c320b6fab"
+    "revision": "fd3516f5def414d7fab1182c65c271d5"
   }, {
     "url": "play.bundle.js",
-    "revision": "1494982af8a58f54318a633d6144919d"
+    "revision": "b10cc409c9ce42953ede09952f725cee"
   }, {
     "url": "play.html",
-    "revision": "a9a64e781404034d02756e6e3fca0938"
+    "revision": "a3d0f626dd719f6cb9a87991c29cc57d"
   }, {
-    "url": "src_engine_js.bundle.js",
-    "revision": "763387aa7b49a82fa4f6f1293d47b95b"
+    "url": "src_page_js-src_pack_ts.bundle.js",
+    "revision": "16129a64cc5caf25f55b67f60d2ac10c"
   }, {
-    "url": "src_style_css-src_pack_js-src_pwa_js.bundle.js",
-    "revision": "cdfc4192fb99a339be6123210d63fa6b"
+    "url": "src_player_ts.bundle.js",
+    "revision": "e86b27180d5de0c37726ac9bdf168bfc"
   }, {
-    "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452.bundle.js",
-    "revision": "b232f222aecb05ebb6bd14cd56091100"
+    "url": "test.bundle.js",
+    "revision": "c18086f3e8215ae595249b2b4a8d0b06"
+  }, {
+    "url": "test.html",
+    "revision": "e9e5895782b0ed13aa64b7a5ecd26185"
+  }, {
+    "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js.bundle.js",
+    "revision": "ecb71e3bd29e11fa6be1ae02ca5a5c99"
+  }, {
+    "url": "vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js",
+    "revision": "8167d382401d442b99c7d389b8b601d4"
   }, {
     "url": "vendors-node_modules_matter-js_build_matter_js.bundle.js",
     "revision": "fcf4548b169b68267c110283433027fe"
   }, {
-    "url": "vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-b166e9.bundle.js",
-    "revision": "f7152292f2b08a3b34fc02fb5a827f88"
+    "url": "vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js",
+    "revision": "e703ead720c7b33a868205afce182dc6"
   }], {});
 
 }));

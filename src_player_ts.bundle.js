@@ -1,8 +1,8 @@
-(self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_engine_js"],{
+(self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_player_ts"],{
 
-/***/ "./src/camera.js":
+/***/ "./src/camera.ts":
 /*!***********************!*\
-  !*** ./src/camera.js ***!
+  !*** ./src/camera.ts ***!
   \***********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -16,8 +16,8 @@ class Camera {
     #targetPos;
     #speed;
     constructor() {
-        this.#currentPos = {x: 0, y: 0};
-        this.#targetPos = {x: 0, y: 0};
+        this.#currentPos = { x: 0, y: 0 };
+        this.#targetPos = { x: 0, y: 0 };
         this.#speed = 256;
     }
     set x(value) {
@@ -33,10 +33,11 @@ class Camera {
         return this.#targetPos.y;
     }
     frame(deltaTime) {
-        let dX = this.#targetPos.x - this.#currentPos.x
-        let dY = this.#targetPos.y - this.#currentPos.y
+        let dX = this.#targetPos.x - this.#currentPos.x;
+        let dY = this.#targetPos.y - this.#currentPos.y;
         let len = Math.sqrt(dX * dX + dY * dY);
-        if (len == 0) return;
+        if (len == 0)
+            return;
         dX /= len;
         dY /= len;
         let maxMove = this.#speed * deltaTime;
@@ -44,7 +45,8 @@ class Camera {
             // Move max distance
             this.#currentPos.x += dX * maxMove;
             this.#currentPos.y += dY * maxMove;
-        } else {
+        }
+        else {
             // Move to target
             this.#currentPos.x = this.#targetPos.x;
             this.#currentPos.y = this.#targetPos.y;
@@ -56,16 +58,16 @@ class Camera {
     getViewOffset() {
         let offsetX = -this.#currentPos.x;
         let offsetY = -this.#currentPos.y;
-        return {x: offsetX, y: offsetY};
+        return { x: offsetX, y: offsetY };
     }
 }
 
 
 /***/ }),
 
-/***/ "./src/engine.js":
+/***/ "./src/engine.ts":
 /*!***********************!*\
-  !*** ./src/engine.js ***!
+  !*** ./src/engine.ts ***!
   \***********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -78,13 +80,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(wasmoon__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint.js */ "./src/spriteDragConstraint.js");
-/* harmony import */ var _sprite_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite.js */ "./src/sprite.js");
-/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants.js */ "./src/constants.js");
-/* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
-/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
+/* harmony import */ var _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint */ "./src/spriteDragConstraint.ts");
+/* harmony import */ var _sprite__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite */ "./src/sprite.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./src/util.ts");
 /* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "./node_modules/sam-js/dist/samjs.esm.min.js");
-/* harmony import */ var _camera_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera.js */ "./src/camera.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
+/* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "./node_modules/wasmoon/dist/glue.wasm");
 
 
 
@@ -96,29 +99,41 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Engine {
+    gameCanvas;
+    textToSpeech;
+    luaFactory;
+    ctx;
+    downPointers;
+    luaDrag;
+    luaTap;
+    game;
+    sprites;
+    tileMap;
+    camera;
+    matterEngine;
+    spriteDragConstraint;
+    lua;
+    luaFrame;
+    paused;
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
-        this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory();
+        this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__);
         this.ctx = gameCanvas.getContext('2d');
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
             this.downPointers.add(event.pointerId);
-            if (this.luaDrag)
-            {
-                this.luaDrag(_util_js__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
+            if (this.luaDrag) {
+                this.luaDrag(_util__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
             }
-            if (this.luaTap)
-            {
+            if (this.luaTap) {
                 this.luaTap();
             }
         });
         gameCanvas.addEventListener('pointermove', (event) => {
-            if (this.downPointers.has(event.pointerId))
-            {
-                if (this.luaDrag)
-                {
-                    this.luaDrag(_util_js__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
+            if (this.downPointers.has(event.pointerId)) {
+                if (this.luaDrag) {
+                    this.luaDrag(_util__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
                 }
             }
         });
@@ -128,25 +143,27 @@ class Engine {
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
+        this.paused = true;
     }
     async play(game) {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
-        this.tileMap = _tile_js__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
-        this.camera = new _camera_js__WEBPACK_IMPORTED_MODULE_8__.Camera();
+        this.tileMap = _tile__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
+        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_8__.Camera();
         // Create physics engine
-        (matter_js__WEBPACK_IMPORTED_MODULE_1___default().Resolver)._restingThresh = 1;
-        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.create({ 
+        matter_js__WEBPACK_IMPORTED_MODULE_1__.Resolver._restingThresh = 1;
+        this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.create({
             gravity: { scale: 0 }
         });
-        this.spriteDragConstraint = _spriteDragConstraint_js__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint.create(this.matterEngine, this.gameCanvas);
-        matter_js__WEBPACK_IMPORTED_MODULE_1___default().Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
+        this.tileMap.createBodies(this.matterEngine);
+        this.spriteDragConstraint = new _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint(this.matterEngine, this.gameCanvas);
+        matter_js__WEBPACK_IMPORTED_MODULE_1__.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment
-        this.lua = await this.luaFactory.createEngine()
-        this.lua.global.set('FRAME_TIME', _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
+        this.lua = await this.luaFactory.createEngine();
+        this.lua.global.set('FRAME_TIME', _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
         this.lua.global.set('createSprite', (char, color, x, y) => {
-            let newSprite = new _sprite_js__WEBPACK_IMPORTED_MODULE_3__.Sprite(char, color, x, y);
+            let newSprite = new _sprite__WEBPACK_IMPORTED_MODULE_3__.Sprite(char, color, x, y);
             this.sprites.push(newSprite);
             return newSprite;
         });
@@ -154,7 +171,7 @@ class Engine {
             this.sprites = this.sprites.filter(s => s !== sprite);
         });
         this.lua.global.set('copySprite', (sprite) => {
-            let newSprite = _sprite_js__WEBPACK_IMPORTED_MODULE_3__.Sprite.Copy(sprite);
+            let newSprite = _sprite__WEBPACK_IMPORTED_MODULE_3__.Sprite.Copy(sprite);
             this.sprites.push(newSprite);
             return newSprite;
         });
@@ -171,26 +188,31 @@ class Engine {
         // Start
         requestAnimationFrame(this.#mainLoop.bind(this));
     }
+    setPaused(value) {
+        this.paused = value;
+    }
+    isPaused() {
+        return this.paused;
+    }
     #mainLoop(timestamp) {
         if (this.#previousTimestamp === undefined) {
             this.#previousTimestamp = timestamp;
         }
         const elapsed = timestamp - this.#previousTimestamp;
-        if (elapsed > _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS) {
-            if (this.gameCanvas.checkVisibility()) {
+        if (elapsed > _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS) {
+            if (this.gameCanvas.checkVisibility() && !this.paused) {
                 // Frame
-                if (this.luaFrame)
-                {
+                if (this.luaFrame) {
                     this.luaFrame();
                 }
-                this.camera.frame(_constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME)
+                this.camera.frame(_constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
                 // Physics
                 for (let sprite of this.sprites) {
-                    sprite.prePhysicsUpdate(this.matterEngine)
+                    sprite.prePhysicsUpdate(this.matterEngine);
                 }
-                matter_js__WEBPACK_IMPORTED_MODULE_1___default().Engine.update(this.matterEngine, _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS);
+                matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.update(this.matterEngine, _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS);
                 for (let sprite of this.sprites) {
-                    sprite.postPhysicsUpdate(this.matterEngine)
+                    sprite.postPhysicsUpdate(this.matterEngine);
                 }
                 // Rendering
                 this.ctx.beginPath();
@@ -202,14 +224,15 @@ class Engine {
                 this.tileMap.draw(this.ctx, viewOffset);
                 // Draw Sprites
                 for (let sprite of this.sprites) {
-                    sprite.draw(this.ctx, viewOffset)
+                    sprite.draw(this.ctx, viewOffset);
                 }
             }
-            if (elapsed > _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS * 5) {
-                console.log("Elapsed time is large, skipping frames")
+            if (elapsed > _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS * 5) {
+                console.log("Elapsed time is large, skipping frames");
                 this.#previousTimestamp = timestamp;
-            } else {
-                this.#previousTimestamp += _constants_js__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS;
+            }
+            else {
+                this.#previousTimestamp += _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS;
             }
         }
         requestAnimationFrame((t) => this.#mainLoop(t));
@@ -217,11 +240,92 @@ class Engine {
     #previousTimestamp;
 }
 
+
 /***/ }),
 
-/***/ "./src/sprite.js":
+/***/ "./src/player.ts":
 /*!***********************!*\
-  !*** ./src/sprite.js ***!
+  !*** ./src/player.ts ***!
+  \***********************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Player: () => (/* binding */ Player)
+/* harmony export */ });
+/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./engine */ "./src/engine.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_3__]);
+var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+_pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_async_dependencies_result__[0];
+
+
+
+
+class Player {
+    canvas;
+    playPauseButton;
+    reloadButton;
+    urlButton;
+    qrButton;
+    qrCanvas;
+    gameProvider;
+    constructor(gameProvider) {
+        this.gameProvider = gameProvider;
+        this.canvas = document.getElementById('game-canvas');
+        this.playPauseButton = document.getElementById('play-pause-button');
+        this.reloadButton = document.getElementById('reload-button');
+        this.urlButton = document.getElementById('url-button');
+        this.qrButton = document.getElementById('qr-button');
+        this.qrCanvas = document.getElementById('qr-canvas');
+        const engine = new _engine__WEBPACK_IMPORTED_MODULE_2__.Engine(this.canvas);
+        engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
+        const qrGenerateOptions = {
+            minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_0__.correction.L
+        };
+        const qrImageOptions = {
+            on: [0, 0, 0, 255],
+            off: [255, 255, 255, 255]
+        };
+        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        // Buttons
+        let that = this;
+        this.playPauseButton.onclick = async function () {
+            engine.setPaused(!engine.isPaused());
+        };
+        this.reloadButton.onclick = async function () {
+            engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
+            (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
+        };
+        this.urlButton.onclick = async function () {
+            navigator.clipboard.writeText((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game));
+        };
+        this.qrButton.onclick = async function () {
+            that.qrCanvas.toBlob(function (blob) {
+                if (blob !== null) {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    navigator.clipboard.write([item]);
+                }
+                else {
+                    throw "Blob was null, could not copy QR Image to clipboard";
+                }
+            });
+        };
+    }
+}
+
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/sprite.ts":
+/*!***********************!*\
+  !*** ./src/sprite.ts ***!
   \***********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -230,15 +334,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Sprite: () => (/* binding */ Sprite)
 /* harmony export */ });
-/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render */ "./src/render.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_2__);
 
 
 
-
 class Sprite {
+    char;
+    color;
+    wrap;
+    compact;
     #x;
     #y;
     #px;
@@ -296,16 +403,10 @@ class Sprite {
     #getBodyY() {
         return this.#y - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
     }
-    #getEntityXFromBody() {
-        return this.#physBody.position.x + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
-    }
-    #getEntityYFromBody() {
-        return this.#physBody.position.y + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
-    }
     set x(value) {
         this.#x = value;
         if (this.#physBody) {
-            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.#physBody, {x: this.#getBodyX(), y: this.#getBodyY()});
+            matter_js__WEBPACK_IMPORTED_MODULE_2__.Body.setPosition(this.#physBody, { x: this.#getBodyX(), y: this.#getBodyY() });
             //Matter.Body.setVelocity(this.#physBody, {x: 0, y: 0})
         }
     }
@@ -315,7 +416,7 @@ class Sprite {
     set y(value) {
         this.#y = value;
         if (this.#physBody) {
-            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setPosition(this.#physBody, {x: this.#getBodyX(), y: this.#getBodyY()});
+            matter_js__WEBPACK_IMPORTED_MODULE_2__.Body.setPosition(this.#physBody, { x: this.#getBodyX(), y: this.#getBodyY() });
             //Matter.Body.setVelocity(this.#physBody, {x: 0, y: 0})
         }
     }
@@ -343,7 +444,7 @@ class Sprite {
         return this.#physWantsBody;
     }
     set static(value) {
-        this.#physIsStatic = value
+        this.#physIsStatic = value;
         if (this.#physBody) {
             this.#physBody.isStatic = value;
         }
@@ -352,7 +453,7 @@ class Sprite {
         return this.#physIsStatic;
     }
     set sensor(value) {
-        this.#physIsSensor = value
+        this.#physIsSensor = value;
         if (this.#physBody) {
             this.#physBody.isSensor = value;
         }
@@ -378,7 +479,7 @@ class Sprite {
                 return this.#physVelX;
             }
             if (this.#physBody !== null) {
-                return this.#physBody.velocity.x
+                return this.#physBody.velocity.x;
             }
         }
         return 0;
@@ -392,7 +493,7 @@ class Sprite {
                 return this.#physVelY;
             }
             if (this.#physBody !== null) {
-                return this.#physBody.velocity.y
+                return this.#physBody.velocity.y;
             }
         }
         return 0;
@@ -413,25 +514,25 @@ class Sprite {
         // Remove body if wanted or width/height is wrong
         if (this.#physBody !== null && (!this.#physWantsBody || this.#physWantsWidth !== this.#physWidth || this.#physWantsHeight !== this.#physHeight)) {
             // Destroy body
-            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.remove(matterEngine.world, this.#physBody);
+            matter_js__WEBPACK_IMPORTED_MODULE_2__.Composite.remove(matterEngine.world, this.#physBody);
             this.#physBody = null;
         }
         // Check if the body needs to be created
         if (this.#physWantsBody && this.#physBody === null) {
             // Create Body
             const options = {
-                inertia: Infinity,// Prevent rotation
+                inertia: Infinity, // Prevent rotation
                 restitution: 1.0,
                 frictionAir: 0.0,
                 friction: 0.0,
                 isSensor: this.#physIsSensor,
                 isStatic: this.#physIsStatic,
                 plugin: { drag: this.#physIsDrag }
-            }
-            this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_2___default().Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
+            };
+            this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_2__.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
             this.#physWidth = this.#physWantsWidth;
             this.#physHeight = this.#physWantsHeight;
-            matter_js__WEBPACK_IMPORTED_MODULE_2___default().Composite.add(matterEngine.world, this.#physBody);
+            matter_js__WEBPACK_IMPORTED_MODULE_2__.Composite.add(matterEngine.world, this.#physBody);
         }
         if (this.#physBody) {
             if (this.#physVelX !== null || this.#physVelY !== null) {
@@ -442,7 +543,7 @@ class Sprite {
                     this.#physVelY = this.#physBody.velocity.y;
                 }
                 const newVel = { x: this.#physVelX, y: this.#physVelY };
-                matter_js__WEBPACK_IMPORTED_MODULE_2___default().Body.setVelocity(this.#physBody, newVel);
+                matter_js__WEBPACK_IMPORTED_MODULE_2__.Body.setVelocity(this.#physBody, newVel);
             }
         }
         this.#physVelX = null;
@@ -450,21 +551,22 @@ class Sprite {
     }
     postPhysicsUpdate(matterEngine) {
         if (this.#physBody) {
-            this.#x = this.#getEntityXFromBody();
-            this.#y = this.#getEntityYFromBody();
+            this.#x = this.#physBody.position.x + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#px - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
+            this.#y = this.#physBody.position.y + _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * this.#py - _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH * 0.5;
         }
     }
     draw(context, viewOffset) {
-        const codePoints = [...this.char].map(c => c.codePointAt(0));
-        _render_js__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
+        const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
+        _render__WEBPACK_IMPORTED_MODULE_0__["default"].draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact);
     }
 }
 
+
 /***/ }),
 
-/***/ "./src/spriteDragConstraint.js":
+/***/ "./src/spriteDragConstraint.ts":
 /*!*************************************!*\
-  !*** ./src/spriteDragConstraint.js ***!
+  !*** ./src/spriteDragConstraint.ts ***!
   \*************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -476,123 +578,83 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
 
-
-var SpriteDragConstraint = {};
-
-SpriteDragConstraint.create = function(engine, canvas) {
-    var mouse = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Mouse.create(canvas);
-    var constraint = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Constraint.create({ 
-        label: 'Sprite Drag Constraint',
-        pointA: mouse.position,
-        pointB: { x: 0, y: 0 },
-        length: 0.01, 
-        stiffness: 0.1,
-        angularStiffness: 1,
-        render: {
-            strokeStyle: '#90EE90',
-            lineWidth: 3
-        }
-    });
-
-    var spriteDragConstraint  = {
-        type: 'spriteDragConstraint',
-        mouse: mouse,
-        element: canvas,
-        body: null,
-        constraint: constraint,
-        collisionFilter: {
+class SpriteDragConstraint {
+    type;
+    mouse;
+    element;
+    constraint;
+    collisionFilter;
+    constructor(engine, canvas) {
+        this.type = 'spriteDragConstraint';
+        this.mouse = matter_js__WEBPACK_IMPORTED_MODULE_0__.Mouse.create(canvas);
+        this.element = canvas;
+        this.constraint = matter_js__WEBPACK_IMPORTED_MODULE_0__.Constraint.create({
+            label: 'Sprite Drag Constraint',
+            pointA: this.mouse.position,
+            pointB: { x: 0, y: 0 },
+            length: 0.01,
+            stiffness: 0.1,
+            render: {
+                strokeStyle: '#90EE90',
+                lineWidth: 3
+            }
+        });
+        this.collisionFilter = {
             category: 0x0001,
             mask: 0xFFFFFFFF,
             group: 0
-        }
-    };
-
-    matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.on(engine, 'beforeUpdate', function() {
-        var allBodies = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite.allBodies(engine.world);
-        SpriteDragConstraint.update(spriteDragConstraint, allBodies);
-        SpriteDragConstraint._triggerEvents(spriteDragConstraint);
-    });
-
-    return spriteDragConstraint;
-};
-
-/**
- * Updates the given mouse constraint.
- * @private
- * @method update
- * @param {SpriteDragConstraint} spriteDragConstraint
- * @param {body[]} bodies
- */
-SpriteDragConstraint.update = function(spriteDragConstraint, bodies) {
-    var mouse = spriteDragConstraint.mouse,
-        constraint = spriteDragConstraint.constraint,
-        body = spriteDragConstraint.body;
-    if (mouse.button === 0) {
-        if (!constraint.bodyB) {
-            for (var i = 0; i < bodies.length; i++) {
-                body = bodies[i];
-                if (body.plugin.drag 
-                        && matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bounds.contains(body.bounds, mouse.position) 
-                        && matter_js__WEBPACK_IMPORTED_MODULE_0___default().Detector.canCollide(body.collisionFilter, spriteDragConstraint.collisionFilter)) {
-                    
-                    for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
-                        var part = body.parts[j];
-                        if (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Vertices.contains(part.vertices, mouse.position)) {
-                            constraint.pointA = mouse.position;
-                            constraint.bodyB = spriteDragConstraint.body = body;
-                            constraint.pointB = { x: mouse.position.x - body.position.x, y: mouse.position.y - body.position.y };
-                            constraint.angleB = body.angle;
-                            
-                            matter_js__WEBPACK_IMPORTED_MODULE_0___default().Sleeping.set(body, false);
-                            matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.trigger(spriteDragConstraint, 'startdrag', { mouse: mouse, body: body });
-
-                            break;
+        };
+        let that = this;
+        matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.on(engine, 'beforeUpdate', function () {
+            var allBodies = matter_js__WEBPACK_IMPORTED_MODULE_0__.Composite.allBodies(engine.world);
+            that.#update(allBodies);
+            //that.#triggerEvents();
+        });
+    }
+    #update(bodies) {
+        if (this.mouse.button === 0) { // If button down
+            if (!this.constraint.bodyB) { // If there is no body constrained
+                for (let body of bodies) {
+                    // Broad phase
+                    if (body.plugin.drag
+                        && matter_js__WEBPACK_IMPORTED_MODULE_0__.Bounds.contains(body.bounds, this.mouse.position)
+                        && matter_js__WEBPACK_IMPORTED_MODULE_0__.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
+                        // Narrow phase
+                        for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
+                            var part = body.parts[j];
+                            if (matter_js__WEBPACK_IMPORTED_MODULE_0__.Vertices.contains(part.vertices, this.mouse.position)) {
+                                // Start drag
+                                this.constraint.pointA = this.mouse.position;
+                                this.constraint.bodyB = body;
+                                this.constraint.pointB = { x: this.mouse.position.x - body.position.x, y: this.mouse.position.y - body.position.y };
+                                //this.constraint.angleB = body.angle;
+                                matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(body, false);
+                                matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.trigger(this, 'startdrag', { mouse: this.mouse, body: body });
+                                break;
+                            }
                         }
                     }
                 }
             }
-        } else {
-            matter_js__WEBPACK_IMPORTED_MODULE_0___default().Sleeping.set(constraint.bodyB, false);
-            constraint.pointA = mouse.position;
+            else { // If there is a body constrained
+                matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(this.constraint.bodyB, false);
+                this.constraint.pointA = this.mouse.position;
+            }
         }
-    } else {
-        constraint.bodyB = spriteDragConstraint.body = null;
-        constraint.pointB = null;
-
-        if (body)
-            matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.trigger(spriteDragConstraint, 'enddrag', { mouse: mouse, body: body });
+        else if (this.constraint.bodyB) { // If button released and a body is being dragged
+            matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.trigger(this, 'enddrag', { mouse: this.mouse, body: this.constraint.bodyB });
+            this.constraint.bodyB = null;
+        }
     }
-};
-
-/**
- * Triggers mouse constraint events.
- * @method _triggerEvents
- * @private
- * @param {mouse} spriteDragConstraint
- */
-SpriteDragConstraint._triggerEvents = function(spriteDragConstraint) {
-    var mouse = spriteDragConstraint.mouse,
-        mouseEvents = mouse.sourceEvents;
-
-    if (mouseEvents.mousemove)
-        matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.trigger(spriteDragConstraint, 'mousemove', { mouse: mouse });
-
-    if (mouseEvents.mousedown)
-        matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.trigger(spriteDragConstraint, 'mousedown', { mouse: mouse });
-
-    if (mouseEvents.mouseup)
-        matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events.trigger(spriteDragConstraint, 'mouseup', { mouse: mouse });
-
-    // reset the mouse state ready for the next step
-    matter_js__WEBPACK_IMPORTED_MODULE_0___default().Mouse.clearSourceEvents(mouse);
-};
+    ;
+}
 
 
 /***/ }),
 
-/***/ "./src/util.js":
+/***/ "./src/util.ts":
 /*!*********************!*\
-  !*** ./src/util.js ***!
+  !*** ./src/util.ts ***!
   \*********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -606,17 +668,15 @@ __webpack_require__.r(__webpack_exports__);
 function getPointerPos(canvas, event) {
     const canvasScaleX = canvas.offsetWidth / canvas.width;
     const canvasScaleY = canvas.offsetHeight / canvas.height;
-    const x = Math.floor(event.offsetX / canvasScaleX)
-    const y = Math.floor(event.offsetY / canvasScaleY)
+    const x = Math.floor(event.offsetX / canvasScaleX);
+    const y = Math.floor(event.offsetY / canvasScaleY);
     return { x: x, y: y };
 }
-
 function pixelToTile(coords) {
     return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
 }
-
 function clamp(number, min, max) {
-  return Math.max(min, Math.min(number, max));
+    return Math.max(min, Math.min(number, max));
 }
 
 
@@ -633,4 +693,4 @@ function clamp(number, min, max) {
 /***/ })
 
 }]);
-//# sourceMappingURL=src_engine_js.bundle.js.map
+//# sourceMappingURL=src_player_ts.bundle.js.map

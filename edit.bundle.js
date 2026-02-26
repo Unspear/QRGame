@@ -2,111 +2,25 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/benchmark.js":
-/*!**************************!*\
-  !*** ./src/benchmark.js ***!
-  \**************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
-/* harmony import */ var _compressor_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./compressor.js */ "./src/compressor.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor_js__WEBPACK_IMPORTED_MODULE_2__]);
-var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_compressor_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_async_dependencies_result__[0];
-
-
-const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_1__["default"];
-
-
-const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
-
-class StreamCompressor {
-    constructor(algorithm) {
-        this.#algorithm = algorithm;
-    }
-    async compress(data) {
-        const stream = new Blob([data]).stream();
-        const compressedStream = stream.pipeThrough(new CompressionStream(this.#algorithm));
-        return await new Response(compressedStream).bytes();
-    }
-    async decompress(data) {
-        const stream = new Blob([data]).stream();
-        const decompressedStream = stream.pipeThrough(new DecompressionStream(this.#algorithm));
-        return await new Response(decompressedStream).bytes();
-    }
-    toString() {
-        return "web " + this.#algorithm;
-    }
-    #algorithm
-}
-
-const compressors = [
-    new StreamCompressor("deflate-raw"),
-    new StreamCompressor("gzip"),
-    new StreamCompressor("deflate"),
-];
-
-/* harmony default export */ async function __WEBPACK_DEFAULT_EXPORT__(game) {
-        console.log(JSON.stringify(game));
-        const gameData = game.toData();
-        const results = {};
-        results["raw"] = gameData.length;
-        for (const c of compressors) {
-            const compressed = await c.compress(gameData);
-            results[c.toString()] = compressed.length;
-        }
-        const fflateOpts = {level: 9, mem: 8};
-        const fflateOptsDict = {level: 9, mem: 8, dictionary: new TextEncoder().encode(LUA_KEYWORDS)};
-        results["fflate gzip"] = fflate__WEBPACK_IMPORTED_MODULE_0__.gzipSync(gameData, fflateOpts).length;
-        results["fflate gzip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.gzipSync(gameData, fflateOptsDict).length;
-        results["fflate zip"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zipSync(gameData, fflateOpts).length;
-        results["fflate zip w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zipSync(gameData, fflateOptsDict).length;
-        results["fflate zlib"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zlibSync(gameData, fflateOpts).length;
-        results["fflate zlib w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.zlibSync(gameData, fflateOptsDict).length;
-        results["fflate deflate"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOpts).length;
-        results["fflate deflate w/dict"] = fflate__WEBPACK_IMPORTED_MODULE_0__.deflateSync(gameData, fflateOptsDict).length;
-        results["brotli"] = brotli.compress(gameData, {quality: 11}).length;
-        results["ppmd"] = _compressor_js__WEBPACK_IMPORTED_MODULE_2__.compress(gameData).length;
-        console.table(results);
-}
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } }, 1);
-
-/***/ }),
-
-/***/ "./src/edit.js":
+/***/ "./src/edit.ts":
 /*!*********************!*\
-  !*** ./src/edit.js ***!
+  !*** ./src/edit.ts ***!
   \*********************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _style_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./style.css */ "./src/style.css");
+/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
 /* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
 /* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
 /* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
 /* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
-/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _engine_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./engine.js */ "./src/engine.js");
-/* harmony import */ var _editor_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./editor.js */ "./src/editor.js");
-/* harmony import */ var _benchmark_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./benchmark.js */ "./src/benchmark.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./pwa.js */ "./src/pwa.js");
-/* harmony import */ var _pwa_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_pwa_js__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var _pack_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./pack.js */ "./src/pack.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_benchmark_js__WEBPACK_IMPORTED_MODULE_9__, _pack_js__WEBPACK_IMPORTED_MODULE_11__]);
-([_benchmark_js__WEBPACK_IMPORTED_MODULE_9__, _pack_js__WEBPACK_IMPORTED_MODULE_11__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-
-
-
-
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./editor */ "./src/editor.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./player */ "./src/player.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_7__, _player__WEBPACK_IMPORTED_MODULE_8__]);
+([_pack__WEBPACK_IMPORTED_MODULE_7__, _player__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -116,70 +30,33 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_ben
 
 
 // DOM
-
-const gameCanvas = document.getElementById('game-canvas');
 const codeContent = document.getElementById('tab-content-code');
-const reloadButton = document.getElementById('reload-button');
-const urlButton = document.getElementById('url-button');
-const qrButton = document.getElementById('qr-button');
-const qrCanvas = document.getElementById('qr-canvas');
-
-// Script Editor
+// Load game from URL into editor
+let game = (0,_pack__WEBPACK_IMPORTED_MODULE_7__.urlToGame)();
 let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
     extensions: [codemirror__WEBPACK_IMPORTED_MODULE_2__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_3__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__.lua)],
     parent: codeContent
-})
-function gameToEditor(game) {
-    const transaction = scriptInput.state.update({changes: {
-        from: 0, 
-        to: scriptInput.state.doc.length, 
+});
+const transaction = scriptInput.state.update({ changes: {
+        from: 0,
+        to: scriptInput.state.doc.length,
         insert: game.script
-    }});
-    scriptInput.update([transaction]);
-}
+    } });
+scriptInput.update([transaction]);
+const editor = new _editor__WEBPACK_IMPORTED_MODULE_6__.Editor(game.tileMap);
 function editorToGame() {
-    return new _game_js__WEBPACK_IMPORTED_MODULE_6__.Game(scriptInput.state.doc.toString(), editor.tileMap);
+    return new _game__WEBPACK_IMPORTED_MODULE_5__.Game(scriptInput.state.doc.toString(), editor.tileMap);
 }
-// Editor
-const editor = new _editor_js__WEBPACK_IMPORTED_MODULE_8__.Editor();
-// Engine
-const engine = new _engine_js__WEBPACK_IMPORTED_MODULE_7__.Engine(gameCanvas);
-let game = (0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.urlToGame)();
-gameToEditor(game);
-// (could load the game directly here but want to make sure the editor works properly)
-engine.play(editorToGame());
-const qrGenerateOptions = {
-    minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_5__.correction.L
-}
-const qrImageOptions = {
-    on: [0, 0, 0, 255],
-    off: [255, 255, 255, 255]
-}
-;(0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
+const player = new _player__WEBPACK_IMPORTED_MODULE_8__.Player(editorToGame);
 
-// Buttons
-reloadButton.onclick = async function(){
-    engine.play(editorToGame());
-    (0,lean_qr__WEBPACK_IMPORTED_MODULE_5__.generate)((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(qrCanvas, qrImageOptions);
-    (0,_benchmark_js__WEBPACK_IMPORTED_MODULE_9__["default"])(engine.game);
-};
-urlButton.onclick = async function(){
-    navigator.clipboard.writeText((0,_pack_js__WEBPACK_IMPORTED_MODULE_11__.gameToUrl)(engine.game));
-};
-qrButton.onclick = async function(){
-    qrCanvas.toBlob(function(blob) { 
-        const item = new ClipboardItem({ "image/png": blob });
-        navigator.clipboard.write([item]); 
-    });
-}
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
-/***/ "./src/editor.js":
+/***/ "./src/editor.ts":
 /*!***********************!*\
-  !*** ./src/editor.js ***!
+  !*** ./src/editor.ts ***!
   \***********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -187,30 +64,47 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Editor: () => (/* binding */ Editor)
 /* harmony export */ });
-/* harmony import */ var _camera_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera.js */ "./src/camera.js");
-/* harmony import */ var _game_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game.js */ "./src/game.js");
-/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./render.js */ "./src/render.js");
-/* harmony import */ var _tile_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tile.js */ "./src/tile.js");
-/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util.js */ "./src/util.js");
-
-
-
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util */ "./src/util.ts");
 
 
 
 class Editor {
-    constructor() {
+    canvas;
+    widthInput;
+    heightInput;
+    changeSizeButton;
+    charInput;
+    colorInput;
+    invertedInput;
+    leftButton;
+    upButton;
+    rightButton;
+    downButton;
+    exportButton;
+    importButton;
+    ctx;
+    placingTiles;
+    camera;
+    tileMap;
+    constructor(tileMap) {
         this.canvas = document.getElementById('editor-canvas');
-        this.charInput = document.getElementById('editor-char-input');;
+        this.widthInput = document.getElementById('tilemap-width');
+        this.heightInput = document.getElementById('tilemap-height');
+        this.changeSizeButton = document.getElementById('tilemap-change-size');
+        this.charInput = document.getElementById('editor-char-input');
         this.colorInput = document.getElementById('editor-color-input');
         this.invertedInput = document.getElementById('editor-invert-input');
         this.leftButton = document.getElementById('left-button');
         this.upButton = document.getElementById('up-button');
         this.rightButton = document.getElementById('right-button');
         this.downButton = document.getElementById('down-button');
+        this.exportButton = document.getElementById('export-button');
+        this.importButton = document.getElementById('import-button');
         this.ctx = this.canvas.getContext('2d');
         this.placingTiles = false;
-        this.camera = new _camera_js__WEBPACK_IMPORTED_MODULE_0__.Camera();
+        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_0__.Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
@@ -232,12 +126,56 @@ class Editor {
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
-        this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
-        this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
-        this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
-        this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
-        this.tileMap = new _tile_js__WEBPACK_IMPORTED_MODULE_3__.TileMap({ w: 32, h: 32 });
+        this.changeSizeButton.onclick = function () {
+            // Make new tilemap with new size and copy data
+            const newDim = that.getAndValidateDimensionsFromInput();
+            const newTileMap = new _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap(newDim);
+            for (let y = 0; y < newDim.h; y++) {
+                for (let x = 0; x < newDim.w; x++) {
+                    const coords = { x: x, y: y };
+                    const getTileResult = that.tileMap.getTile(coords);
+                    if (getTileResult !== null) {
+                        newTileMap.setTile(coords, getTileResult);
+                    }
+                }
+            }
+            that.tileMap = newTileMap;
+            that.draw();
+        };
+        this.leftButton.onclick = function () { that.camera.x -= 64; that.updateCamera(); };
+        this.upButton.onclick = function () { that.camera.y -= 64; that.updateCamera(); };
+        this.rightButton.onclick = function () { that.camera.x += 64; that.updateCamera(); };
+        this.downButton.onclick = function () { that.camera.y += 64; that.updateCamera(); };
+        this.exportButton.onclick = function () {
+            let serialised = JSON.stringify(that.tileMap);
+            navigator.clipboard.writeText(serialised);
+        };
+        this.importButton.onclick = async function () {
+            try {
+                let serialised = JSON.parse(await navigator.clipboard.readText());
+                that.tileMap = _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap.Copy(serialised);
+            }
+            catch (err) {
+                alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?");
+            }
+        };
+        if (tileMap === null) {
+            this.tileMap = new _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap(this.getAndValidateDimensionsFromInput());
+        }
+        else {
+            this.tileMap = tileMap;
+            this.widthInput.valueAsNumber = tileMap.dim.w;
+            this.heightInput.valueAsNumber = tileMap.dim.h;
+        }
         this.draw();
+    }
+    getAndValidateDimensionsFromInput() {
+        const newDim = { w: this.widthInput.valueAsNumber, h: this.heightInput.valueAsNumber };
+        newDim.w = _util__WEBPACK_IMPORTED_MODULE_2__.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
+        newDim.h = _util__WEBPACK_IMPORTED_MODULE_2__.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
+        this.widthInput.valueAsNumber = newDim.w;
+        this.heightInput.valueAsNumber = newDim.h;
+        return newDim;
     }
     setTileFromEvent(event) {
         // Get array of codepoints
@@ -252,11 +190,11 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let pixel = _util_js__WEBPACK_IMPORTED_MODULE_4__.getPointerPos(this.canvas, event);
+        let pixel = _util__WEBPACK_IMPORTED_MODULE_2__.getPointerPos(this.canvas, event);
         let viewOffset = this.camera.getViewOffset();
         pixel.x -= viewOffset.x;
         pixel.y -= viewOffset.y;
-        let coords = _util_js__WEBPACK_IMPORTED_MODULE_4__.pixelToTile(pixel);
+        let coords = _util__WEBPACK_IMPORTED_MODULE_2__.pixelToTile(pixel);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
@@ -274,6 +212,7 @@ class Editor {
         this.tileMap.draw(this.ctx, this.camera.getViewOffset());
     }
 }
+
 
 /***/ })
 
@@ -692,7 +631,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-b166e9","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452","src_style_css-src_pack_js-src_pwa_js","src_engine_js"], () => (__webpack_require__("./src/edit.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","src_page_js-src_pack_ts","src_player_ts"], () => (__webpack_require__("./src/edit.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

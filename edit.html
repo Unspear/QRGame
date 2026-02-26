@@ -5,41 +5,35 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-b166e9.bundle.js"></script><script defer src="vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js-node_modules-131452.bundle.js"></script><script defer src="src_style_css-src_pack_js-src_pwa_js.bundle.js"></script><script defer src="src_engine_js.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="d18af635b16961150e6d.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="3de0dbada69323d7b522.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
     <nav>
-    <ul>
-        <li><a href="index.html">Index</a></li>
-        <li><a href="play.html">Play</a></li>
-        <li><a href="edit.html">Edit</a></li>
-    </ul>
+    <div>
+        <a href="index.html">Index</a>
+        <a href="play.html">Play</a>
+        <a href="edit.html">Edit</a>
+        <a href="test.html">Test</a>
+    </div>
 </nav>
     <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <div class="tabs">
+    <my-tabs name="tab">
       <!-- Radio Buttons -->
-      <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
-      <label for="tab-play">Play</label>
-
-      <input type="radio" name="tab" id="tab-share" autocomplete="off">
-      <label for="tab-share">Share</label>
-
-      
-
-      <input type="radio" name="tab" id="tab-edit" autocomplete="off">
-      <label for="tab-edit">Tilemap</label>
-
-      <input type="radio" name="tab" id="tab-code" autocomplete="off">
-      <label for="tab-code">Code</label>
-
-      
-
+      <div class="tabs">
+        <div tabHeader="play">Play</div>
+        
+        <div tabHeader="edit">Tilemap</div>
+        <div tabHeader="code">Code</div>
+        
+        <div tabHeader="share" style="flex-grow: 0;"><img src="./icon-16.png"></div>
+      </div>
       <!-- Tab Content -->
-      <div class="tab-content" id="tab-content-play">
-          <button id="reload-button">Reload Game</button>
+      <div tabContent="play" id="tab-content-play">
+          <button class="square-button" id="play-pause-button">⏯</button>
+          <button class="square-button" id="reload-button">↻</button>
           <canvas id="game-canvas" width="192" height="256"></canvas>
       </div>
 
-      <div class="tab-content" id="tab-content-share">
+      <div tabContent="share" id="tab-content-share">
         <p>
           <button id="url-button">URL to Clipboard</button>
           <button id="qr-button">QR to Clipboard</button>
@@ -49,34 +43,52 @@
       
       
 
-      <div class="tab-content" id="tab-content-edit">
-          <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
-          <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
-          <br>
-          <label for="editor-color-input">Color:</label>
-          <select id="editor-color-input">
-            <option value="0">White</option>
-            <option value="1">Grey</option>
-            <option value="2">Red</option>
-            <option value="3">Orange</option>
-            <option value="4">Yellow</option>
-            <option value="5">Green</option>
-            <option value="6">Blue</option>
-            <option value="7">Magenta</option>
-          </select>
-          <br>
-          <label for="editor-invert-input">Inverted:</label>
-          <input type="checkbox" id="editor-invert-input">
-          <br>
-          <canvas id="editor-canvas" width="192" height="256"></canvas>
-          <br>
-          <button id="left-button">←</button>
-          <button id="up-button">↑</button>
-          <button id="right-button">→</button>
-          <button id="down-button">↓</button>
+      <div tabContent="edit" id="tab-content-edit">
+        <my-tabs name="tab">
+          <div class="tabs">
+            <div tabHeader="settings">⚙️</div>
+            <div tabHeader="draw">✎</div>
+          </div>
+          <div tabContent="settings">
+            <label for="tilemap-width">Dimensions:</label>
+            <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
+            <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
+            <button class="small-button" id="tilemap-change-size">Apply</button>
+          </div>
+          <div tabContent="draw">
+            <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
+            <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
+            <br>
+            <label for="editor-color-input">Color:</label>
+            <select id="editor-color-input">
+              <option value="0">White</option>
+              <option value="1">Grey</option>
+              <option value="2">Red</option>
+              <option value="3">Orange</option>
+              <option value="4">Yellow</option>
+              <option value="5">Green</option>
+              <option value="6">Blue</option>
+              <option value="7">Magenta</option>
+            </select>
+            <br>
+            <label for="editor-invert-input">Inverted:</label>
+            <input type="checkbox" id="editor-invert-input">
+          </div>
+        </my-tabs>
+        <canvas id="editor-canvas" width="192" height="256"></canvas>
+        <p>
+          <button class="square-button" id="left-button">←</button>
+          <button class="square-button" id="up-button">↑</button>
+          <button class="square-button" id="down-button">↓</button>
+          <button class="square-button" id="right-button">→</button>
+        </p>
+        <p>
+          <button id="export-button">Export to Clipboard</button>
+          <button id="import-button">Import from Clipboard</button>
+        </p>
       </div>
 
-      <div class="tab-content" id="tab-content-code">
+      <div tabContent="code" id="tab-content-code">
           <!-- Code editor will be inserted here from JS -->
       </div>
 

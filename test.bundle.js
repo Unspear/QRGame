@@ -2,26 +2,246 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/play.ts":
+/***/ "./src/games/pong.ts":
+/*!***************************!*\
+  !*** ./src/games/pong.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tile */ "./src/tile.ts");
+
+
+let script = `-- Paddles
+local top = createSprite('----', 8, 96, 32)
+top.width = 32
+top.physics = true
+top.static = true
+local bottom = copySprite(top)
+bottom.y = 256 - 32
+-- Ball
+local ball = createSprite('⬤', 4, 96, 128)
+ball.width = 16
+ball.physics = true
+-- Control Paddles
+function drag(pos)
+  local x = math.min(math.max(pos.x, 32), 192-32)
+  if pos.y < 64 then
+    top.x = x
+  elseif pos.y > (256-64) then
+    bottom.x = x 
+  end
+end
+-- Score
+top.score = 0
+bottom.score = 0
+local topScore = createSprite('', 12, 20, 4)
+topScore.px = 0
+topScore.py = 0
+local bottomScore = createSprite('', 12, 192-20, 256-4)
+bottomScore.px = 1
+bottomScore.py = 1
+-- Update score and reset ball
+function newRound()
+    topScore.char = tostring(top.score)
+    bottomScore.char = tostring(bottom.score)
+    ball.x = 96
+    local dirY = math.random(0, 1)*2-1
+    ball.y = 128-dirY*64
+    ball.velY = dirY*3
+    ball.velX = (math.random(0, 1)*2-1)*1.5
+end
+newRound()
+-- Frame
+function frame()
+    if ball.y < 0 then
+        top.score = top.score + 1
+        newRound()
+    end
+    if ball.y > 256 then
+        bottom.score = bottom.score + 1
+        newRound()
+    end
+end`;
+let tiles = '{"dim":{"w":12,"h":16},"tileData":{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,1,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9]}}';
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap.Copy(JSON.parse(tiles)));
+}
+
+
+/***/ }),
+
+/***/ "./src/library.ts":
+/*!************************!*\
+  !*** ./src/library.ts ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _games_pong__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/pong */ "./src/games/pong.ts");
+
+
+const games = {
+    "none": new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
+    "pong": (0,_games_pong__WEBPACK_IMPORTED_MODULE_1__["default"])()
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
+
+
+/***/ }),
+
+/***/ "./src/test.ts":
 /*!*********************!*\
-  !*** ./src/play.ts ***!
+  !*** ./src/test.ts ***!
   \*********************/
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
-/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./player */ "./src/player.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_player__WEBPACK_IMPORTED_MODULE_1__, _pack__WEBPACK_IMPORTED_MODULE_2__]);
-([_player__WEBPACK_IMPORTED_MODULE_1__, _pack__WEBPACK_IMPORTED_MODULE_2__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _library__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./library */ "./src/library.ts");
+/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
+/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
+/* harmony import */ var _compressor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compressor */ "./src/compressor.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__]);
+([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
-const player = new _player__WEBPACK_IMPORTED_MODULE_1__.Player(_pack__WEBPACK_IMPORTED_MODULE_2__.urlToGame);
+
+const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_3__["default"];
+
+
+
+const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
+function basicGameToData(game) {
+    return new TextEncoder().encode(JSON.stringify(game));
+}
+function basicGameFromData(data) {
+    if (data === null)
+        return new _game__WEBPACK_IMPORTED_MODULE_5__.Game();
+    const string = new TextDecoder().decode(data);
+    if (string.length === 0)
+        return new _game__WEBPACK_IMPORTED_MODULE_5__.Game();
+    const parsed = JSON.parse(string);
+    return new _game__WEBPACK_IMPORTED_MODULE_5__.Game(parsed.script, parsed.tileMap);
+}
+class StreamCompressor {
+    constructor(algorithm) {
+        this.#algorithm = algorithm;
+    }
+    async compress(data) {
+        const stream = new Blob([data]).stream();
+        const compressedStream = stream.pipeThrough(new CompressionStream(this.#algorithm));
+        return await new Response(compressedStream).bytes();
+    }
+    async decompress(data) {
+        const stream = new Blob([data]).stream();
+        const decompressedStream = stream.pipeThrough(new DecompressionStream(this.#algorithm));
+        return await new Response(decompressedStream).bytes();
+    }
+    toString() {
+        return "web " + this.#algorithm;
+    }
+    #algorithm;
+}
+const compressors = [
+    new StreamCompressor("deflate-raw"),
+    new StreamCompressor("gzip"),
+    new StreamCompressor("deflate"),
+];
+const fflateOpts = {
+    level: 9,
+    mem: 8
+};
+const fflateOptsDict = {
+    level: 9,
+    mem: 8,
+    dictionary: new TextEncoder().encode(LUA_KEYWORDS)
+};
+async function benchmarkGame(game) {
+    //console.log(JSON.stringify(game));
+    const gameData = basicGameToData(game);
+    const results = [];
+    results.push(["raw", gameData.length]);
+    for (const c of compressors) {
+        const compressed = await c.compress(gameData);
+        results.push([c.toString(), compressed.length]);
+    }
+    results.push(["fflate gzip", fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOpts).length]);
+    results.push(["fflate gzip w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOptsDict).length]);
+    results.push(["fflate zlib", fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOpts).length]);
+    results.push(["fflate zlib w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOptsDict).length]);
+    results.push(["fflate deflate", fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOpts).length]);
+    results.push(["fflate deflate w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOptsDict).length]);
+    results.push(["brotli", brotli.compress(gameData, { quality: 11 }).length]);
+    results.push(["ppmd", _compressor__WEBPACK_IMPORTED_MODULE_4__.compress(gameData).length]);
+    results.push(["packGame", (0,_pack__WEBPACK_IMPORTED_MODULE_6__.packGame)(game).length]);
+    return results;
+}
+const benchmarkButton = document.getElementById('benchmark-button');
+const benchmarkTable = document.getElementById('benchmark-table');
+benchmarkButton.onclick = async function () {
+    let promises = [];
+    for (const key in _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+        promises.push(benchmarkGame(_library__WEBPACK_IMPORTED_MODULE_1__["default"][key]));
+    }
+    let values = await Promise.all(promises);
+    // Add column header
+    let firstRow = benchmarkTable.insertRow();
+    for (const entry of values[0]) {
+        let cell = firstRow.insertCell();
+        cell.innerHTML = entry[0];
+    }
+    // Make data
+    for (const rowData of values) {
+        let row = benchmarkTable.insertRow();
+        for (const entry of rowData) {
+            let cell = row.insertCell();
+            cell.innerHTML = entry[1].toString();
+        }
+    }
+    // Remove button
+    benchmarkButton.remove();
+};
+const ppmdButton = document.getElementById('ppmd-button');
+const ppmdParagraph = document.getElementById('ppmd-paragraph');
+function testPPMd(data) {
+    let dataOut = _compressor__WEBPACK_IMPORTED_MODULE_4__.decompress(_compressor__WEBPACK_IMPORTED_MODULE_4__.compress(data));
+    if (data.byteLength !== dataOut.byteLength) {
+        return false;
+    }
+    for (let i = 0; i < data.byteLength; i++) {
+        if (data[i] != dataOut[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+ppmdButton.onclick = async function () {
+    const zeroBytes = testPPMd(new Uint8Array(10240));
+    const pong = testPPMd(basicGameToData(_library__WEBPACK_IMPORTED_MODULE_1__["default"]["pong"]));
+    const randomBytesArray = new Uint8Array(10240);
+    for (let i = 0; i < randomBytesArray.byteLength; i++) {
+        randomBytesArray[i] = Math.floor(Math.random() * 256);
+    }
+    const randomBytes = testPPMd(randomBytesArray);
+    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Pong: ${pong} <br> Random Bytes: ${randomBytes}`;
+    ppmdButton.remove();
+};
 
 __webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
+} catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ })
 
@@ -176,36 +396,6 @@ __webpack_async_result__();
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/create fake namespace object */
-/******/ 	(() => {
-/******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
-/******/ 		var leafPrototypes;
-/******/ 		// create a fake namespace object
-/******/ 		// mode & 1: value is a module id, require it
-/******/ 		// mode & 2: merge all properties of value into the ns
-/******/ 		// mode & 4: return value when already ns object
-/******/ 		// mode & 16: return value when it's Promise-like
-/******/ 		// mode & 8|1: behave like require
-/******/ 		__webpack_require__.t = function(value, mode) {
-/******/ 			if(mode & 1) value = this(value);
-/******/ 			if(mode & 8) return value;
-/******/ 			if(typeof value === 'object' && value) {
-/******/ 				if((mode & 4) && value.__esModule) return value;
-/******/ 				if((mode & 16) && typeof value.then === 'function') return value;
-/******/ 			}
-/******/ 			var ns = Object.create(null);
-/******/ 			__webpack_require__.r(ns);
-/******/ 			var def = {};
-/******/ 			leafPrototypes = leafPrototypes || [null, getProto({}), getProto([]), getProto(getProto)];
-/******/ 			for(var current = mode & 2 && value; (typeof current == 'object' || typeof current == 'function') && !~leafPrototypes.indexOf(current); current = getProto(current)) {
-/******/ 				Object.getOwnPropertyNames(current).forEach((key) => (def[key] = () => (value[key])));
-/******/ 			}
-/******/ 			def['default'] = () => (value);
-/******/ 			__webpack_require__.d(ns, def);
-/******/ 			return ns;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -215,37 +405,6 @@ __webpack_async_result__();
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/ensure chunk */
-/******/ 	(() => {
-/******/ 		__webpack_require__.f = {};
-/******/ 		// This file contains only the entry chunk.
-/******/ 		// The chunk loading function for additional chunks
-/******/ 		__webpack_require__.e = (chunkId) => {
-/******/ 			return Promise.all(Object.keys(__webpack_require__.f).reduce((promises, key) => {
-/******/ 				__webpack_require__.f[key](chunkId, promises);
-/******/ 				return promises;
-/******/ 			}, []));
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/get javascript chunk filename */
-/******/ 	(() => {
-/******/ 		// This function allow to reference async chunks
-/******/ 		__webpack_require__.u = (chunkId) => {
-/******/ 			// return url for filenames based on template
-/******/ 			return "" + chunkId + ".bundle.js";
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/get mini-css chunk filename */
-/******/ 	(() => {
-/******/ 		// This function allow to reference async chunks
-/******/ 		__webpack_require__.miniCssF = (chunkId) => {
-/******/ 			// return url for filenames based on template
-/******/ 			return undefined;
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -264,51 +423,6 @@ __webpack_async_result__();
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/load script */
-/******/ 	(() => {
-/******/ 		var inProgress = {};
-/******/ 		var dataWebpackPrefix = "qrgame:";
-/******/ 		// loadScript function to load a script via script tag
-/******/ 		__webpack_require__.l = (url, done, key, chunkId) => {
-/******/ 			if(inProgress[url]) { inProgress[url].push(done); return; }
-/******/ 			var script, needAttach;
-/******/ 			if(key !== undefined) {
-/******/ 				var scripts = document.getElementsByTagName("script");
-/******/ 				for(var i = 0; i < scripts.length; i++) {
-/******/ 					var s = scripts[i];
-/******/ 					if(s.getAttribute("src") == url || s.getAttribute("data-webpack") == dataWebpackPrefix + key) { script = s; break; }
-/******/ 				}
-/******/ 			}
-/******/ 			if(!script) {
-/******/ 				needAttach = true;
-/******/ 				script = document.createElement('script');
-/******/ 		
-/******/ 				script.charset = 'utf-8';
-/******/ 				if (__webpack_require__.nc) {
-/******/ 					script.setAttribute("nonce", __webpack_require__.nc);
-/******/ 				}
-/******/ 				script.setAttribute("data-webpack", dataWebpackPrefix + key);
-/******/ 		
-/******/ 				script.src = url;
-/******/ 			}
-/******/ 			inProgress[url] = [done];
-/******/ 			var onScriptComplete = (prev, event) => {
-/******/ 				// avoid mem leaks in IE.
-/******/ 				script.onerror = script.onload = null;
-/******/ 				clearTimeout(timeout);
-/******/ 				var doneFns = inProgress[url];
-/******/ 				delete inProgress[url];
-/******/ 				script.parentNode && script.parentNode.removeChild(script);
-/******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
-/******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
-/******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
-/******/ 			script.onload = onScriptComplete.bind(null, script.onload);
-/******/ 			needAttach && document.head.appendChild(script);
-/******/ 		};
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
@@ -353,47 +467,10 @@ __webpack_async_result__();
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			"play": 0
+/******/ 			"test": 0
 /******/ 		};
 /******/ 		
-/******/ 		__webpack_require__.f.j = (chunkId, promises) => {
-/******/ 				// JSONP chunk loading for javascript
-/******/ 				var installedChunkData = __webpack_require__.o(installedChunks, chunkId) ? installedChunks[chunkId] : undefined;
-/******/ 				if(installedChunkData !== 0) { // 0 means "already installed".
-/******/ 		
-/******/ 					// a Promise means "currently loading".
-/******/ 					if(installedChunkData) {
-/******/ 						promises.push(installedChunkData[2]);
-/******/ 					} else {
-/******/ 						if(true) { // all chunks have JS
-/******/ 							// setup Promise in chunk cache
-/******/ 							var promise = new Promise((resolve, reject) => (installedChunkData = installedChunks[chunkId] = [resolve, reject]));
-/******/ 							promises.push(installedChunkData[2] = promise);
-/******/ 		
-/******/ 							// start chunk loading
-/******/ 							var url = __webpack_require__.p + __webpack_require__.u(chunkId);
-/******/ 							// create error before stack unwound to get useful stacktrace later
-/******/ 							var error = new Error();
-/******/ 							var loadingEnded = (event) => {
-/******/ 								if(__webpack_require__.o(installedChunks, chunkId)) {
-/******/ 									installedChunkData = installedChunks[chunkId];
-/******/ 									if(installedChunkData !== 0) installedChunks[chunkId] = undefined;
-/******/ 									if(installedChunkData) {
-/******/ 										var errorType = event && (event.type === 'load' ? 'missing' : event.type);
-/******/ 										var realSrc = event && event.target && event.target.src;
-/******/ 										error.message = 'Loading chunk ' + chunkId + ' failed.\n(' + errorType + ': ' + realSrc + ')';
-/******/ 										error.name = 'ChunkLoadError';
-/******/ 										error.type = errorType;
-/******/ 										error.request = realSrc;
-/******/ 										installedChunkData[1](error);
-/******/ 									}
-/******/ 								}
-/******/ 							};
-/******/ 							__webpack_require__.l(url, loadingEnded, "chunk-" + chunkId, chunkId);
-/******/ 						}
-/******/ 					}
-/******/ 				}
-/******/ 		};
+/******/ 		// no chunk on demand loading
 /******/ 		
 /******/ 		// no prefetching
 /******/ 		
@@ -440,9 +517,9 @@ __webpack_async_result__();
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f","src_page_js-src_pack_ts","src_player_ts"], () => (__webpack_require__("./src/play.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js","src_page_js-src_pack_ts"], () => (__webpack_require__("./src/test.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=play.bundle.js.map
+//# sourceMappingURL=test.bundle.js.map

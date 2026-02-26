@@ -22,7 +22,6 @@ p {
     margin-bottom: 1rem;
 }
 button {
-    width: 18ch;
     font-size: 1.2rem;
     line-height: 1.5;
     text-wrap: nowrap;
@@ -38,33 +37,50 @@ canvas {
     outline: 2px solid grey;
     background: white;
 }
-
-.tabs .tab-content {
-	display: none;
+nav div {
+    display: flex;
+    background-color: darkslategray;
+    color: white;
 }
-
-.tabs input[id="tab-play"]:checked ~ #tab-content-play {
-	display: block;
+nav div a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
 }
-
-.tabs input[id="tab-share"]:checked ~ #tab-content-share {
-	display: block;
+table, th, td {
+  border: 1px solid;
 }
-
-.tabs input[id="tab-edit"]:checked ~ #tab-content-edit {
-	display: block;
+table {
+    border-collapse: collapse;
 }
-
-.tabs input[id="tab-code"]:checked ~ #tab-content-code {
-	display: block;
-}
-nav ul {
-    list-style-type:none;
-    margin: 0.5rem;
+.square-button {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto;
     padding: 0;
+    display: inline-block;
+    text-align: center;
 }
-nav li {
-    display: inline;
+.small-button {
+    font-size: 1rem;
+}
+.tabs {
+    display: flex;
+}
+div[tabHeader] {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0.1em;
+    padding: 0.2em;
+    background-color: lightgrey;
+    cursor: pointer;
+}
+div[tabHeader]:hover {
+    background-color: lightblue;
+}
+div[tabHeader][selected] {
+    background-color: blue;
+    color: white;
 }
 
-/*# sourceMappingURL=d18af635b16961150e6d.css.map*/
+/*# sourceMappingURL=3de0dbada69323d7b522.css.map*/
