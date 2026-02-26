@@ -1,5 +1,4 @@
-import './style.css';
-import './pwa'
+import './page'
 import {gameToUrl} from './pack'
 import library from './library'
 

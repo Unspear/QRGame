@@ -34,26 +34,6 @@ canvas {
     outline: 2px solid grey;
     background: white;
 }
-
-.tabs .tab-content {
-	display: none;
-}
-
-.tabs input[id="tab-play"]:checked ~ #tab-content-play {
-	display: block;
-}
-
-.tabs input[id="tab-share"]:checked ~ #tab-content-share {
-	display: block;
-}
-
-.tabs input[id="tab-edit"]:checked ~ #tab-content-edit {
-	display: block;
-}
-
-.tabs input[id="tab-code"]:checked ~ #tab-content-code {
-	display: block;
-}
 nav ul {
     list-style-type:none;
     margin: 0.5rem;
@@ -78,4 +58,22 @@ table {
 }
 .small-button {
     font-size: 1rem;
+}
+.tabs {
+    display: flex;
+}
+div[tabHeader] {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0.1em;
+    padding: 0.2em;
+    background-color: lightgrey;
+    cursor: pointer;
+}
+div[tabHeader]:hover {
+    background-color: lightblue;
+}
+div[tabHeader][selected] {
+    background-color: blue;
+    color: white;
 }

@@ -9,32 +9,24 @@
   <body>
     <%= require('html-loader!./navbar.html').default %>
     <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <div class="tabs">
+    <my-tabs name="tab">
       <!-- Radio Buttons -->
-      <input type="radio" name="tab" id="tab-play" autocomplete="off" checked>
-      <label for="tab-play">Play</label>
-
-      <input type="radio" name="tab" id="tab-share" autocomplete="off">
-      <label for="tab-share">Share</label>
-
-      <% if (isEditor) { %>
-
-      <input type="radio" name="tab" id="tab-edit" autocomplete="off">
-      <label for="tab-edit">Tilemap</label>
-
-      <input type="radio" name="tab" id="tab-code" autocomplete="off">
-      <label for="tab-code">Code</label>
-
-      <% } %>
-
+      <div class="tabs">
+        <div tabHeader="play">Play</div>
+        <div tabHeader="share">Share</div>
+        <% if (isEditor) { %>
+        <div tabHeader="edit">Tilemap</div>
+        <div tabHeader="code">Code</div>
+        <% } %>
+      </div>
       <!-- Tab Content -->
-      <div class="tab-content" id="tab-content-play">
+      <div tabContent="play" id="tab-content-play">
           <button class="square-button" id="play-pause-button">⏯</button>
           <button class="square-button" id="reload-button">↻</button>
           <canvas id="game-canvas" width="192" height="256"></canvas>
       </div>
 
-      <div class="tab-content" id="tab-content-share">
+      <div tabContent="share" id="tab-content-share">
         <p>
           <button id="url-button">URL to Clipboard</button>
           <button id="qr-button">QR to Clipboard</button>
@@ -44,7 +36,7 @@
       
       <% if (isEditor) { %>
 
-      <div class="tab-content" id="tab-content-edit">
+      <div tabContent="edit" id="tab-content-edit">
           <label for="tilemap-width">Dimensions:</label>
           <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
           <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
@@ -81,7 +73,7 @@
           </p>
       </div>
 
-      <div class="tab-content" id="tab-content-code">
+      <div tabContent="code" id="tab-content-code">
           <!-- Code editor will be inserted here from JS -->
       </div>
 

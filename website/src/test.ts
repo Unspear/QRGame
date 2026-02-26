@@ -1,5 +1,4 @@
-import './style.css';
-import './pwa'
+import './page'
 import library from './library'
 import * as fflate from 'fflate'
 import brotliPromise from 'brotli-wasm';

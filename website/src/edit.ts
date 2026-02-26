@@ -1,10 +1,9 @@
-import './style.css';
+import './page';
 import {EditorView, basicSetup} from 'codemirror'
 import {StreamLanguage} from '@codemirror/language'
 import {lua} from '@codemirror/legacy-modes/mode/lua'
 import {Game} from './game'
 import {Editor} from './editor'
-import './pwa'
 import {urlToGame} from './pack'
 import { Player } from './player';
 
