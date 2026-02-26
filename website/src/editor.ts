@@ -1,6 +1,4 @@
 import { Camera } from './camera';
-import { Game } from './game'
-import charRenderer from './render'
 import { TileMap } from './tile'
 import * as Util from './util'
 

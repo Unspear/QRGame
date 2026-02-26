@@ -25,6 +25,7 @@ export class Engine {
     spriteDragConstraint!: SpriteDragConstraint;
     lua!: LuaEngine;
     luaFrame!: () => void;
+    paused: boolean;
     constructor(gameCanvas: HTMLCanvasElement) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
@@ -57,6 +58,7 @@ export class Engine {
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
+        this.paused = true;
     }
     async play(game: Game) {
         // Setup (should override any existing values)
@@ -101,13 +103,19 @@ export class Engine {
         // Start
         requestAnimationFrame(this.#mainLoop.bind(this));
     }
+    setPaused(value: boolean) {
+        this.paused = value;
+    }
+    isPaused(): boolean {
+        return this.paused;
+    }
     #mainLoop(timestamp: DOMHighResTimeStamp) {
         if (this.#previousTimestamp === undefined) {
             this.#previousTimestamp = timestamp;
         }
         const elapsed = timestamp - this.#previousTimestamp;
         if (elapsed > FRAME_TIME_MS) {
-            if (this.gameCanvas.checkVisibility()) {
+            if (this.gameCanvas.checkVisibility() && !this.paused) {
                 // Frame
                 if (this.luaFrame)
                 {

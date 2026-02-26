@@ -69,3 +69,11 @@ table, th, td {
 table {
     border-collapse: collapse;
 }
+.square-button {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto;
+    padding: 0;
+    display: inline-block;
+    text-align: center;
+}
