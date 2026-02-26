@@ -79,11 +79,3 @@ table {
 .small-button {
     font-size: 1rem;
 }
-.controller-container {
-    
-}
-.controller-column {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
