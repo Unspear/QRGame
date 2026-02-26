@@ -9,8 +9,8 @@ top.static = true
 local bottom = copySprite(top)
 bottom.y = 256 - 32
 -- Ball
-local ball = createSprite('O', 8, 96, 128)
-ball.width = 8
+local ball = createSprite('⬤', 4, 96, 128)
+ball.width = 16
 ball.physics = true
 -- Control Paddles
 function drag(pos)
