@@ -8,6 +8,7 @@ import * as Util from './util'
 import SamJs from 'sam-js'
 import { Camera } from './camera'
 import { Game } from './game'
+import glueUrl from 'wasmoon/dist/glue.wasm';
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
@@ -29,7 +30,7 @@ export class Engine {
     constructor(gameCanvas: HTMLCanvasElement) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
-        this.luaFactory = new LuaFactory();
+        this.luaFactory = new LuaFactory(glueUrl);
         this.ctx = gameCanvas.getContext('2d')!;
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
