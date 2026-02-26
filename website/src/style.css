@@ -34,13 +34,15 @@ canvas {
     outline: 2px solid grey;
     background: white;
 }
-nav ul {
-    list-style-type:none;
-    margin: 0.5rem;
-    padding: 0;
+nav div {
+    display: flex;
+    background-color: darkslategray;
+    color: white;
 }
-nav li {
-    display: inline;
+nav div a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
 }
 table, th, td {
   border: 1px solid;

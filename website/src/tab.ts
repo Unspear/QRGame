@@ -5,9 +5,8 @@ customElements.define('my-tabs',
       super();
       let name = this.getAttribute("name");
 
-      const headers = Array.from(this.querySelectorAll(`div[tabHeader]`)) as HTMLElement[];
-      const contents = Array.from(this.querySelectorAll(`div[tabContent]`)) as HTMLElement[];
-
+      const headers = Array.from(this.querySelectorAll(`div[tabHeader]`)).filter(el => el.closest('my-tabs') === this) as HTMLElement[];
+      const contents = Array.from(this.querySelectorAll(`div[tabContent]`)).filter(el => el.closest('my-tabs') === this) as HTMLElement[];
       let that = this;
       function selectTab(header: HTMLElement) {
         let tabId = header.getAttribute("tabHeader");

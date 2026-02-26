@@ -13,11 +13,11 @@
       <!-- Radio Buttons -->
       <div class="tabs">
         <div tabHeader="play">Play</div>
-        <div tabHeader="share">Share</div>
         <% if (isEditor) { %>
         <div tabHeader="edit">Tilemap</div>
         <div tabHeader="code">Code</div>
         <% } %>
+        <div tabHeader="share" style="flex-grow: 0;"><img src="./icon-16.png"></div>
       </div>
       <!-- Tab Content -->
       <div tabContent="play" id="tab-content-play">
@@ -37,40 +37,48 @@
       <% if (isEditor) { %>
 
       <div tabContent="edit" id="tab-content-edit">
-          <label for="tilemap-width">Dimensions:</label>
-          <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
-          <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
-          <button class="small-button" id="tilemap-change-size">Apply</button>
-          <br>
-          <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
-          <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
-          <br>
-          <label for="editor-color-input">Color:</label>
-          <select id="editor-color-input">
-            <option value="0">White</option>
-            <option value="1">Grey</option>
-            <option value="2">Red</option>
-            <option value="3">Orange</option>
-            <option value="4">Yellow</option>
-            <option value="5">Green</option>
-            <option value="6">Blue</option>
-            <option value="7">Magenta</option>
-          </select>
-          <br>
-          <label for="editor-invert-input">Inverted:</label>
-          <input type="checkbox" id="editor-invert-input">
-          <br>
-          <canvas id="editor-canvas" width="192" height="256"></canvas>
-          <p>
-            <button class="square-button" id="left-button">←</button>
-            <button class="square-button" id="up-button">↑</button>
-            <button class="square-button" id="down-button">↓</button>
-            <button class="square-button" id="right-button">→</button>
-          </p>
-          <p>
-            <button id="export-button">Export to Clipboard</button>
-            <button id="import-button">Import from Clipboard</button>
-          </p>
+        <my-tabs name="tab">
+          <div class="tabs">
+            <div tabHeader="settings">⚙️</div>
+            <div tabHeader="draw">✎</div>
+          </div>
+          <div tabContent="settings">
+            <label for="tilemap-width">Dimensions:</label>
+            <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
+            <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
+            <button class="small-button" id="tilemap-change-size">Apply</button>
+          </div>
+          <div tabContent="draw">
+            <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
+            <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
+            <br>
+            <label for="editor-color-input">Color:</label>
+            <select id="editor-color-input">
+              <option value="0">White</option>
+              <option value="1">Grey</option>
+              <option value="2">Red</option>
+              <option value="3">Orange</option>
+              <option value="4">Yellow</option>
+              <option value="5">Green</option>
+              <option value="6">Blue</option>
+              <option value="7">Magenta</option>
+            </select>
+            <br>
+            <label for="editor-invert-input">Inverted:</label>
+            <input type="checkbox" id="editor-invert-input">
+          </div>
+        </my-tabs>
+        <canvas id="editor-canvas" width="192" height="256"></canvas>
+        <p>
+          <button class="square-button" id="left-button">←</button>
+          <button class="square-button" id="up-button">↑</button>
+          <button class="square-button" id="down-button">↓</button>
+          <button class="square-button" id="right-button">→</button>
+        </p>
+        <p>
+          <button id="export-button">Export to Clipboard</button>
+          <button id="import-button">Import from Clipboard</button>
+        </p>
       </div>
 
       <div tabContent="code" id="tab-content-code">
