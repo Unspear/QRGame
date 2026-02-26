@@ -45,13 +45,10 @@
       <% if (isEditor) { %>
 
       <div class="tab-content" id="tab-content-edit">
-          <label for="tilemap-width">Tilemap Width:</label>
+          <label for="tilemap-width">Dimensions:</label>
           <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
-          <br>
-          <label for="tilemap-height">Tilemap Height:</label>
           <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
-          <br>
-          <button id="tilemap-change-size">Change Size</button>
+          <button class="small-button" id="tilemap-change-size">Apply</button>
           <br>
           <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
           <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
@@ -73,12 +70,10 @@
           <br>
           <canvas id="editor-canvas" width="192" height="256"></canvas>
           <p>
-            <button id="up-button">↑</button>
-            <br>
-            <button id="left-button">←</button>
-            <button id="right-button">→</button>
-            <br>
-            <button id="down-button">↓</button>
+            <button class="square-button" id="left-button">←</button>
+            <button class="square-button" id="up-button">↑</button>
+            <button class="square-button" id="down-button">↓</button>
+            <button class="square-button" id="right-button">→</button>
           </p>
           <p>
             <button id="export-button">Export to Clipboard</button>

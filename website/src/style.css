@@ -19,7 +19,6 @@ p {
     margin-bottom: 1rem;
 }
 button {
-    width: 18ch;
     font-size: 1.2rem;
     line-height: 1.5;
     text-wrap: nowrap;
@@ -76,4 +75,15 @@ table {
     padding: 0;
     display: inline-block;
     text-align: center;
+}
+.small-button {
+    font-size: 1rem;
+}
+.controller-container {
+    
+}
+.controller-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
