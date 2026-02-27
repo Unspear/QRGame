@@ -11,43 +11,17 @@
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
-/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
-/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./editor */ "./src/editor.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
-/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./player */ "./src/player.ts");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_7__, _player__WEBPACK_IMPORTED_MODULE_8__]);
-([_pack__WEBPACK_IMPORTED_MODULE_7__, _player__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./editor */ "./src/editor.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./player */ "./src/player.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_2__, _player__WEBPACK_IMPORTED_MODULE_3__]);
+([_pack__WEBPACK_IMPORTED_MODULE_2__, _player__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
 
-
-
-
-
-// DOM
-const codeContent = document.getElementById('tab-content-code');
-// Load game from URL into editor
-let game = (0,_pack__WEBPACK_IMPORTED_MODULE_7__.urlToGame)();
-let scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
-    extensions: [codemirror__WEBPACK_IMPORTED_MODULE_2__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_3__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_4__.lua)],
-    parent: codeContent
-});
-const transaction = scriptInput.state.update({ changes: {
-        from: 0,
-        to: scriptInput.state.doc.length,
-        insert: game.script
-    } });
-scriptInput.update([transaction]);
-const editor = new _editor__WEBPACK_IMPORTED_MODULE_6__.Editor(game.tileMap);
-function editorToGame() {
-    return new _game__WEBPACK_IMPORTED_MODULE_5__.Game(scriptInput.state.doc.toString(), editor.tileMap);
-}
-const player = new _player__WEBPACK_IMPORTED_MODULE_8__.Player(editorToGame);
+const editor = new _editor__WEBPACK_IMPORTED_MODULE_1__.Editor((0,_pack__WEBPACK_IMPORTED_MODULE_2__.urlToGame)());
+const player = new _player__WEBPACK_IMPORTED_MODULE_3__.Player(() => editor.getGame());
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
@@ -64,13 +38,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Editor: () => (/* binding */ Editor)
 /* harmony export */ });
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
-/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util */ "./src/util.ts");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
+/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
+/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./src/util.ts");
+
+
+
+
 
 
 
 class Editor {
+    scriptInput;
     canvas;
     widthInput;
     heightInput;
@@ -78,6 +62,7 @@ class Editor {
     charInput;
     colorInput;
     invertedInput;
+    solidCharInput;
     leftButton;
     upButton;
     rightButton;
@@ -88,23 +73,36 @@ class Editor {
     placingTiles;
     camera;
     tileMap;
-    constructor(tileMap) {
+    constructor(inputGame) {
+        //Code
+        const codeContent = document.getElementById('tab-content-code');
+        this.scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_0__.EditorView({
+            extensions: [codemirror__WEBPACK_IMPORTED_MODULE_1__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_2__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__.lua)],
+            parent: codeContent
+        });
+        //Canvas
         this.canvas = document.getElementById('editor-canvas');
+        //Settings
         this.widthInput = document.getElementById('tilemap-width');
         this.heightInput = document.getElementById('tilemap-height');
         this.changeSizeButton = document.getElementById('tilemap-change-size');
+        //Drawing
         this.charInput = document.getElementById('editor-char-input');
         this.colorInput = document.getElementById('editor-color-input');
         this.invertedInput = document.getElementById('editor-invert-input');
+        //Physics
+        this.solidCharInput = document.getElementById('editor-solid-input');
+        //Camera
         this.leftButton = document.getElementById('left-button');
         this.upButton = document.getElementById('up-button');
         this.rightButton = document.getElementById('right-button');
         this.downButton = document.getElementById('down-button');
+        //Import/Export
         this.exportButton = document.getElementById('export-button');
         this.importButton = document.getElementById('import-button');
         this.ctx = this.canvas.getContext('2d');
         this.placingTiles = false;
-        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_0__.Camera();
+        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.placingTiles = true;
@@ -129,7 +127,7 @@ class Editor {
         this.changeSizeButton.onclick = function () {
             // Make new tilemap with new size and copy data
             const newDim = that.getAndValidateDimensionsFromInput();
-            const newTileMap = new _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap(newDim);
+            const newTileMap = new _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap(newDim);
             for (let y = 0; y < newDim.h; y++) {
                 for (let x = 0; x < newDim.w; x++) {
                     const coords = { x: x, y: y };
@@ -153,33 +151,37 @@ class Editor {
         this.importButton.onclick = async function () {
             try {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
-                that.tileMap = _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap.Copy(serialised);
+                that.tileMap = _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap.Copy(serialised);
             }
             catch (err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?");
             }
         };
-        if (tileMap === null) {
-            this.tileMap = new _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap(this.getAndValidateDimensionsFromInput());
-        }
-        else {
-            this.tileMap = tileMap;
-            this.widthInput.valueAsNumber = tileMap.dim.w;
-            this.heightInput.valueAsNumber = tileMap.dim.h;
-        }
+        // Load input game into editor
+        const transaction = this.scriptInput.state.update({ changes: {
+                from: 0,
+                to: this.scriptInput.state.doc.length,
+                insert: inputGame.script
+            } });
+        this.scriptInput.update([transaction]);
+        this.tileMap = _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap.Copy(inputGame.tileMap);
+        this.widthInput.valueAsNumber = this.tileMap.dim.w;
+        this.heightInput.valueAsNumber = this.tileMap.dim.h;
+        this.solidCharInput.value = String.fromCodePoint(...this.tileMap.solidTiles);
+        // Update Canvas
         this.draw();
     }
     getAndValidateDimensionsFromInput() {
         const newDim = { w: this.widthInput.valueAsNumber, h: this.heightInput.valueAsNumber };
-        newDim.w = _util__WEBPACK_IMPORTED_MODULE_2__.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
-        newDim.h = _util__WEBPACK_IMPORTED_MODULE_2__.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
+        newDim.w = _util__WEBPACK_IMPORTED_MODULE_7__.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
+        newDim.h = _util__WEBPACK_IMPORTED_MODULE_7__.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
         this.widthInput.valueAsNumber = newDim.w;
         this.heightInput.valueAsNumber = newDim.h;
         return newDim;
     }
     setTileFromEvent(event) {
         // Get array of codepoints
-        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0));
+        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0) ?? 0);
         let color = parseInt(this.colorInput.value);
         const inverted = this.invertedInput.checked;
         if (inverted) {
@@ -190,11 +192,11 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let pixel = _util__WEBPACK_IMPORTED_MODULE_2__.getPointerPos(this.canvas, event);
+        let pixel = _util__WEBPACK_IMPORTED_MODULE_7__.getPointerPos(this.canvas, event);
         let viewOffset = this.camera.getViewOffset();
         pixel.x -= viewOffset.x;
         pixel.y -= viewOffset.y;
-        let coords = _util__WEBPACK_IMPORTED_MODULE_2__.pixelToTile(pixel);
+        let coords = _util__WEBPACK_IMPORTED_MODULE_7__.pixelToTile(pixel);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
@@ -210,6 +212,10 @@ class Editor {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+    }
+    getGame() {
+        this.tileMap.solidTiles = _util__WEBPACK_IMPORTED_MODULE_7__.stringToCodePoints(this.solidCharInput.value);
+        return new _game__WEBPACK_IMPORTED_MODULE_5__.Game(this.scriptInput.state.doc.toString(), this.tileMap);
     }
 }
 

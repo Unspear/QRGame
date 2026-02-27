@@ -652,36 +652,6 @@ class SpriteDragConstraint {
 
 /***/ }),
 
-/***/ "./src/util.ts":
-/*!*********************!*\
-  !*** ./src/util.ts ***!
-  \*********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   clamp: () => (/* binding */ clamp),
-/* harmony export */   getPointerPos: () => (/* binding */ getPointerPos),
-/* harmony export */   pixelToTile: () => (/* binding */ pixelToTile)
-/* harmony export */ });
-function getPointerPos(canvas, event) {
-    const canvasScaleX = canvas.offsetWidth / canvas.width;
-    const canvasScaleY = canvas.offsetHeight / canvas.height;
-    const x = Math.floor(event.offsetX / canvasScaleX);
-    const y = Math.floor(event.offsetY / canvasScaleY);
-    return { x: x, y: y };
-}
-function pixelToTile(coords) {
-    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
-}
-function clamp(number, min, max) {
-    return Math.max(min, Math.min(number, max));
-}
-
-
-/***/ }),
-
 /***/ "?3254":
 /*!*********************!*\
   !*** url (ignored) ***!

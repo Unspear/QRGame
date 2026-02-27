@@ -161,9 +161,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
 /* harmony import */ var _compressor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./compressor */ "./src/compressor.ts");
 /* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util */ "./src/util.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor__WEBPACK_IMPORTED_MODULE_1__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 _compressor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_async_dependencies_result__[0];
+
 
 
 
@@ -252,6 +254,7 @@ function packGame(game) {
     packer.packString(game.script);
     packer.packUint16(game.tileMap.dim.w);
     packer.packUint16(game.tileMap.dim.h);
+    packer.packString(String.fromCodePoint(...game.tileMap.solidTiles));
     packer.packString(String.fromCodePoint(...game.tileMap.tileData.codePoint));
     packer.packUint8Array(Uint8Array.from(game.tileMap.tileData.color));
     return packer.getUint8Array();
@@ -261,10 +264,12 @@ function unpackGame(data) {
     const script = unpacker.unpackString();
     const tileMapDimW = unpacker.unpackUint16();
     const tileMapDimH = unpacker.unpackUint16();
+    const tileMapSolidTiles = unpacker.unpackString();
     const tileMapCodePoints = unpacker.unpackString();
     const tileMapColors = unpacker.unpackUint8Array();
     const tileMap = new _tile__WEBPACK_IMPORTED_MODULE_2__.TileMap({ w: tileMapDimW, h: tileMapDimH });
-    tileMap.tileData.codePoint = [...tileMapCodePoints].map(c => c.codePointAt(0) ?? 0);
+    tileMap.solidTiles = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapSolidTiles);
+    tileMap.tileData.codePoint = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapCodePoints);
     tileMap.tileData.color = [...tileMapColors];
     return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, tileMap);
 }
@@ -495,6 +500,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class TileMap {
     dim;
+    solidTiles;
     tileData;
     constructor(dim) {
         this.dim = dim;
@@ -502,10 +508,16 @@ class TileMap {
             codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
             color: new Array(dim.w * dim.h).fill(0)
         };
+        this.solidTiles = [];
     }
     static Copy(tileMap) {
         let copied = new TileMap(tileMap.dim);
-        copied.tileData = structuredClone(tileMap.tileData);
+        if (tileMap.tileData !== undefined) {
+            copied.tileData = structuredClone(tileMap.tileData);
+        }
+        if (tileMap.solidTiles !== undefined) {
+            copied.solidTiles = structuredClone(tileMap.solidTiles);
+        }
         return copied;
     }
     getIndex(coords) {
@@ -546,7 +558,7 @@ class TileMap {
         for (let y = 0; y < this.dim.h; y++) {
             for (let x = 0; x < this.dim.w; x++) {
                 const tile = this.getTile({ x: x, y: y });
-                if (tile.codePoint == "#".codePointAt(0)) {
+                if (this.solidTiles.includes(tile.codePoint)) {
                     const physBody = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies.rectangle((x + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, (y + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, options);
                     matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite.add(matterEngine.world, physBody);
                 }
@@ -575,6 +587,39 @@ export class TileSet {
         this.tiles = {};
     }
 } */ 
+
+
+/***/ }),
+
+/***/ "./src/util.ts":
+/*!*********************!*\
+  !*** ./src/util.ts ***!
+  \*********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clamp: () => (/* binding */ clamp),
+/* harmony export */   getPointerPos: () => (/* binding */ getPointerPos),
+/* harmony export */   pixelToTile: () => (/* binding */ pixelToTile),
+/* harmony export */   stringToCodePoints: () => (/* binding */ stringToCodePoints)
+/* harmony export */ });
+function getPointerPos(canvas, event) {
+    const canvasScaleX = canvas.offsetWidth / canvas.width;
+    const canvasScaleY = canvas.offsetHeight / canvas.height;
+    const x = Math.floor(event.offsetX / canvasScaleX);
+    const y = Math.floor(event.offsetY / canvasScaleY);
+    return { x: x, y: y };
+}
+function pixelToTile(coords) {
+    return { x: Math.floor(coords.x / 16), y: Math.floor(coords.y / 16) };
+}
+function clamp(number, min, max) {
+    return Math.max(min, Math.min(number, max));
+}
+function stringToCodePoints(string) {
+    return [...string].map(c => c.codePointAt(0) ?? 0);
+}
 
 
 /***/ })
