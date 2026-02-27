@@ -13,26 +13,33 @@ TileSet: but a tileset can also contain a TileMap which
  */
 
 type SingleTileData = {
-    codePoint?: number;
-    color?: number;
+    codePoint: number;
+    color: number;
 }
 
 export class TileMap {
     dim: Dimensions;
+    solidTiles: number[];
     tileData: {
         codePoint: number[],
         color: number[]
-    }
+    };
     constructor(dim: Dimensions) {
         this.dim = dim;
         this.tileData = {
             codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
             color: new Array(dim.w * dim.h,).fill(0)
         };
+        this.solidTiles = [];
     }
     static Copy(tileMap: TileMap): TileMap {
         let copied = new TileMap(tileMap.dim);
-        copied.tileData = structuredClone(tileMap.tileData);
+        if (tileMap.tileData !== undefined) {
+            copied.tileData = structuredClone(tileMap.tileData);
+        }
+        if (tileMap.solidTiles !== undefined) {
+            copied.solidTiles = structuredClone(tileMap.solidTiles);
+        }
         return copied;
     }
     getIndex(coords: Point): number | null {
@@ -76,7 +83,7 @@ export class TileMap {
         for (let y = 0; y < this.dim.h; y++) {
             for (let x = 0; x < this.dim.w; x++) {
                 const tile: SingleTileData = this.getTile({x: x, y: y})!;
-                if (tile.codePoint == "#".codePointAt(0)) {
+                if (this.solidTiles.includes(tile.codePoint)) {
                     const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
                     Matter.Composite.add(matterEngine.world, physBody);
                 }

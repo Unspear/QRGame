@@ -23,3 +23,7 @@ export function pixelToTile(coords: Point): Point {
 export function clamp(number: number, min: number, max: number): number {
   return Math.max(min, Math.min(number, max));
 }
+
+export function stringToCodePoints(string: string): number[] {
+    return [...string].map(c => c.codePointAt(0) ?? 0);
+}

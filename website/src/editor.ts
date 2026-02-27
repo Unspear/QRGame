@@ -1,8 +1,13 @@
+import {EditorView, basicSetup} from 'codemirror'
+import {StreamLanguage} from '@codemirror/language'
+import {lua} from '@codemirror/legacy-modes/mode/lua'
 import { Camera } from './camera';
+import { Game } from './game';
 import { TileMap } from './tile'
 import * as Util from './util'
 
 export class Editor {
+    scriptInput: EditorView;
     canvas: HTMLCanvasElement;
     widthInput: HTMLInputElement;
     heightInput: HTMLInputElement;
@@ -10,6 +15,7 @@ export class Editor {
     charInput: HTMLInputElement;
     colorInput: HTMLInputElement;
     invertedInput: HTMLInputElement;
+    solidCharInput: HTMLInputElement;
     leftButton: HTMLButtonElement;
     upButton: HTMLButtonElement;
     rightButton: HTMLButtonElement;
@@ -20,18 +26,31 @@ export class Editor {
     placingTiles: boolean;
     camera: Camera;
     tileMap: TileMap;
-    constructor(tileMap: TileMap | null) {
+    constructor(inputGame: Game) {
+        //Code
+        const codeContent = document.getElementById('tab-content-code') as HTMLElement;
+        this.scriptInput = new EditorView({
+            extensions: [basicSetup, StreamLanguage.define(lua)],
+            parent: codeContent
+        })
+        //Canvas
         this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
+        //Settings
         this.widthInput = document.getElementById('tilemap-width') as HTMLInputElement;
         this.heightInput = document.getElementById('tilemap-height') as HTMLInputElement;
         this.changeSizeButton = document.getElementById('tilemap-change-size') as HTMLButtonElement;
+        //Drawing
         this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
         this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
         this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
+        //Physics
+        this.solidCharInput = document.getElementById('editor-solid-input') as HTMLInputElement;
+        //Camera
         this.leftButton = document.getElementById('left-button') as HTMLButtonElement;
         this.upButton = document.getElementById('up-button') as HTMLButtonElement;
         this.rightButton = document.getElementById('right-button') as HTMLButtonElement;
         this.downButton = document.getElementById('down-button') as HTMLButtonElement;
+        //Import/Export
         this.exportButton = document.getElementById('export-button') as HTMLButtonElement;
         this.importButton = document.getElementById('import-button') as HTMLButtonElement;
         this.ctx = this.canvas.getContext('2d')!;
@@ -90,13 +109,18 @@ export class Editor {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
         }
-        if (tileMap === null) {
-            this.tileMap = new TileMap(this.getAndValidateDimensionsFromInput());
-        } else {
-            this.tileMap = tileMap;
-            this.widthInput.valueAsNumber = tileMap.dim.w;
-            this.heightInput.valueAsNumber = tileMap.dim.h;
-        }
+        // Load input game into editor
+        const transaction = this.scriptInput.state.update({changes: {
+            from: 0, 
+            to: this.scriptInput.state.doc.length, 
+            insert: inputGame.script
+        }});
+        this.scriptInput.update([transaction]);
+        this.tileMap = TileMap.Copy(inputGame.tileMap);
+        this.widthInput.valueAsNumber = this.tileMap.dim.w;
+        this.heightInput.valueAsNumber = this.tileMap.dim.h;
+        this.solidCharInput.value = String.fromCodePoint(...this.tileMap.solidTiles);
+        // Update Canvas
         this.draw();
     }
     getAndValidateDimensionsFromInput(): Util.Dimensions {
@@ -109,7 +133,7 @@ export class Editor {
     }
     setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
-        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0));
+        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0) ?? 0);
         let color = parseInt(this.colorInput.value);
         const inverted = this.invertedInput.checked;
         if (inverted) {
@@ -117,7 +141,7 @@ export class Editor {
         }
         if (codePoints.length == 0) {
             // Erase
-            codePoints = [' '.codePointAt(0)];
+            codePoints = [' '.codePointAt(0)!];
         }
         // Draw array to tilemap
         let pixel = Util.getPointerPos(this.canvas, event);
@@ -140,5 +164,9 @@ export class Editor {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+    }
+    getGame(): Game {
+        this.tileMap.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);
+        return new Game(this.scriptInput.state.doc.toString(), this.tileMap);
     }
 }

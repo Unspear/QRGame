@@ -41,16 +41,17 @@
           <div class="tabs">
             <div tabHeader="settings">⚙️</div>
             <div tabHeader="draw">✎</div>
+            <div tabHeader="physics">🧱</div>
           </div>
           <div tabContent="settings">
             <label for="tilemap-width">Dimensions:</label>
-            <input type="number" id="tilemap-width" min="12" max="128" step="4" value="12">
-            <input type="number" id="tilemap-height" min="16" max="128" step="4" value="16">
+            <input type="number" id="tilemap-width" min="12" max="128" step="4">
+            <input type="number" id="tilemap-height" min="16" max="128" step="4">
             <button class="small-button" id="tilemap-change-size">Apply</button>
           </div>
           <div tabContent="draw">
-            <label for="editor-char-input">Character(s):</label><!-- This is the last option so that when the on screen phone keyboard comes up it doesn't cover the other options-->
-            <input type="text" id="editor-char-input"/><!-- Max length is 2 because some codepoints need two UTF-16 chars -->
+            <label for="editor-char-input">Character(s):</label>
+            <input type="text" id="editor-char-input"/>
             <br>
             <label for="editor-color-input">Color:</label>
             <select id="editor-color-input">
@@ -66,6 +67,10 @@
             <br>
             <label for="editor-invert-input">Inverted:</label>
             <input type="checkbox" id="editor-invert-input">
+          </div>
+          <div tabContent="physics">
+            <label for="editor-solid-input">Solid Character(s):</label>
+            <input type="text" id="editor-solid-input"/>
           </div>
         </my-tabs>
         <canvas id="editor-canvas" width="192" height="256"></canvas>

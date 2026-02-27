@@ -1,6 +1,7 @@
 import {Game} from './game'
 import * as PPMd from "./compressor"
 import { TileMap } from './tile';
+import { stringToCodePoints } from './util';
 
 export class Packer {
     #buffer: ArrayBuffer;
@@ -88,6 +89,7 @@ export function packGame(game: Game): Uint8Array {
     packer.packString(game.script);
     packer.packUint16(game.tileMap.dim.w);
     packer.packUint16(game.tileMap.dim.h);
+    packer.packString(String.fromCodePoint(...game.tileMap.solidTiles));
     packer.packString(String.fromCodePoint(...game.tileMap.tileData.codePoint));
     packer.packUint8Array(Uint8Array.from(game.tileMap.tileData.color));
     return packer.getUint8Array();
@@ -98,10 +100,12 @@ export function unpackGame(data: Uint8Array): Game {
     const script = unpacker.unpackString();
     const tileMapDimW = unpacker.unpackUint16();
     const tileMapDimH = unpacker.unpackUint16();
+    const tileMapSolidTiles = unpacker.unpackString();
     const tileMapCodePoints = unpacker.unpackString();
     const tileMapColors = unpacker.unpackUint8Array();
     const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH});
-    tileMap.tileData.codePoint = [...tileMapCodePoints].map(c => c.codePointAt(0) ?? 0);
+    tileMap.solidTiles = stringToCodePoints(tileMapSolidTiles);
+    tileMap.tileData.codePoint = stringToCodePoints(tileMapCodePoints);
     tileMap.tileData.color = [...tileMapColors];
     return new Game(script, tileMap);
 }
