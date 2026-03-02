@@ -8,6 +8,7 @@
 #include "PPMdType.h"
 #include "Coder.hpp"
 #include "SubAlloc.hpp"
+#include "api.hpp"
 
 enum MR_METHOD { MRM_RESTART, MRM_CUT_OFF, MRM_FREEZE };
 
@@ -47,6 +48,7 @@ static struct SEE2_CONTEXT {// SEE-contexts for PPM-contexts with masked symbols
 	}
 } _PACK_ATTR SEE2Cont[24][32], DummySEE2Cont;
 
+
 static struct PPM_CONTEXT {// Notes:
 	BYTE NumStats, Flags;// 1. NumStats & NumMasked contain
 	WORD SummFreq;//  number of symbols minus 1
@@ -75,6 +77,8 @@ static struct PPM_CONTEXT {// Notes:
 		return (STATE&)SummFreq;
 	}
 } _PACK_ATTR* MaxContext;
+
+static_assert(sizeof(PPM_CONTEXT) == 12);
 
 #pragma pack()
 
@@ -154,6 +158,7 @@ static void _STDCALL StartModelRare(int MaxOrder, MR_METHOD MRMethod) {
 	::MRMethod = MRMethod;
 	InitSubAllocator();
 	RunLength = InitRL = -((MaxOrder < 12) ? MaxOrder : 12) - 1;
+	// Alloc root context and add order 0 for every symbol
 	MaxContext = (PPM_CONTEXT*)AllocContext();
 	MaxContext->Suffix = NULL;
 	MaxContext->SummFreq = (MaxContext->NumStats = 255) + 2;
@@ -392,6 +397,7 @@ static PPM_CONTEXT* _FASTCALL ReduceOrder(PPM_CONTEXT::STATE* p, PPM_CONTEXT* pc
 }
 
 void PPM_CONTEXT::rescale() {
+	// Frequencies have grown too large so they need to be brought down
 	UINT OldNU, Adder, EscFreq, i = NumStats;
 	STATE tmp, *p1, *p;
 	for (p = FoundState; p != Stats; p--) {
@@ -671,8 +677,10 @@ inline void PPM_CONTEXT::decodeBinSymbol(Decoder& decoder) {
 }
 
 inline void PPM_CONTEXT::update1(STATE* p) {
+	// Set FoundState to the current symbol
 	(FoundState = p)->Freq += 4;
 	SummFreq += 4;
+	// Not sure what this is doing
 	if (p[0].Freq > p[-1].Freq) {
 		SWAP(p[0], p[-1]);
 		FoundState = --p;
@@ -697,13 +705,15 @@ inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 		encoder.subRange.LowCount = 0;
 		return;
 	}
+	// Iterate and sum frequencies to determine the probability slice for this symbol
 	LoCnt = p->Freq;
 	i = NumStats;
 	PrevSuccess = 0;
 	while ((++p)->Symbol != symbol) {
 		LoCnt += p->Freq;
-		if (--i == 0) {
+		if (--i == 0) {// Reached end of stats array
 			encoder.subRange.LowCount = LoCnt;
+			// Fill CharMask with EscCount for every Symbol in Stats
 			CharMask[p->Symbol] = EscCount;
 			i = NumMasked = NumStats;
 			FoundState = NULL;
@@ -714,6 +724,7 @@ inline void PPM_CONTEXT::encodeSymbol1(Encoder& encoder, int symbol) {
 			return;
 		}
 	}
+	// The LowCount and HighCount are a the range that represents the symbol 
 	encoder.subRange.HighCount = (encoder.subRange.LowCount = LoCnt) + p->Freq;
 	update1(p);
 }
@@ -936,7 +947,7 @@ STOP_DECODING:
 }
 
 extern "C" {
-void encode(char* inputPath, char* outputPath) {
+void encode(const char* inputPath, const char* outputPath) {
 	FILE* inputFile = fopen(inputPath, "rb");
 	FILE* outputFile = fopen(outputPath, "w+b");
 	StartSubAllocator(10);
@@ -946,7 +957,7 @@ void encode(char* inputPath, char* outputPath) {
 	fclose(outputFile);
 }
 
-void decode(char* inputPath, char* outputPath) {
+void decode(const char* inputPath, const char* outputPath) {
 	FILE* inputFile = fopen(inputPath, "rb");
 	FILE* outputFile = fopen(outputPath, "w+b");
 	StartSubAllocator(10);
