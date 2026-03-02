@@ -110,17 +110,9 @@ struct Model {
 };
 
 inline void SWAP(PPM_STATE& s1, PPM_STATE& s2) {
-	WORD t1 = (WORD&)s1;
-	PPM_CONTEXT* t2 = s1.Successor;
-	(WORD&)s1 = (WORD&)s2;
-	s1.Successor = s2.Successor;
-	(WORD&)s2 = t1;
-	s2.Successor = t2;
-}
-
-inline void StateCpy(PPM_STATE& s1, const PPM_STATE& s2) {
-	(WORD&)s1 = (WORD&)s2;
-	s1.Successor = s2.Successor;
+	PPM_STATE temp = s1;
+	s1 = s2;
+	s2 = temp;
 }
 
 struct PPMD_STARTUP {
@@ -271,7 +263,7 @@ PPM_CONTEXT* Model::cutOff(PPM_CONTEXT* context, int Order) {
 			goto REMOVE;
 		} else if (i == 0) {
 			context->Flags = (context->Flags & 0x10) + 0x08 * (p->Symbol >= 0x40);
-			StateCpy(context->oneState(), *p);
+			context->oneState() = *p;
 			FreeUnits(p, tmp);
 			context->oneState().Freq = (context->oneState().Freq + 11) >> 3;
 		} else {
@@ -314,7 +306,7 @@ void Model::RestoreModelRare(PPM_CONTEXT* pc1, PPM_CONTEXT* MinContext, PPM_CONT
 		if (--(pc->NumStats) == 0) {
 			pc->Flags = (pc->Flags & 0x10) + 0x08 * (pc->Stats->Symbol >= 0x40);
 			p = pc->Stats;
-			StateCpy(pc->oneState(), *p);
+			pc->oneState() = *p;
 			SpecialFreeUnit(p);
 			pc->oneState().Freq = (pc->oneState().Freq + 11) >> 3;
 		} else {
@@ -435,11 +427,11 @@ void Model::rescale(PPM_CONTEXT* context) {
 		EscFreq -= (++p)->Freq;
 		context->SummFreq += (p->Freq = (p->Freq + Adder) >> 1);
 		if (p[0].Freq > p[-1].Freq) {
-			StateCpy(tmp, *(p1 = p));
+			tmp = *(p1 = p);
 			do {
-				StateCpy(p1[0], p1[-1]);
+				p1[0] = p1[-1];
 			} while (tmp.Freq > (--p1)[-1].Freq);
-			StateCpy(*p1, tmp);
+			*p1 = tmp;
 		}
 	} while (--i);
 	if (p->Freq == 0) {
@@ -449,13 +441,13 @@ void Model::rescale(PPM_CONTEXT* context) {
 		EscFreq += i;
 		OldNU = (context->NumStats + 2) >> 1;
 		if ((context->NumStats -= i) == 0) {
-			StateCpy(tmp, *context->Stats);
+			tmp = *context->Stats;
 			tmp.Freq = (2 * tmp.Freq + EscFreq - 1) / EscFreq;
 			if (tmp.Freq > MAX_FREQ / 3) {
 				tmp.Freq = MAX_FREQ / 3;
 			}
 			FreeUnits(context->Stats, OldNU);
-			StateCpy(context->oneState(), tmp);
+			context->oneState() = tmp;
 			context->Flags = (context->Flags & 0x10) + 0x08 * (tmp.Symbol >= 0x40);
 			FoundState = &context->oneState();
 			return;
@@ -619,7 +611,7 @@ void Model::UpdateModel(PPM_CONTEXT* MinContext) {
 			if (!p) {
 				goto RESTART_MODEL;
 			}
-			StateCpy(*p, pc1->oneState());
+			*p = pc1->oneState();
 			pc1->Stats = p;
 			if (p->Freq < MAX_FREQ / 4 - 1) {
 				p->Freq += p->Freq;
