@@ -10,7 +10,9 @@
 			"buildCommandArgs": "",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_x86" ],
-			"variables": []
+			"variables": [],
+			"enableMicrosoftCodeAnalysis": true,
+			"enableClangTidyCodeAnalysis": true
 		}
 	]
 }
