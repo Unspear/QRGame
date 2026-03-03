@@ -9,6 +9,10 @@ import SamJs from 'sam-js'
 import { Camera } from './camera'
 import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
+import PressPlay from './press-play.png';
+
+let pressPlayImage = new Image();
+pressPlayImage.src = PressPlay;
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
@@ -32,6 +36,11 @@ export class Engine {
         this.textToSpeech = new SamJs();
         this.luaFactory = new LuaFactory(glueUrl);
         this.ctx = gameCanvas.getContext('2d')!;
+        // Fill Background
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+        this.ctx.fillStyle = "white";
+        this.ctx.drawImage(pressPlayImage, 0, 0);
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);

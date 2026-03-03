@@ -23,7 +23,6 @@ export class Player {
         this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
 
         const engine = new Engine(this.canvas);
-        engine.play(gameProvider() ?? new Game());
         const qrGenerateOptions = {
             minCorrectionLevel: correction.L
         }
@@ -31,15 +30,18 @@ export class Player {
             on: [0, 0, 0, 255],
             off: [255, 255, 255, 255]
         }
-        generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
-
+        generate(gameToUrl(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         // Buttons
         let that = this;
         this.playPauseButton.onclick = async function(){
+            if (engine.game === undefined) {
+                engine.play(gameProvider() ?? new Game());
+            }
             engine.setPaused(!engine.isPaused());
         };
         this.reloadButton.onclick = async function(){
             engine.play(gameProvider() ?? new Game());
+            engine.setPaused(false);
             generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
         };
         this.urlButton.onclick = async function(){
