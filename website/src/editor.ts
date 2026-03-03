@@ -159,11 +159,11 @@ export class Editor {
         this.draw();
     }
     draw() {
-        this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+        this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
     }
     getGame(): Game {
         this.tileMap.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);

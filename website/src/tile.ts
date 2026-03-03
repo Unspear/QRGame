@@ -73,6 +73,24 @@ export class TileMap {
     draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         charRenderer.draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
+    drawOutline(ctx: CanvasRenderingContext2D, viewOffset: Point) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'white';
+        ctx.lineDashOffset = 0.5;
+        ctx.setLineDash([6, 2]);
+        ctx.beginPath();
+        const margin = 2.5;
+        const x0 = viewOffset.x - margin;
+        const x1 = viewOffset.x + this.dim.w * CHAR_WIDTH + margin;
+        const y0 = viewOffset.y - margin;
+        const y1 = viewOffset.y + this.dim.h * CHAR_WIDTH + margin;
+        ctx.lineTo(x0, y0);
+        ctx.lineTo(x1, y0);
+        ctx.lineTo(x1, y1);
+        ctx.lineTo(x0, y1);
+        ctx.closePath();
+        ctx.stroke();
+    }
     createBodies(matterEngine: Matter.Engine) {
         const options = {
             restitution: 1.0,

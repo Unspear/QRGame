@@ -132,7 +132,6 @@ export class Engine {
                     sprite.postPhysicsUpdate(this.matterEngine)
                 }
                 // Rendering
-                this.ctx.beginPath();
                 // Fill Background
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
