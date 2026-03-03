@@ -92,7 +92,9 @@ export class Engine {
             return newSprite;
         });
         this.lua.global.set('say', (string: string) => {
-            this.textToSpeech.speak(string);
+            // Replace non-ascii and control characters with space
+            const ascii = string.replace(/[^\x20-\x7E]/g, " ");
+            this.textToSpeech.speak(ascii);
         });
         this.lua.global.set('camera', this.camera);
         // Load Script
