@@ -1,10 +1,18 @@
 import png
 import unicodedataplus as ud
+from collections import Counter
+
+
+extra_chars = Counter()
+#extra_chars.update(open('kaomoji.json', 'r', encoding="utf-8").read())
+#extra_chars.update(open('emoticons.txt', 'r', encoding="utf-8").read())
+#extra_chars = set(x for x, count in extra_chars.items() if count > 4 and ud.script(x) != 'Han')
 
 blocks = set()
 with open('blocks_by_char.txt', 'r', encoding="utf-8") as file:
     for c in file.read():
         blocks.add(ud.block(c))
+        #print(c+" "+ud.block(c))
 
 unidata = {}
 lines = 0
@@ -17,9 +25,10 @@ with open('unifont.hex', 'r') as file:
         if index >= 0x0FD5 and index <= 0x0FD8:
             continue
         c = chr(index)
-        if (ud.is_extended_pictographic(c) or ud.block(c) in blocks) and ud.category(c) != 'Mn':# Mn == Non-spacing e.i. combining which won't work on a tilemap
-            unidata[index] = value
-
+        if ud.category(c) != 'Mn':# Mn == Non-spacing e.i. combining which won't work on a tilemap
+            if ud.is_extended_pictographic(c) or ud.block(c) in blocks or c in extra_chars:
+                unidata[index] = value
+            
 print("Lines:"+str(lines))
 print("Codepoints:"+str(len(unidata)))
 width = 16

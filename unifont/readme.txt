@@ -1,0 +1,1 @@
+Emoticons copied from https://www.emoticonstext.com and https://emotes.io/
