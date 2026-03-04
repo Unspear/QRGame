@@ -6,6 +6,11 @@ import { Game } from './game';
 import { TileMap } from './tile'
 import * as Util from './util'
 
+enum EditorState {
+    Brush,
+    Pipette,
+}
+
 export class Editor {
     scriptInput: EditorView;
     canvas: HTMLCanvasElement;
@@ -15,6 +20,8 @@ export class Editor {
     charInput: HTMLInputElement;
     colorInput: HTMLInputElement;
     invertedInput: HTMLInputElement;
+    invertedLabel: HTMLSpanElement;
+    pipetteButton: HTMLButtonElement;
     solidCharInput: HTMLInputElement;
     leftButton: HTMLButtonElement;
     upButton: HTMLButtonElement;
@@ -23,10 +30,12 @@ export class Editor {
     exportButton: HTMLButtonElement;
     importButton: HTMLButtonElement
     ctx: CanvasRenderingContext2D;
-    placingTiles: boolean;
+    heldDown: boolean;
     camera: Camera;
     tileMap: TileMap;
+    state: EditorState;
     constructor(inputGame: Game) {
+        this.state = EditorState.Brush;
         //Code
         const codeContent = document.getElementById('tab-content-code') as HTMLElement;
         this.scriptInput = new EditorView({
@@ -43,6 +52,8 @@ export class Editor {
         this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
         this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
         this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
+        this.invertedLabel = document.getElementById('editor-invert-label') as HTMLSpanElement;
+        this.pipetteButton = document.getElementById('editor-pipette-button') as HTMLButtonElement;
         //Physics
         this.solidCharInput = document.getElementById('editor-solid-input') as HTMLInputElement;
         //Camera
@@ -54,22 +65,32 @@ export class Editor {
         this.exportButton = document.getElementById('export-button') as HTMLButtonElement;
         this.importButton = document.getElementById('import-button') as HTMLButtonElement;
         this.ctx = this.canvas.getContext('2d')!;
-        this.placingTiles = false;
+        this.heldDown = false;
         this.camera = new Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
-            this.placingTiles = true;
-            this.setTileFromEvent(event);
-            this.draw();
-        });
-        window.addEventListener('pointerup', (event) => {
-            this.placingTiles = false;
-            this.draw();
-        });
-        this.canvas.addEventListener('pointermove', (event) => {
-            if (this.placingTiles) {
+            this.heldDown = true;
+            if (this.state === EditorState.Brush) {
                 this.setTileFromEvent(event);
                 this.draw();
+            } else {
+                this.setBrushFromEvent(event);
+            }
+        });
+        window.addEventListener('pointerup', (event) => {
+            this.heldDown = false;
+            if (this.state === EditorState.Brush) {
+                this.draw();
+            } else {
+                this.state = EditorState.Brush;
+            }
+        });
+        this.canvas.addEventListener('pointermove', (event) => {
+            if (this.heldDown) {
+                if (this.state === EditorState.Brush) {
+                    this.setTileFromEvent(event);
+                    this.draw();
+                }
             }
         });
         // Nuke default touch behaviour (pull down screen to reload)
@@ -109,6 +130,13 @@ export class Editor {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
         }
+        this.invertedLabel.classList.toggle("hidden", !this.invertedInput.checked);
+        this.invertedInput.onchange = function() {
+            that.invertedLabel.classList.toggle("hidden", !that.invertedInput.checked);
+        };
+        this.pipetteButton.onclick = function() {
+            that.state = EditorState.Pipette;
+        };
         // Load input game into editor
         const transaction = this.scriptInput.state.update({changes: {
             from: 0, 
@@ -131,6 +159,13 @@ export class Editor {
         this.heightInput.valueAsNumber = newDim.h;
         return newDim;
     }
+    getCoordFromEvent(event: PointerEvent): Util.Point {
+        let pixel = Util.getPointerPos(this.canvas, event);
+        let viewOffset = this.camera.getViewOffset();
+        pixel.x -= viewOffset.x;
+        pixel.y -= viewOffset.y;
+        return Util.pixelToTile(pixel);
+    }
     setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
         let codePoints = [...this.charInput.value].map(c => c.codePointAt(0) ?? 0);
@@ -144,14 +179,19 @@ export class Editor {
             codePoints = [' '.codePointAt(0)!];
         }
         // Draw array to tilemap
-        let pixel = Util.getPointerPos(this.canvas, event);
-        let viewOffset = this.camera.getViewOffset();
-        pixel.x -= viewOffset.x;
-        pixel.y -= viewOffset.y;
-        let coords = Util.pixelToTile(pixel);
+        let coords = this.getCoordFromEvent(event);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
+        }
+    }
+    setBrushFromEvent(event: PointerEvent) {
+        let coords = this.getCoordFromEvent(event);
+        let tileData = this.tileMap.getTile(coords);
+        if (tileData !== null) {
+            this.charInput.value = String.fromCodePoint(tileData.codePoint);
+            this.colorInput.value = (tileData.color % 8).toString();
+            this.invertedInput.checked = tileData.color > 8;
         }
     }
     updateCamera() {

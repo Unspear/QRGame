@@ -49,11 +49,9 @@
             <input type="number" id="tilemap-height" min="16" max="128" step="4">
             <button class="small-button" id="tilemap-change-size">Apply</button>
           </div>
-          <div tabContent="draw">
-            <label for="editor-char-input">Character(s):</label>
-            <input type="text" id="editor-char-input"/>
-            <br>
-            <label for="editor-color-input">Color:</label>
+          <div class="container-flex" tabContent="draw">
+            <label for="editor-char-input">Brush:</label>
+            <input type="text" id="editor-char-input" placeholder="(space)"/>
             <select id="editor-color-input">
               <option value="0">White</option>
               <option value="1">Grey</option>
@@ -64,9 +62,9 @@
               <option value="6">Blue</option>
               <option value="7">Magenta</option>
             </select>
-            <br>
-            <label for="editor-invert-input">Inverted:</label>
             <input type="checkbox" id="editor-invert-input">
+            <span id="editor-invert-label">(inverted)</span>
+            <button class="small-button" id="editor-pipette-button">⛏</button>
           </div>
           <div tabContent="physics">
             <label for="editor-solid-input">Solid Character(s):</label>

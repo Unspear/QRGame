@@ -16,7 +16,7 @@ customElements.define('my-tabs',
         });
         contents.forEach(content => {
           let visible = (content.getAttribute("tabContent") === tabId);
-          content.style.display = visible ? "block" : "none";
+          content.classList.toggle("hidden", !visible);
         });
       }
 
