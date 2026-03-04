@@ -88,6 +88,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "./node_modules/sam-js/dist/samjs.esm.min.js");
 /* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
 /* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "./node_modules/wasmoon/dist/glue.wasm");
+/* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./press-play.png */ "./src/press-play.png");
 
 
 
@@ -98,6 +99,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+let pressPlayImage = new Image();
+pressPlayImage.src = _press_play_png__WEBPACK_IMPORTED_MODULE_10__;
 class Engine {
     gameCanvas;
     textToSpeech;
@@ -120,6 +124,11 @@ class Engine {
         this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__);
         this.ctx = gameCanvas.getContext('2d');
+        // Fill Background
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
+        this.ctx.fillStyle = "white";
+        this.ctx.drawImage(pressPlayImage, 0, 0);
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event) => {
             this.downPointers.add(event.pointerId);
@@ -176,7 +185,9 @@ class Engine {
             return newSprite;
         });
         this.lua.global.set('say', (string) => {
-            this.textToSpeech.speak(string);
+            // Replace non-ascii and control characters with space
+            const ascii = string.replace(/[^\x20-\x7E]/g, " ");
+            this.textToSpeech.speak(ascii);
         });
         this.lua.global.set('camera', this.camera);
         // Load Script
@@ -215,7 +226,6 @@ class Engine {
                     sprite.postPhysicsUpdate(this.matterEngine);
                 }
                 // Rendering
-                this.ctx.beginPath();
                 // Fill Background
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
@@ -283,7 +293,6 @@ class Player {
         this.qrButton = document.getElementById('qr-button');
         this.qrCanvas = document.getElementById('qr-canvas');
         const engine = new _engine__WEBPACK_IMPORTED_MODULE_2__.Engine(this.canvas);
-        engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
         const qrGenerateOptions = {
             minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_0__.correction.L
         };
@@ -291,14 +300,18 @@ class Player {
             on: [0, 0, 0, 255],
             off: [255, 255, 255, 255]
         };
-        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         // Buttons
         let that = this;
         this.playPauseButton.onclick = async function () {
+            if (engine.game === undefined) {
+                engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
+            }
             engine.setPaused(!engine.isPaused());
         };
         this.reloadButton.onclick = async function () {
             engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
+            engine.setPaused(false);
             (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
         };
         this.urlButton.onclick = async function () {
@@ -320,6 +333,17 @@ class Player {
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/press-play.png":
+/*!****************************!*\
+  !*** ./src/press-play.png ***!
+  \****************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "c2d13a665429ea85e8de.png";
 
 /***/ }),
 

@@ -84,47 +84,50 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "3f53db599ee755d90efd.wasm",
     "revision": null
   }, {
+    "url": "5a875fe39a17f0cc9c81.wasm",
+    "revision": null
+  }, {
     "url": "84576ba241a5e4a9a110.wasm",
+    "revision": null
+  }, {
+    "url": "8ab9f6a5f4328a5e0cae.png",
     "revision": null
   }, {
     "url": "_9995.bundle.js",
     "revision": "31c7f5828c1cc95849d66c63f6e87f41"
   }, {
-    "url": "c2701bfe48f352bd883e.wasm",
-    "revision": null
-  }, {
-    "url": "d8a5c13deffe5116d1ad.png",
+    "url": "c2d13a665429ea85e8de.png",
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "77bc081f60c2f39ce8d794576b3d185f"
+    "revision": "df45790da6cf22eeb31bb349e272cfa5"
   }, {
     "url": "edit.html",
-    "revision": "1b6290ab29b8ef67eae652c8cb8cb560"
+    "revision": "e35202cbf26704ce71a132f02c88ad58"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "index.bundle.js",
-    "revision": "baf4a894f8eda3eccba41ef9f6e01ad0"
+    "revision": "37fac4c9efe2eb8b6d1340504325d920"
   }, {
     "url": "index.html",
-    "revision": "fd3516f5def414d7fab1182c65c271d5"
+    "revision": "0b544a767181eb0c9e89e4df9959096e"
   }, {
     "url": "play.bundle.js",
     "revision": "b10cc409c9ce42953ede09952f725cee"
   }, {
     "url": "play.html",
-    "revision": "a3d0f626dd719f6cb9a87991c29cc57d"
+    "revision": "ba3ce89de7ea2cb4f7aa58533c0ef2cf"
   }, {
     "url": "src_page_js-src_pack_ts.bundle.js",
-    "revision": "db07139e267305216f5085824eb19505"
+    "revision": "394631d8c6794d9ad7df92069ba0cc42"
   }, {
     "url": "src_player_ts.bundle.js",
-    "revision": "70b1dff0a12a99ceed9c18c29b9beba7"
+    "revision": "dba0b84b21adbc8cc86caa9b1bdc2c12"
   }, {
     "url": "test.bundle.js",
-    "revision": "603f1d7aeb522c1925af9a5e323cb13f"
+    "revision": "61564c03533c315fdb5fa5a661bf6672"
   }, {
     "url": "test.html",
     "revision": "e9e5895782b0ed13aa64b7a5ecd26185"

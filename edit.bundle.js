@@ -207,11 +207,11 @@ class Editor {
         this.draw();
     }
     draw() {
-        this.ctx.beginPath();
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+        this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
     }
     getGame() {
         this.tileMap.solidTiles = _util__WEBPACK_IMPORTED_MODULE_7__.stringToCodePoints(this.solidCharInput.value);
