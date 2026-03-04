@@ -103,7 +103,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "6cd1f853a17a2f549d95318a3a068307"
   }, {
     "url": "edit.html",
-    "revision": "429ae181832e5b10e9eec69ce1487661"
+    "revision": "ffcebe42308617a23d81515f5fc51d5d"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
