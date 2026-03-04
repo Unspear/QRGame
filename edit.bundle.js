@@ -53,6 +53,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var EditorState;
+(function (EditorState) {
+    EditorState[EditorState["Brush"] = 0] = "Brush";
+    EditorState[EditorState["Pipette"] = 1] = "Pipette";
+})(EditorState || (EditorState = {}));
 class Editor {
     scriptInput;
     canvas;
@@ -62,6 +67,8 @@ class Editor {
     charInput;
     colorInput;
     invertedInput;
+    invertedLabel;
+    pipetteButton;
     solidCharInput;
     leftButton;
     upButton;
@@ -70,10 +77,12 @@ class Editor {
     exportButton;
     importButton;
     ctx;
-    placingTiles;
+    heldDown;
     camera;
     tileMap;
+    state;
     constructor(inputGame) {
+        this.state = EditorState.Brush;
         //Code
         const codeContent = document.getElementById('tab-content-code');
         this.scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_0__.EditorView({
@@ -90,6 +99,8 @@ class Editor {
         this.charInput = document.getElementById('editor-char-input');
         this.colorInput = document.getElementById('editor-color-input');
         this.invertedInput = document.getElementById('editor-invert-input');
+        this.invertedLabel = document.getElementById('editor-invert-label');
+        this.pipetteButton = document.getElementById('editor-pipette-button');
         //Physics
         this.solidCharInput = document.getElementById('editor-solid-input');
         //Camera
@@ -101,22 +112,34 @@ class Editor {
         this.exportButton = document.getElementById('export-button');
         this.importButton = document.getElementById('import-button');
         this.ctx = this.canvas.getContext('2d');
-        this.placingTiles = false;
+        this.heldDown = false;
         this.camera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
-            this.placingTiles = true;
-            this.setTileFromEvent(event);
-            this.draw();
-        });
-        window.addEventListener('pointerup', (event) => {
-            this.placingTiles = false;
-            this.draw();
-        });
-        this.canvas.addEventListener('pointermove', (event) => {
-            if (this.placingTiles) {
+            this.heldDown = true;
+            if (this.state === EditorState.Brush) {
                 this.setTileFromEvent(event);
                 this.draw();
+            }
+            else {
+                this.setBrushFromEvent(event);
+            }
+        });
+        window.addEventListener('pointerup', (event) => {
+            this.heldDown = false;
+            if (this.state === EditorState.Brush) {
+                this.draw();
+            }
+            else {
+                this.state = EditorState.Brush;
+            }
+        });
+        this.canvas.addEventListener('pointermove', (event) => {
+            if (this.heldDown) {
+                if (this.state === EditorState.Brush) {
+                    this.setTileFromEvent(event);
+                    this.draw();
+                }
             }
         });
         // Nuke default touch behaviour (pull down screen to reload)
@@ -157,6 +180,13 @@ class Editor {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?");
             }
         };
+        this.invertedLabel.classList.toggle("hidden", !this.invertedInput.checked);
+        this.invertedInput.onchange = function () {
+            that.invertedLabel.classList.toggle("hidden", !that.invertedInput.checked);
+        };
+        this.pipetteButton.onclick = function () {
+            that.state = EditorState.Pipette;
+        };
         // Load input game into editor
         const transaction = this.scriptInput.state.update({ changes: {
                 from: 0,
@@ -179,6 +209,13 @@ class Editor {
         this.heightInput.valueAsNumber = newDim.h;
         return newDim;
     }
+    getCoordFromEvent(event) {
+        let pixel = _util__WEBPACK_IMPORTED_MODULE_7__.getPointerPos(this.canvas, event);
+        let viewOffset = this.camera.getViewOffset();
+        pixel.x -= viewOffset.x;
+        pixel.y -= viewOffset.y;
+        return _util__WEBPACK_IMPORTED_MODULE_7__.pixelToTile(pixel);
+    }
     setTileFromEvent(event) {
         // Get array of codepoints
         let codePoints = [...this.charInput.value].map(c => c.codePointAt(0) ?? 0);
@@ -192,14 +229,19 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let pixel = _util__WEBPACK_IMPORTED_MODULE_7__.getPointerPos(this.canvas, event);
-        let viewOffset = this.camera.getViewOffset();
-        pixel.x -= viewOffset.x;
-        pixel.y -= viewOffset.y;
-        let coords = _util__WEBPACK_IMPORTED_MODULE_7__.pixelToTile(pixel);
+        let coords = this.getCoordFromEvent(event);
         for (const codePoint of codePoints) {
             this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
             coords.x++;
+        }
+    }
+    setBrushFromEvent(event) {
+        let coords = this.getCoordFromEvent(event);
+        let tileData = this.tileMap.getTile(coords);
+        if (tileData !== null) {
+            this.charInput.value = String.fromCodePoint(tileData.codePoint);
+            this.colorInput.value = (tileData.color % 8).toString();
+            this.invertedInput.checked = tileData.color > 8;
         }
     }
     updateCamera() {

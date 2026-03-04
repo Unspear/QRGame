@@ -78,7 +78,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
   workbox.precacheAndRoute([{
-    "url": "3de0dbada69323d7b522.css",
+    "url": "20ee11d81a1cd010d3ba.css",
     "revision": null
   }, {
     "url": "3f53db599ee755d90efd.wasm",
@@ -100,10 +100,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "df45790da6cf22eeb31bb349e272cfa5"
+    "revision": "6cd1f853a17a2f549d95318a3a068307"
   }, {
     "url": "edit.html",
-    "revision": "e35202cbf26704ce71a132f02c88ad58"
+    "revision": "429ae181832e5b10e9eec69ce1487661"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -112,16 +112,16 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "37fac4c9efe2eb8b6d1340504325d920"
   }, {
     "url": "index.html",
-    "revision": "0b544a767181eb0c9e89e4df9959096e"
+    "revision": "dd507b96908fce530c921d03b31e3cf0"
   }, {
     "url": "play.bundle.js",
     "revision": "b10cc409c9ce42953ede09952f725cee"
   }, {
     "url": "play.html",
-    "revision": "ba3ce89de7ea2cb4f7aa58533c0ef2cf"
+    "revision": "1d1ad9e70388d0160a03dd2a20df606f"
   }, {
     "url": "src_page_js-src_pack_ts.bundle.js",
-    "revision": "394631d8c6794d9ad7df92069ba0cc42"
+    "revision": "d53ee9210b40379af09f6fda1d43fd78"
   }, {
     "url": "src_player_ts.bundle.js",
     "revision": "dba0b84b21adbc8cc86caa9b1bdc2c12"
@@ -130,7 +130,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "61564c03533c315fdb5fa5a661bf6672"
   }, {
     "url": "test.html",
-    "revision": "e9e5895782b0ed13aa64b7a5ecd26185"
+    "revision": "62c4a063bc143a00dda5df964c7530ad"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js.bundle.js",
     "revision": "ecb71e3bd29e11fa6be1ae02ca5a5c99"

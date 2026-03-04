@@ -82,5 +82,15 @@ div[tabHeader][selected] {
     background-color: blue;
     color: white;
 }
+.container-flex {
+    display: flex;
+    align-items: center;
+}
+.container-flex :last-child {
+    margin-left: auto;
+}
+.hidden {
+    display: none;
+}
 
-/*# sourceMappingURL=3de0dbada69323d7b522.css.map*/
+/*# sourceMappingURL=20ee11d81a1cd010d3ba.css.map*/

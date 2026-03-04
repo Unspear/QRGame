@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="3de0dbada69323d7b522.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="20ee11d81a1cd010d3ba.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
     <nav>
     <div>
@@ -56,11 +56,9 @@
             <input type="number" id="tilemap-height" min="16" max="128" step="4">
             <button class="small-button" id="tilemap-change-size">Apply</button>
           </div>
-          <div tabContent="draw">
-            <label for="editor-char-input">Character(s):</label>
-            <input type="text" id="editor-char-input"/>
-            <br>
-            <label for="editor-color-input">Color:</label>
+          <div class="container-flex" tabContent="draw">
+            <label for="editor-char-input">Brush:</label>
+            <input type="text" id="editor-char-input" placeholder="(erase)"/>
             <select id="editor-color-input">
               <option value="0">White</option>
               <option value="1">Grey</option>
@@ -71,9 +69,9 @@
               <option value="6">Blue</option>
               <option value="7">Magenta</option>
             </select>
-            <br>
-            <label for="editor-invert-input">Inverted:</label>
             <input type="checkbox" id="editor-invert-input">
+            <span id="editor-invert-label">(inverted)</span>
+            <button class="small-button" id="editor-pipette-button">⛏</button>
           </div>
           <div tabContent="physics">
             <label for="editor-solid-input">Solid Character(s):</label>
