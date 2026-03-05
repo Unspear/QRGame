@@ -126,6 +126,7 @@ export class Editor {
             try {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
                 that.tileMap = TileMap.Copy(serialised as TileMap);
+                that.draw();
             } catch(err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
