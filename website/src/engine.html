@@ -13,10 +13,10 @@
       <div class="tabs">
         <div tabHeader="play">Player</div>
         <% if (isEditor) { %>
-        <div tabHeader="edit">Tilemap</div>
+        <div tabHeader="edit">Level</div>
         <div tabHeader="code">Code</div>
         <% } %>
-        <div tabHeader="share" style="flex-grow: 0;"><img src="./icon-16.png"></div>
+        <div tabHeader="share" style="flex-grow: 0; display: flex; align-items: center;">Share <img src="./icon-16.png" width="16", height="16" style="margin-left: 4px;"></div>
       </div>
       <!-- Tab Content -->
       <div tabContent="play" id="tab-content-play">
@@ -27,8 +27,8 @@
 
       <div tabContent="share" id="tab-content-share">
         <p>
-          <button id="url-button">URL to Clipboard</button>
-          <button id="qr-button">QR to Clipboard</button>
+          <button id="url-button">Copy URL</button>
+          <button id="qr-button">Copy QR Code</button>
         </p>
         <canvas id="qr-canvas"></canvas>
       </div>
@@ -38,10 +38,10 @@
       <div tabContent="edit" id="tab-content-edit">
         <my-tab id="tilemap-tab">
           <div class="tabs">
-            <div tabHeader="settings">⚙️</div>
-            <div tabHeader="draw-tile">✎ Tile</div>
-            <div tabHeader="draw-patch">✎ Patch</div>
-            <div tabHeader="physics">🧱</div>
+            <div tabHeader="settings">Level Settings</div>
+            <div tabHeader="draw-tile">Edit Patches</div>
+            <div tabHeader="draw-patch">Edit Level</div>
+            <div tabHeader="physics">Physics</div>
           </div>
           <div tabContent="settings">
             <label for="tilemap-width">Tilemap Dimensions:</label>
@@ -91,8 +91,8 @@
           <button class="square-button" id="right-button">→</button>
         </p>
         <p>
-          <button id="export-button">Export to Clipboard</button>
-          <button id="import-button">Import from Clipboard</button>
+          <button id="export-button">Copy Level</button>
+          <button id="import-button">Paste Level</button>
         </p>
       </div>
 
