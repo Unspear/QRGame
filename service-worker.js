@@ -100,34 +100,34 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "6cd1f853a17a2f549d95318a3a068307"
+    "revision": "5a0338204e3a9ed733ae16a6fac7bebe"
   }, {
     "url": "edit.html",
-    "revision": "ffcebe42308617a23d81515f5fc51d5d"
+    "revision": "3fd47f537b82ef2f59ba8bf9622c4cc5"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "index.bundle.js",
-    "revision": "37fac4c9efe2eb8b6d1340504325d920"
+    "revision": "ba547a323cd0eb208bf3b3d45cdd9672"
   }, {
     "url": "index.html",
-    "revision": "dd507b96908fce530c921d03b31e3cf0"
+    "revision": "ad3e476d33e3c0a24fe0dfa4f54fc41e"
   }, {
     "url": "play.bundle.js",
     "revision": "b10cc409c9ce42953ede09952f725cee"
   }, {
     "url": "play.html",
-    "revision": "1d1ad9e70388d0160a03dd2a20df606f"
+    "revision": "9f1f016bb465bde6c85c3d586118888f"
   }, {
     "url": "src_page_js-src_pack_ts.bundle.js",
-    "revision": "d53ee9210b40379af09f6fda1d43fd78"
+    "revision": "a7a60bdba388d05d1152b58f704419b7"
   }, {
     "url": "src_player_ts.bundle.js",
-    "revision": "dba0b84b21adbc8cc86caa9b1bdc2c12"
+    "revision": "fa952ebfbf9aeb1159eb948ecc1ecabc"
   }, {
     "url": "test.bundle.js",
-    "revision": "61564c03533c315fdb5fa5a661bf6672"
+    "revision": "d2e245ded5a90b2e42a7be71c0623437"
   }, {
     "url": "test.html",
     "revision": "62c4a063bc143a00dda5df964c7530ad"

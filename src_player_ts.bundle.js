@@ -14,11 +14,9 @@ __webpack_require__.r(__webpack_exports__);
 class Camera {
     #currentPos;
     #targetPos;
-    #speed;
     constructor() {
         this.#currentPos = { x: 0, y: 0 };
         this.#targetPos = { x: 0, y: 0 };
-        this.#speed = 256;
     }
     set x(value) {
         this.#targetPos.x = value;
@@ -33,24 +31,8 @@ class Camera {
         return this.#targetPos.y;
     }
     frame(deltaTime) {
-        let dX = this.#targetPos.x - this.#currentPos.x;
-        let dY = this.#targetPos.y - this.#currentPos.y;
-        let len = Math.sqrt(dX * dX + dY * dY);
-        if (len == 0)
-            return;
-        dX /= len;
-        dY /= len;
-        let maxMove = this.#speed * deltaTime;
-        if (len > maxMove) {
-            // Move max distance
-            this.#currentPos.x += dX * maxMove;
-            this.#currentPos.y += dY * maxMove;
-        }
-        else {
-            // Move to target
-            this.#currentPos.x = this.#targetPos.x;
-            this.#currentPos.y = this.#targetPos.y;
-        }
+        this.#currentPos.x = this.#targetPos.x;
+        this.#currentPos.y = this.#targetPos.y;
     }
     getTargetPos() {
         return Object.assign({}, this.#targetPos);
@@ -158,14 +140,16 @@ class Engine {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
-        this.tileMap = _tile__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
+        const gameTileMap = _tile__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
+        const gamePatchMap = _tile__WEBPACK_IMPORTED_MODULE_5__.PatchMap.Copy(game.patchMap);
+        this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new _camera__WEBPACK_IMPORTED_MODULE_8__.Camera();
         // Create physics engine
         matter_js__WEBPACK_IMPORTED_MODULE_1__.Resolver._restingThresh = 1;
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.create({
             gravity: { scale: 0 }
         });
-        this.tileMap.createBodies(this.matterEngine);
+        this.tileMap.createBodies(this.matterEngine, game.solidTiles);
         this.spriteDragConstraint = new _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint(this.matterEngine, this.gameCanvas);
         matter_js__WEBPACK_IMPORTED_MODULE_1__.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment

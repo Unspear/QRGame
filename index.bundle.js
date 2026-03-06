@@ -78,6 +78,33 @@ My beautiful Daisy Bell!
 
 /***/ }),
 
+/***/ "./src/games/infinity.ts":
+/*!*******************************!*\
+  !*** ./src/games/infinity.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+
+let script = `function frame()
+  camera.x = camera.x + FRAME_TIME * 30
+  if camera.x > 16 * 16 then
+    camera.x = camera.x - 16 * 16
+  end
+end`;
+let tiles = `{"tileMap":{"dim":{"w":4,"h":4},"count":4,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[12,12,12,12,12,10,10,12,12,10,10,12,12,12,12,12]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[9,9,9,9,9,8,8,9,9,8,8,9,9,9,9,9]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[13,13,13,13,13,14,14,13,13,14,14,13,13,13,13,13]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[15,15,15,15,15,11,11,15,15,11,11,15,15,15,15,15]}]},"patchMap":{"dim":{"w":12,"h":4},"tileData":{"patchId":[0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,0,1,2,3,0,1,2,3,0,2,3,0,1,2,3,0,1,2,3,0,1,3,0,1,2,3,0,1,2,3,0,1,2],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}`;
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+    let parsed = JSON.parse(tiles);
+    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
+}
+
+
+/***/ }),
+
 /***/ "./src/games/pong.ts":
 /*!***************************!*\
   !*** ./src/games/pong.ts ***!
@@ -89,8 +116,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
-/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tile */ "./src/tile.ts");
-
 
 let script = `-- Paddles
 local top = createSprite('----', 8, 96, 32)
@@ -143,9 +168,12 @@ function frame()
         newRound()
     end
 end`;
-let tiles = '{"dim":{"w":12,"h":16},"solidTiles":[35],"tileData":{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,1,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9,9,0,0,0,0,0,0,0,0,0,0,9]}}';
+let tiles = '{"tileMap":{"dim":{"w":12,"h":1},"count":1,"tileData":[{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9]}]},"patchMap":{"dim":{"w":1,"h":16},"tileData":{"patchId":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}';
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
-    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, _tile__WEBPACK_IMPORTED_MODULE_1__.TileMap.Copy(JSON.parse(tiles)));
+    let parsed = JSON.parse(tiles);
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
+    game.solidTiles = ['#'.codePointAt(0)];
+    return game;
 }
 
 
@@ -196,13 +224,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
 /* harmony import */ var _games_pong__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/pong */ "./src/games/pong.ts");
 /* harmony import */ var _games_daisy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./games/daisy */ "./src/games/daisy.ts");
+/* harmony import */ var _games_infinity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games/infinity */ "./src/games/infinity.ts");
+
 
 
 
 const games = {
     "none": new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
     "pong": (0,_games_pong__WEBPACK_IMPORTED_MODULE_1__["default"])(),
-    "daisy": (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])()
+    "daisy": (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])(),
+    "infinity": (0,_games_infinity__WEBPACK_IMPORTED_MODULE_3__["default"])(),
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
 

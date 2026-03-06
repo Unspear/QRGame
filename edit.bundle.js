@@ -58,28 +58,46 @@ var EditorState;
     EditorState[EditorState["Brush"] = 0] = "Brush";
     EditorState[EditorState["Pipette"] = 1] = "Pipette";
 })(EditorState || (EditorState = {}));
+const TabDrawTile = "draw-tile";
+const TabDrawPatch = "draw-patch";
 class Editor {
+    // Code
     scriptInput;
+    // Canvas
     canvas;
+    // Tabs
+    tileMapTab;
+    // Settings
     widthInput;
     heightInput;
-    changeSizeButton;
+    patchCountInput;
+    patchWidthInput;
+    patchHeightInput;
+    applySettingsButton;
+    // Draw Tilemap
     charInput;
     colorInput;
     invertedInput;
     invertedLabel;
     pipetteButton;
+    // Draw Patchmap
+    patchIdInput;
+    // Physics
     solidCharInput;
+    // Camera
     leftButton;
     upButton;
     rightButton;
     downButton;
+    // Import/Export
     exportButton;
     importButton;
+    // Other
     ctx;
     heldDown;
     camera;
     tileMap;
+    patchMap;
     state;
     constructor(inputGame) {
         this.state = EditorState.Brush;
@@ -91,16 +109,23 @@ class Editor {
         });
         //Canvas
         this.canvas = document.getElementById('editor-canvas');
+        //Tabs
+        this.tileMapTab = document.getElementById('tilemap-tab');
         //Settings
         this.widthInput = document.getElementById('tilemap-width');
         this.heightInput = document.getElementById('tilemap-height');
-        this.changeSizeButton = document.getElementById('tilemap-change-size');
+        this.patchCountInput = document.getElementById('patch-count');
+        this.patchWidthInput = document.getElementById('patch-width');
+        this.patchHeightInput = document.getElementById('patch-height');
+        this.applySettingsButton = document.getElementById('tilemap-settings-apply');
         //Drawing
         this.charInput = document.getElementById('editor-char-input');
         this.colorInput = document.getElementById('editor-color-input');
         this.invertedInput = document.getElementById('editor-invert-input');
         this.invertedLabel = document.getElementById('editor-invert-label');
         this.pipetteButton = document.getElementById('editor-pipette-button');
+        //Patch Drawing
+        this.patchIdInput = document.getElementById('patch-id');
         //Physics
         this.solidCharInput = document.getElementById('editor-solid-input');
         //Camera
@@ -117,27 +142,44 @@ class Editor {
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.heldDown = true;
-            if (this.state === EditorState.Brush) {
-                this.setTileFromEvent(event);
-                this.draw();
+            if (this.tileMapTab.currentTab === TabDrawTile) {
+                if (this.state === EditorState.Brush) {
+                    this.setTileFromEvent(event);
+                    this.draw();
+                }
+                else {
+                    this.setBrushFromEvent(event);
+                }
             }
-            else {
-                this.setBrushFromEvent(event);
+            else if (this.tileMapTab.currentTab === TabDrawPatch) {
+                this.setPatchFromEvent(event);
+                this.draw();
             }
         });
         window.addEventListener('pointerup', (event) => {
             this.heldDown = false;
-            if (this.state === EditorState.Brush) {
-                this.draw();
+            if (this.tileMapTab.currentTab === TabDrawTile) {
+                if (this.state === EditorState.Brush) {
+                    this.draw();
+                }
+                else {
+                    this.state = EditorState.Brush;
+                }
             }
-            else {
-                this.state = EditorState.Brush;
+            else if (this.tileMapTab.currentTab === TabDrawPatch) {
+                this.draw();
             }
         });
         this.canvas.addEventListener('pointermove', (event) => {
             if (this.heldDown) {
-                if (this.state === EditorState.Brush) {
-                    this.setTileFromEvent(event);
+                if (this.tileMapTab.currentTab === TabDrawTile) {
+                    if (this.state === EditorState.Brush) {
+                        this.setTileFromEvent(event);
+                        this.draw();
+                    }
+                }
+                else if (this.tileMapTab.currentTab === TabDrawPatch) {
+                    this.setPatchFromEvent(event);
                     this.draw();
                 }
             }
@@ -147,20 +189,44 @@ class Editor {
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
-        this.changeSizeButton.onclick = function () {
+        this.tileMapTab.updateListeners.push(function (currentTab) {
+            that.draw();
+        });
+        this.applySettingsButton.onclick = function () {
             // Make new tilemap with new size and copy data
-            const newDim = that.getAndValidateDimensionsFromInput();
-            const newTileMap = new _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap(newDim);
-            for (let y = 0; y < newDim.h; y++) {
-                for (let x = 0; x < newDim.w; x++) {
-                    const coords = { x: x, y: y };
-                    const getTileResult = that.tileMap.getTile(coords);
-                    if (getTileResult !== null) {
-                        newTileMap.setTile(coords, getTileResult);
+            const patchDim = {
+                w: that.getAndValidateInputNumber(that.patchWidthInput, 1, 32, 1),
+                h: that.getAndValidateInputNumber(that.patchHeightInput, 1, 32, 1),
+            };
+            const newPatchCount = that.getAndValidateInputNumber(that.patchCountInput, 1, 128, 1);
+            const newTileMap = new _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap(patchDim, newPatchCount);
+            for (let i = 0; i < newPatchCount; i++) {
+                for (let y = 0; y < patchDim.h; y++) {
+                    for (let x = 0; x < patchDim.w; x++) {
+                        const coords = { x: x, y: y };
+                        const getTileResult = that.tileMap.getTile(coords, i);
+                        if (getTileResult !== null) {
+                            newTileMap.setTile(getTileResult, coords, i);
+                        }
                     }
                 }
             }
             that.tileMap = newTileMap;
+            const newDim = {
+                w: that.getAndValidateInputNumber(that.widthInput, 1, 128, 1),
+                h: that.getAndValidateInputNumber(that.heightInput, 1, 128, 1),
+            };
+            const newPatchMap = new _tile__WEBPACK_IMPORTED_MODULE_6__.PatchMap(newDim);
+            for (let y = 0; y < newDim.h; y++) {
+                for (let x = 0; x < newDim.w; x++) {
+                    const coords = { x: x, y: y };
+                    const getPatchResult = that.patchMap.getPatch(coords);
+                    if (getPatchResult !== null) {
+                        newPatchMap.setPatch(getPatchResult, coords);
+                    }
+                }
+            }
+            that.patchMap = newPatchMap;
             that.draw();
         };
         this.leftButton.onclick = function () { that.camera.x -= 64; that.updateCamera(); };
@@ -168,13 +234,15 @@ class Editor {
         this.rightButton.onclick = function () { that.camera.x += 64; that.updateCamera(); };
         this.downButton.onclick = function () { that.camera.y += 64; that.updateCamera(); };
         this.exportButton.onclick = function () {
-            let serialised = JSON.stringify(that.tileMap);
+            let serialised = JSON.stringify({ tileMap: that.tileMap, patchMap: that.patchMap });
             navigator.clipboard.writeText(serialised);
         };
         this.importButton.onclick = async function () {
             try {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
-                that.tileMap = _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap.Copy(serialised);
+                that.tileMap = _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap.Copy(serialised.tileMap);
+                that.patchMap = _tile__WEBPACK_IMPORTED_MODULE_6__.PatchMap.Copy(serialised.patchMap);
+                that.draw();
             }
             catch (err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?");
@@ -195,19 +263,21 @@ class Editor {
             } });
         this.scriptInput.update([transaction]);
         this.tileMap = _tile__WEBPACK_IMPORTED_MODULE_6__.TileMap.Copy(inputGame.tileMap);
-        this.widthInput.valueAsNumber = this.tileMap.dim.w;
-        this.heightInput.valueAsNumber = this.tileMap.dim.h;
-        this.solidCharInput.value = String.fromCodePoint(...this.tileMap.solidTiles);
+        this.patchMap = _tile__WEBPACK_IMPORTED_MODULE_6__.PatchMap.Copy(inputGame.patchMap);
+        this.patchWidthInput.valueAsNumber = this.tileMap.dim.w;
+        this.patchHeightInput.valueAsNumber = this.tileMap.dim.h;
+        this.patchCountInput.valueAsNumber = this.tileMap.count;
+        this.widthInput.valueAsNumber = this.patchMap.dim.w;
+        this.heightInput.valueAsNumber = this.patchMap.dim.h;
+        this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
         // Update Canvas
         this.draw();
     }
-    getAndValidateDimensionsFromInput() {
-        const newDim = { w: this.widthInput.valueAsNumber, h: this.heightInput.valueAsNumber };
-        newDim.w = _util__WEBPACK_IMPORTED_MODULE_7__.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
-        newDim.h = _util__WEBPACK_IMPORTED_MODULE_7__.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
-        this.widthInput.valueAsNumber = newDim.w;
-        this.heightInput.valueAsNumber = newDim.h;
-        return newDim;
+    getAndValidateInputNumber(input, min, max, step) {
+        let value = input.valueAsNumber;
+        value = _util__WEBPACK_IMPORTED_MODULE_7__.clamp(Math.ceil(value / step) * step, min, max);
+        input.valueAsNumber = value;
+        return value;
     }
     getCoordFromEvent(event) {
         let pixel = _util__WEBPACK_IMPORTED_MODULE_7__.getPointerPos(this.canvas, event);
@@ -229,11 +299,14 @@ class Editor {
             codePoints = [' '.codePointAt(0)];
         }
         // Draw array to tilemap
-        let coords = this.getCoordFromEvent(event);
+        let pair = this.tileMap.getSplitCoords(this.getCoordFromEvent(event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
-            coords.x++;
+            this.tileMap.setTile({ codePoint: codePoint, color: color }, pair.coords, pair.patchIndex);
+            pair.coords.x++;
         }
+    }
+    setPatchFromEvent(event) {
+        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, this.getCoordFromEvent(event));
     }
     setBrushFromEvent(event) {
         let coords = this.getCoordFromEvent(event);
@@ -252,12 +325,19 @@ class Editor {
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.tileMap.draw(this.ctx, this.camera.getViewOffset());
-        this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+        if (this.tileMapTab.currentTab === TabDrawPatch) {
+            this.patchMap.draw(this.ctx, this.camera.getViewOffset());
+            this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
+        }
+        else {
+            this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+            this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+        }
     }
     getGame() {
-        this.tileMap.solidTiles = _util__WEBPACK_IMPORTED_MODULE_7__.stringToCodePoints(this.solidCharInput.value);
-        return new _game__WEBPACK_IMPORTED_MODULE_5__.Game(this.scriptInput.state.doc.toString(), this.tileMap);
+        let game = new _game__WEBPACK_IMPORTED_MODULE_5__.Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
+        game.solidTiles = _util__WEBPACK_IMPORTED_MODULE_7__.stringToCodePoints(this.solidCharInput.value);
+        return game;
     }
 }
 

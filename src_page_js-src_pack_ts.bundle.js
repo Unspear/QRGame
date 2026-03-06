@@ -131,9 +131,13 @@ __webpack_require__.r(__webpack_exports__);
 class Game {
     script;
     tileMap;
-    constructor(script = "", tileMap = null) {
+    patchMap;
+    solidTiles;
+    constructor(script = "", tileMap = null, patchMap = null) {
         this.script = script;
         this.tileMap = tileMap ? _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap.Copy(tileMap) : new _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap({ w: 12, h: 16 });
+        this.patchMap = patchMap ? _tile__WEBPACK_IMPORTED_MODULE_0__.PatchMap.Copy(patchMap) : new _tile__WEBPACK_IMPORTED_MODULE_0__.PatchMap({ w: 1, h: 1 });
+        this.solidTiles = [];
     }
 }
 
@@ -251,27 +255,58 @@ function dataToUrl(data, page) {
 }
 function packGame(game) {
     const packer = new Packer();
+    // Script
     packer.packString(game.script);
+    // Tilemap
     packer.packUint16(game.tileMap.dim.w);
     packer.packUint16(game.tileMap.dim.h);
-    packer.packString(String.fromCodePoint(...game.tileMap.solidTiles));
-    packer.packString(String.fromCodePoint(...game.tileMap.tileData.codePoint));
-    packer.packUint8Array(Uint8Array.from(game.tileMap.tileData.color));
+    packer.packUint16(game.tileMap.count);
+    const codePoints = [];
+    const colors = [];
+    for (const data of game.tileMap.tileData) {
+        codePoints.push(...data.codePoint);
+        colors.push(...data.color);
+    }
+    packer.packString(String.fromCodePoint(...codePoints));
+    packer.packUint8Array(Uint8Array.from(colors));
+    // Patch Map
+    packer.packUint16(game.patchMap.dim.w);
+    packer.packUint16(game.patchMap.dim.h);
+    packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.patchId));
+    packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.transform));
+    // Solid Tiles
+    packer.packString(String.fromCodePoint(...game.solidTiles));
     return packer.getUint8Array();
 }
 function unpackGame(data) {
     const unpacker = new Unpacker(data);
+    // Script
     const script = unpacker.unpackString();
+    // Tilemap
     const tileMapDimW = unpacker.unpackUint16();
     const tileMapDimH = unpacker.unpackUint16();
-    const tileMapSolidTiles = unpacker.unpackString();
-    const tileMapCodePoints = unpacker.unpackString();
+    const tileMapCount = unpacker.unpackUint16();
+    const tileMapCodePoints = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(unpacker.unpackString());
     const tileMapColors = unpacker.unpackUint8Array();
-    const tileMap = new _tile__WEBPACK_IMPORTED_MODULE_2__.TileMap({ w: tileMapDimW, h: tileMapDimH });
-    tileMap.solidTiles = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapSolidTiles);
-    tileMap.tileData.codePoint = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapCodePoints);
-    tileMap.tileData.color = [...tileMapColors];
-    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, tileMap);
+    const tileMap = new _tile__WEBPACK_IMPORTED_MODULE_2__.TileMap({ w: tileMapDimW, h: tileMapDimH }, tileMapCount);
+    const patchSize = tileMapDimW * tileMapDimH;
+    for (let p = 0; p < tileMapCount; p++) {
+        tileMap.tileData[p].codePoint = tileMapCodePoints.slice(patchSize * p, patchSize * (p + 1));
+        tileMap.tileData[p].color = [...tileMapColors.slice(patchSize * p, patchSize * (p + 1))];
+    }
+    // Patch Map
+    const patchMapDimW = unpacker.unpackUint16();
+    const patchMapDimH = unpacker.unpackUint16();
+    const patchMapPatchIds = unpacker.unpackUint8Array();
+    const patchMapTransforms = unpacker.unpackUint8Array();
+    const patchMap = new _tile__WEBPACK_IMPORTED_MODULE_2__.PatchMap({ w: patchMapDimW, h: patchMapDimH });
+    patchMap.tileData.patchId = [...patchMapPatchIds];
+    patchMap.tileData.transform = [...patchMapTransforms];
+    // Solid tiles
+    const tileMapSolidTiles = unpacker.unpackString();
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, tileMap, patchMap);
+    game.solidTiles = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapSolidTiles);
+    return game;
 }
 function urlToGame() {
     let urlData = urlToData();
@@ -300,7 +335,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pwa__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pwa */ "./src/pwa.ts");
 /* harmony import */ var _pwa__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_pwa__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tab */ "./src/tab.ts");
-/* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_tab__WEBPACK_IMPORTED_MODULE_2__);
 
 
 
@@ -446,20 +480,27 @@ __webpack_require__.r(__webpack_exports__);
 /*!********************!*\
   !*** ./src/tab.ts ***!
   \********************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-
-customElements.define('my-tabs', class extends HTMLElement {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MyTabElement: () => (/* binding */ MyTabElement)
+/* harmony export */ });
+class MyTabElement extends HTMLElement {
+    currentTab;
+    updateListeners;
     constructor() {
         super();
-        let name = this.getAttribute("name");
-        const headers = Array.from(this.querySelectorAll(`div[tabHeader]`)).filter(el => el.closest('my-tabs') === this);
-        const contents = Array.from(this.querySelectorAll(`div[tabContent]`)).filter(el => el.closest('my-tabs') === this);
+        this.currentTab = "";
+        this.updateListeners = [];
+        const headers = Array.from(this.querySelectorAll(`div[tabHeader]`)).filter(el => el.closest('my-tab') === this);
+        const contents = Array.from(this.querySelectorAll(`div[tabContent]`)).filter(el => el.closest('my-tab') === this);
         let that = this;
         function selectTab(header) {
             let tabId = header.getAttribute("tabHeader");
             if (!tabId)
                 return;
+            that.currentTab = tabId;
             headers.forEach(header => {
                 header.toggleAttribute("selected", header.getAttribute("tabHeader") === tabId);
             });
@@ -467,6 +508,9 @@ customElements.define('my-tabs', class extends HTMLElement {
                 let visible = (content.getAttribute("tabContent") === tabId);
                 content.classList.toggle("hidden", !visible);
             });
+            for (let listener of that.updateListeners) {
+                listener(that.currentTab);
+            }
         }
         // Add change event listeners to all headers
         headers.forEach(header => {
@@ -476,7 +520,8 @@ customElements.define('my-tabs', class extends HTMLElement {
         });
         selectTab(headers[0]);
     }
-});
+}
+customElements.define('my-tab', MyTabElement);
 
 
 /***/ }),
@@ -489,6 +534,7 @@ customElements.define('my-tabs', class extends HTMLElement {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PatchMap: () => (/* binding */ PatchMap),
 /* harmony export */   TileMap: () => (/* binding */ TileMap)
 /* harmony export */ });
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
@@ -500,23 +546,24 @@ __webpack_require__.r(__webpack_exports__);
 
 class TileMap {
     dim;
-    solidTiles;
+    count;
     tileData;
-    constructor(dim) {
+    constructor(dim, count = 1) {
         this.dim = dim;
-        this.tileData = {
-            codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
-            color: new Array(dim.w * dim.h).fill(0)
-        };
-        this.solidTiles = [];
+        this.count = count;
+        this.tileData = [];
+        for (let i = 0; i < count; i++) {
+            this.tileData.push({
+                codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
+                color: new Array(dim.w * dim.h).fill(0)
+            });
+        }
+        ;
     }
     static Copy(tileMap) {
-        let copied = new TileMap(tileMap.dim);
+        let copied = new TileMap(tileMap.dim, tileMap.count); // Default value is used automatically if 'tileMap.patchDim' is undefined
         if (tileMap.tileData !== undefined) {
             copied.tileData = structuredClone(tileMap.tileData);
-        }
-        if (tileMap.solidTiles !== undefined) {
-            copied.solidTiles = structuredClone(tileMap.solidTiles);
         }
         return copied;
     }
@@ -526,35 +573,138 @@ class TileMap {
         }
         return null;
     }
-    getTile(coords) {
+    getTile(coords, patchIndex = 0) {
         const index = this.getIndex(coords);
-        if (index === null) {
+        if (index == null) {
             return null;
         }
-        return { codePoint: this.tileData.codePoint[index], color: this.tileData.color[index] };
+        let patch = this.tileData[patchIndex];
+        if (patch == null) {
+            return null;
+        }
+        return { codePoint: patch.codePoint[index], color: patch.color[index] };
     }
-    setTile(coords, newTileData) {
+    getSplitCoords(globalCoords) {
+        return {
+            coords: {
+                x: globalCoords.x % this.dim.w,
+                y: globalCoords.y
+            },
+            patchIndex: Math.floor(globalCoords.x / this.dim.w),
+        };
+    }
+    setTile(newTileData, coords, patchIndex = 0) {
         const index = this.getIndex(coords);
         if (index === null) {
             return;
         }
-        if (newTileData.codePoint !== undefined) {
-            this.tileData.codePoint[index] = newTileData.codePoint;
+        let patch = this.tileData[patchIndex];
+        if (patch === null) {
+            return null;
         }
-        if (newTileData.color !== undefined) {
-            this.tileData.color[index] = newTileData.color;
-        }
+        patch.codePoint[index] = newTileData.codePoint;
+        patch.color[index] = newTileData.color;
     }
     draw(ctx, viewOffset) {
-        _render__WEBPACK_IMPORTED_MODULE_1__["default"].draw(ctx, this.tileData.codePoint, this.tileData.color, viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
+        for (let i = 0; i < this.count; i++) {
+            let patch = this.tileData[i];
+            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH;
+            _render__WEBPACK_IMPORTED_MODULE_1__["default"].draw(ctx, patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
+        }
+    }
+    drawOutline(ctx, viewOffset) {
+        for (let i = 0; i < this.count; i++) {
+            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH;
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'aquamarine';
+            ctx.lineDashOffset = 0.5;
+            ctx.setLineDash([6, 2]);
+            ctx.beginPath();
+            const margin = 0.0;
+            const x0 = offset + viewOffset.x - margin;
+            const x1 = offset + viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH + margin;
+            const y0 = viewOffset.y - margin;
+            const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH + margin;
+            ctx.lineTo(x0, y0);
+            ctx.lineTo(x1, y0);
+            ctx.lineTo(x1, y1);
+            ctx.lineTo(x0, y1);
+            ctx.closePath();
+            ctx.stroke();
+        }
+    }
+    createBodies(matterEngine, solidTiles) {
+        const options = {
+            restitution: 1.0,
+            frictionAir: 0.0,
+            friction: 0.0,
+            isStatic: true
+        };
+        for (let y = 0; y < this.dim.h; y++) {
+            for (let x = 0; x < this.dim.w; x++) {
+                const tile = this.getTile({ x: x, y: y });
+                if (solidTiles.includes(tile.codePoint)) {
+                    const physBody = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies.rectangle((x + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, (y + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, options);
+                    matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite.add(matterEngine.world, physBody);
+                }
+            }
+        }
+    }
+}
+class PatchMap {
+    dim;
+    tileData;
+    constructor(dim) {
+        this.dim = dim;
+        this.tileData = {
+            patchId: new Array(dim.w * dim.h).fill(0),
+            transform: new Array(dim.w * dim.h).fill(0)
+        };
+    }
+    static Copy(patchMap) {
+        let copied = new PatchMap(patchMap.dim);
+        if (patchMap.tileData !== undefined) {
+            copied.tileData = structuredClone(patchMap.tileData);
+        }
+        return copied;
+    }
+    getIndex(coords) {
+        if (coords.x >= 0 && coords.x < this.dim.w && coords.y >= 0 && coords.y < this.dim.h) {
+            return coords.y * this.dim.w + coords.x;
+        }
+        return null;
+    }
+    getPatch(coords) {
+        const index = this.getIndex(coords);
+        if (index === null) {
+            return null;
+        }
+        return { patchId: this.tileData.patchId[index], transform: this.tileData.transform[index] };
+    }
+    setPatch(newTileData, coords) {
+        const index = this.getIndex(coords);
+        if (index === null) {
+            return;
+        }
+        this.tileData.patchId[index] = newTileData.patchId;
+        this.tileData.transform[index] = newTileData.transform;
+    }
+    getPatchDrawOffset(patchCoords) {
+        return {
+            x: patchCoords.x * (this.dim.w + 1) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH,
+            y: patchCoords.y * (this.dim.h + 1) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH,
+        };
+    }
+    draw(ctx, viewOffset) {
+        _render__WEBPACK_IMPORTED_MODULE_1__["default"].draw(ctx, this.tileData.patchId.map(n => n + 0x30 /**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
     drawOutline(ctx, viewOffset) {
         ctx.lineWidth = 1;
-        ctx.strokeStyle = 'white';
+        ctx.strokeStyle = 'aquamarine';
         ctx.lineDashOffset = 0.5;
         ctx.setLineDash([6, 2]);
         ctx.beginPath();
-        const margin = 2.5;
+        const margin = 0;
         const x0 = viewOffset.x - margin;
         const x1 = viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH + margin;
         const y0 = viewOffset.y - margin;
@@ -566,45 +716,25 @@ class TileMap {
         ctx.closePath();
         ctx.stroke();
     }
-    createBodies(matterEngine) {
-        const options = {
-            restitution: 1.0,
-            frictionAir: 0.0,
-            friction: 0.0,
-            isStatic: true
-        };
-        for (let y = 0; y < this.dim.h; y++) {
-            for (let x = 0; x < this.dim.w; x++) {
-                const tile = this.getTile({ x: x, y: y });
-                if (this.solidTiles.includes(tile.codePoint)) {
-                    const physBody = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies.rectangle((x + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, (y + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_2__.CHAR_WIDTH, options);
-                    matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite.add(matterEngine.world, physBody);
+    createTileMap(patchSource) {
+        let tileMap = new TileMap({ w: patchSource.dim.w * this.dim.w, h: patchSource.dim.h * this.dim.h });
+        // Iterate patches
+        for (let outerX = 0; outerX < this.dim.w; outerX++) {
+            for (let outerY = 0; outerY < this.dim.h; outerY++) {
+                let offsetX = outerX * patchSource.dim.w;
+                let offsetY = outerY * patchSource.dim.h;
+                let patchIndex = this.getPatch({ x: outerX, y: outerY }).patchId;
+                // Iterate tiles in patch
+                for (let innerX = 0; innerX < patchSource.dim.w; innerX++) {
+                    for (let innerY = 0; innerY < patchSource.dim.h; innerY++) {
+                        tileMap.setTile(patchSource.getTile({ x: innerX, y: innerY }, patchIndex), { x: innerX + offsetX, y: innerY + offsetY });
+                    }
                 }
             }
         }
+        return tileMap;
     }
 }
-/**
-export class MetaTileMap {
-    constructor(dim, tileSet) {
-        this.dim = dim;
-        this.tiles = new Array(dim.w * dim.h).fill({tileId: 0, transform: 0 });
-        this.tileSet = tileSet;
-    }
-    setTile(coords, tileId, transform) {
-        let tile = this.tiles[coords.y * this.dim.w + coords.x];
-        tile.tileId = tileId;
-        tile.transform = transform;
-    }
-    getTileMap() {
-    }
-}
-
-export class TileSet {
-    constructor(count, dim, tileSet) {
-        this.tiles = {};
-    }
-} */ 
 
 
 /***/ }),
