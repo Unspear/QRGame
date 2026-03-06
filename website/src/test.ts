@@ -6,6 +6,7 @@ const brotli = await brotliPromise;
 import * as PPMd from "./compressor"
 import { Game } from './game';
 import { packGame } from './pack';
+import makeAirHockey from './games/airHockey'
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 
@@ -81,8 +82,8 @@ const benchmarkButton = document.getElementById('benchmark-button') as HTMLButto
 const benchmarkTable = document.getElementById('benchmark-table') as HTMLTableElement;
 benchmarkButton.onclick = async function (){
     let promises: Promise<readonly [string, number][]>[] = [];
-    for (const key in library) {
-        promises.push(benchmarkGame(library[key]));
+    for (const entry of library) {
+        promises.push(benchmarkGame(entry.game));
     }
     let values = await Promise.all(promises);
     // Add column header
@@ -118,12 +119,12 @@ function testPPMd(data: Uint8Array): boolean {
 }
 ppmdButton.onclick = async function(){
     const zeroBytes = testPPMd(new Uint8Array(10240));
-    const pong = testPPMd(basicGameToData(library["pong"]));
+    const airHockey = testPPMd(basicGameToData(makeAirHockey()));
     const randomBytesArray = new Uint8Array(10240);
     for (let i = 0; i < randomBytesArray.byteLength; i++) {
         randomBytesArray[i] = Math.floor(Math.random() * 256);
     }
     const randomBytes = testPPMd(randomBytesArray);
-    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Pong: ${pong} <br> Random Bytes: ${randomBytes}`
+    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Air Hockey: ${airHockey} <br> Random Bytes: ${randomBytes}`
     ppmdButton.remove();
 }
