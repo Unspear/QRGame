@@ -12,6 +12,9 @@ enum EditorState {
     Pipette,
 }
 
+const TabDrawTile = "draw-tile";
+const TabDrawPatch = "draw-patch";
+
 export class Editor {
     // Code
     scriptInput: EditorView;
@@ -22,6 +25,7 @@ export class Editor {
     // Settings
     widthInput: HTMLInputElement;
     heightInput: HTMLInputElement;
+    patchCountInput: HTMLInputElement;
     patchWidthInput: HTMLInputElement;
     patchHeightInput: HTMLInputElement;
     applySettingsButton: HTMLButtonElement;
@@ -31,6 +35,8 @@ export class Editor {
     invertedInput: HTMLInputElement;
     invertedLabel: HTMLSpanElement;
     pipetteButton: HTMLButtonElement;
+    // Draw Patchmap
+    patchIdInput: HTMLInputElement;
     // Physics
     solidCharInput: HTMLInputElement;
     // Camera
@@ -63,6 +69,7 @@ export class Editor {
         //Settings
         this.widthInput = document.getElementById('tilemap-width') as HTMLInputElement;
         this.heightInput = document.getElementById('tilemap-height') as HTMLInputElement;
+        this.patchCountInput = document.getElementById('patch-count') as HTMLInputElement;
         this.patchWidthInput = document.getElementById('patch-width') as HTMLInputElement;
         this.patchHeightInput = document.getElementById('patch-height') as HTMLInputElement;
         this.applySettingsButton = document.getElementById('tilemap-settings-apply') as HTMLButtonElement;
@@ -72,6 +79,8 @@ export class Editor {
         this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
         this.invertedLabel = document.getElementById('editor-invert-label') as HTMLSpanElement;
         this.pipetteButton = document.getElementById('editor-pipette-button') as HTMLButtonElement;
+        //Patch Drawing
+        this.patchIdInput = document.getElementById('patch-id') as HTMLInputElement;
         //Physics
         this.solidCharInput = document.getElementById('editor-solid-input') as HTMLInputElement;
         //Camera
@@ -88,25 +97,39 @@ export class Editor {
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.heldDown = true;
-            if (this.state === EditorState.Brush) {
-                this.setTileFromEvent(event);
+            if (this.tileMapTab.currentTab === TabDrawTile) {
+                if (this.state === EditorState.Brush) {
+                    this.setTileFromEvent(event);
+                    this.draw();
+                } else {
+                    this.setBrushFromEvent(event);
+                }
+            } else if (this.tileMapTab.currentTab === TabDrawPatch){
+                this.setPatchFromEvent(event);
                 this.draw();
-            } else {
-                this.setBrushFromEvent(event);
             }
         });
         window.addEventListener('pointerup', (event) => {
             this.heldDown = false;
-            if (this.state === EditorState.Brush) {
+            if (this.tileMapTab.currentTab === TabDrawTile) {
+                if (this.state === EditorState.Brush) {
+                    this.draw();
+                } else {
+                    this.state = EditorState.Brush;
+                }
+            } else if (this.tileMapTab.currentTab === TabDrawPatch) {
                 this.draw();
-            } else {
-                this.state = EditorState.Brush;
             }
         });
         this.canvas.addEventListener('pointermove', (event) => {
             if (this.heldDown) {
-                if (this.state === EditorState.Brush) {
-                    this.setTileFromEvent(event);
+                if (this.tileMapTab.currentTab === TabDrawTile) {
+                    if (this.state === EditorState.Brush) {
+                        this.setTileFromEvent(event);
+                        this.draw();
+                    }
+                } else if (this.tileMapTab.currentTab === TabDrawPatch) {
+                    this.setPatchFromEvent(event);
                     this.draw();
                 }
             }
@@ -121,17 +144,14 @@ export class Editor {
         });
         this.applySettingsButton.onclick = function(){
             // Make new tilemap with new size and copy data
-            const newDim = {
-                w: that.getAndValidateInputNumber(that.widthInput, 1, 128, 1),
-                h: that.getAndValidateInputNumber(that.heightInput, 1, 128, 1),
-            };
-            const newPatchDim = {
+            const patchDim = {
                 w: that.getAndValidateInputNumber(that.patchWidthInput, 1, 32, 1),
                 h: that.getAndValidateInputNumber(that.patchHeightInput, 1, 32, 1),
             };
-            const newTileMap = new TileMap(newDim, newPatchDim);
-            for (let y = 0; y < newDim.h; y++) {
-                for (let x = 0; x < newDim.w; x++) {
+            const newPatchCount = that.getAndValidateInputNumber(that.patchCountInput, 1, 128, 1);
+            const newTileMap = new TileMap(patchDim, newPatchCount);
+            for (let y = 0; y < patchDim.h; y++) {
+                for (let x = 0; x < patchDim.w; x++) {
                     const coords = {x: x, y: y};
                     const getTileResult = that.tileMap.getTile(coords);
                     if (getTileResult !== null) {
@@ -140,6 +160,22 @@ export class Editor {
                 }
             }
             that.tileMap = newTileMap;
+
+            const newDim = {
+                w: that.getAndValidateInputNumber(that.widthInput, 1, 128, 1),
+                h: that.getAndValidateInputNumber(that.heightInput, 1, 128, 1),
+            };
+            const newPatchMap = new PatchMap(newDim);
+            for (let y = 0; y < newDim.h; y++) {
+                for (let x = 0; x < newDim.w; x++) {
+                    const coords = {x: x, y: y};
+                    const getPatchResult = that.patchMap.getPatch(coords);
+                    if (getPatchResult !== null) {
+                        newPatchMap.setPatch(getPatchResult, coords);
+                    }
+                }
+            }
+            that.patchMap = newPatchMap;
             that.draw();
         };
         this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
@@ -147,13 +183,14 @@ export class Editor {
         this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
         this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
         this.exportButton.onclick = function(){
-            let serialised = JSON.stringify(that.tileMap);
+            let serialised = JSON.stringify({tileMap: that.tileMap, patchMap: that.patchMap});
             navigator.clipboard.writeText(serialised);
         };
         this.importButton.onclick = async function(){
             try {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
-                that.tileMap = TileMap.Copy(serialised as TileMap);
+                that.tileMap = TileMap.Copy(serialised.tileMap as TileMap);
+                that.patchMap = PatchMap.Copy(serialised.patchMap as PatchMap);
                 that.draw();
             } catch(err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
@@ -175,10 +212,11 @@ export class Editor {
         this.scriptInput.update([transaction]);
         this.tileMap = TileMap.Copy(inputGame.tileMap);
         this.patchMap = PatchMap.Copy(inputGame.patchMap);
-        this.widthInput.valueAsNumber = this.tileMap.dim.w;
-        this.heightInput.valueAsNumber = this.tileMap.dim.h;
-        this.patchWidthInput.valueAsNumber = this.tileMap.patchDim.w;
-        this.patchHeightInput.valueAsNumber = this.tileMap.patchDim.h;
+        this.patchWidthInput.valueAsNumber = this.tileMap.dim.w;
+        this.patchHeightInput.valueAsNumber = this.tileMap.dim.h;
+        this.patchCountInput.valueAsNumber = this.tileMap.count;
+        this.widthInput.valueAsNumber = this.patchMap.dim.w;
+        this.heightInput.valueAsNumber = this.patchMap.dim.h;
         this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
         // Update Canvas
         this.draw();
@@ -211,9 +249,12 @@ export class Editor {
         // Draw array to tilemap
         let pair = this.tileMap.getSplitCoords(this.getCoordFromEvent(event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile({ codePoint: codePoint, color: color }, pair.coords, pair.patchCoords);
+            this.tileMap.setTile({ codePoint: codePoint, color: color }, pair.coords, pair.patchIndex);
             pair.coords.x++;
         }
+    }
+    setPatchFromEvent(event: PointerEvent) {
+        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, this.getCoordFromEvent(event));
     }
     setBrushFromEvent(event: PointerEvent) {
         let coords = this.getCoordFromEvent(event);
@@ -232,8 +273,9 @@ export class Editor {
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        if (this.tileMapTab.currentTab == "draw-patch") {
-            
+        if (this.tileMapTab.currentTab === TabDrawPatch) {
+            this.patchMap.draw(this.ctx, this.camera.getViewOffset());
+            this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
         } else {
             this.tileMap.draw(this.ctx, this.camera.getViewOffset());
             this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());

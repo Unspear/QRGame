@@ -91,8 +91,7 @@ export function packGame(game: Game): Uint8Array {
     // Tilemap
     packer.packUint16(game.tileMap.dim.w);
     packer.packUint16(game.tileMap.dim.h);
-    packer.packUint16(game.tileMap.patchDim.w);
-    packer.packUint16(game.tileMap.patchDim.h);
+    packer.packUint16(game.tileMap.count);
     const codePoints = [];
     const colors = [];
     for(const data of game.tileMap.tileData) {
@@ -118,14 +117,12 @@ export function unpackGame(data: Uint8Array): Game {
     // Tilemap
     const tileMapDimW = unpacker.unpackUint16();
     const tileMapDimH = unpacker.unpackUint16();
-    const tileMapPatchDimW = unpacker.unpackUint16();
-    const tileMapPatchDimH = unpacker.unpackUint16();
+    const tileMapCount = unpacker.unpackUint16();
     const tileMapCodePoints = stringToCodePoints(unpacker.unpackString());
     const tileMapColors = unpacker.unpackUint8Array();
-    const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH}, {w: tileMapPatchDimW, h: tileMapPatchDimH});
-    const patchCount = tileMap.tileData.length;
+    const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH}, tileMapCount);
     const patchSize = tileMapDimW * tileMapDimH;
-    for(let p = 0; p < patchCount; p++) {
+    for(let p = 0; p < tileMapCount; p++) {
         tileMap.tileData[p].codePoint = tileMapCodePoints.slice(patchSize * p, patchSize * (p + 1));
         tileMap.tileData[p].color = [...tileMapColors.slice(patchSize * p, patchSize * (p + 1))];
     }

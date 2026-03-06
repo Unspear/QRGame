@@ -3,7 +3,7 @@ import * as Matter from 'matter-js'
 import { SpriteDragConstraint } from './spriteDragConstraint'
 import { Sprite } from './sprite'
 import { FRAME_TIME, FRAME_TIME_MS } from './constants'
-import { TileMap } from './tile'
+import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import SamJs from 'sam-js'
 import { Camera } from './camera'
@@ -74,7 +74,9 @@ export class Engine {
         // Setup (should override any existing values)
         this.game = game;
         this.sprites = [];
-        this.tileMap = TileMap.Copy(game.tileMap);
+        const gameTileMap = TileMap.Copy(game.tileMap);
+        const gamePatchMap = PatchMap.Copy(game.patchMap);
+        this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new Camera();
         // Create physics engine
         (Matter.Resolver as any)._restingThresh = 1;
