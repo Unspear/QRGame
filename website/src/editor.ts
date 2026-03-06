@@ -3,8 +3,9 @@ import {StreamLanguage} from '@codemirror/language'
 import {lua} from '@codemirror/legacy-modes/mode/lua'
 import { Camera } from './camera';
 import { Game } from './game';
-import { TileMap } from './tile'
+import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
+import { MyTabElement } from './tab';
 
 enum EditorState {
     Brush,
@@ -12,27 +13,40 @@ enum EditorState {
 }
 
 export class Editor {
+    // Code
     scriptInput: EditorView;
+    // Canvas
     canvas: HTMLCanvasElement;
+    // Tabs
+    tileMapTab: MyTabElement;
+    // Settings
     widthInput: HTMLInputElement;
     heightInput: HTMLInputElement;
-    changeSizeButton: HTMLButtonElement;
+    patchWidthInput: HTMLInputElement;
+    patchHeightInput: HTMLInputElement;
+    applySettingsButton: HTMLButtonElement;
+    // Draw Tilemap
     charInput: HTMLInputElement;
     colorInput: HTMLInputElement;
     invertedInput: HTMLInputElement;
     invertedLabel: HTMLSpanElement;
     pipetteButton: HTMLButtonElement;
+    // Physics
     solidCharInput: HTMLInputElement;
+    // Camera
     leftButton: HTMLButtonElement;
     upButton: HTMLButtonElement;
     rightButton: HTMLButtonElement;
     downButton: HTMLButtonElement;
+    // Import/Export
     exportButton: HTMLButtonElement;
-    importButton: HTMLButtonElement
+    importButton: HTMLButtonElement;
+    // Other
     ctx: CanvasRenderingContext2D;
     heldDown: boolean;
     camera: Camera;
     tileMap: TileMap;
+    patchMap: PatchMap;
     state: EditorState;
     constructor(inputGame: Game) {
         this.state = EditorState.Brush;
@@ -44,10 +58,14 @@ export class Editor {
         })
         //Canvas
         this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
+        //Tabs
+        this.tileMapTab = document.getElementById('tilemap-tab') as MyTabElement;
         //Settings
         this.widthInput = document.getElementById('tilemap-width') as HTMLInputElement;
         this.heightInput = document.getElementById('tilemap-height') as HTMLInputElement;
-        this.changeSizeButton = document.getElementById('tilemap-change-size') as HTMLButtonElement;
+        this.patchWidthInput = document.getElementById('patch-width') as HTMLInputElement;
+        this.patchHeightInput = document.getElementById('patch-height') as HTMLInputElement;
+        this.applySettingsButton = document.getElementById('tilemap-settings-apply') as HTMLButtonElement;
         //Drawing
         this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
         this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
@@ -98,16 +116,26 @@ export class Editor {
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
-        this.changeSizeButton.onclick = function(){
+        this.tileMapTab.updateListeners.push(function(currentTab: string): void {
+            that.draw();
+        });
+        this.applySettingsButton.onclick = function(){
             // Make new tilemap with new size and copy data
-            const newDim = that.getAndValidateDimensionsFromInput();
-            const newTileMap = new TileMap(newDim);
+            const newDim = {
+                w: that.getAndValidateInputNumber(that.widthInput, 1, 128, 1),
+                h: that.getAndValidateInputNumber(that.heightInput, 1, 128, 1),
+            };
+            const newPatchDim = {
+                w: that.getAndValidateInputNumber(that.patchWidthInput, 1, 32, 1),
+                h: that.getAndValidateInputNumber(that.patchHeightInput, 1, 32, 1),
+            };
+            const newTileMap = new TileMap(newDim, newPatchDim);
             for (let y = 0; y < newDim.h; y++) {
                 for (let x = 0; x < newDim.w; x++) {
                     const coords = {x: x, y: y};
                     const getTileResult = that.tileMap.getTile(coords);
                     if (getTileResult !== null) {
-                        newTileMap.setTile(coords, getTileResult);
+                        newTileMap.setTile(getTileResult, coords);
                     }
                 }
             }
@@ -146,19 +174,20 @@ export class Editor {
         }});
         this.scriptInput.update([transaction]);
         this.tileMap = TileMap.Copy(inputGame.tileMap);
+        this.patchMap = PatchMap.Copy(inputGame.patchMap);
         this.widthInput.valueAsNumber = this.tileMap.dim.w;
         this.heightInput.valueAsNumber = this.tileMap.dim.h;
-        this.solidCharInput.value = String.fromCodePoint(...this.tileMap.solidTiles);
+        this.patchWidthInput.valueAsNumber = this.tileMap.patchDim.w;
+        this.patchHeightInput.valueAsNumber = this.tileMap.patchDim.h;
+        this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
         // Update Canvas
         this.draw();
     }
-    getAndValidateDimensionsFromInput(): Util.Dimensions {
-        const newDim = {w: this.widthInput.valueAsNumber, h: this.heightInput.valueAsNumber};
-        newDim.w = Util.clamp(Math.ceil(newDim.w / 4) * 4, 12, 128);
-        newDim.h = Util.clamp(Math.ceil(newDim.h / 4) * 4, 16, 128);
-        this.widthInput.valueAsNumber = newDim.w;
-        this.heightInput.valueAsNumber = newDim.h;
-        return newDim;
+    getAndValidateInputNumber(input: HTMLInputElement, min: number, max: number, step: number): number {
+        let value = input.valueAsNumber;
+        value = Util.clamp(Math.ceil(value / step) * step, min, max);
+        input.valueAsNumber = value;
+        return value;
     }
     getCoordFromEvent(event: PointerEvent): Util.Point {
         let pixel = Util.getPointerPos(this.canvas, event);
@@ -180,10 +209,10 @@ export class Editor {
             codePoints = [' '.codePointAt(0)!];
         }
         // Draw array to tilemap
-        let coords = this.getCoordFromEvent(event);
+        let pair = this.tileMap.getSplitCoords(this.getCoordFromEvent(event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile(coords, { codePoint: codePoint, color: color });
-            coords.x++;
+            this.tileMap.setTile({ codePoint: codePoint, color: color }, pair.coords, pair.patchCoords);
+            pair.coords.x++;
         }
     }
     setBrushFromEvent(event: PointerEvent) {
@@ -203,11 +232,16 @@ export class Editor {
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.tileMap.draw(this.ctx, this.camera.getViewOffset());
-        this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+        if (this.tileMapTab.currentTab == "draw-patch") {
+            
+        } else {
+            this.tileMap.draw(this.ctx, this.camera.getViewOffset());
+            this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+        }
     }
     getGame(): Game {
-        this.tileMap.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);
-        return new Game(this.scriptInput.state.doc.toString(), this.tileMap);
+        let game = new Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
+        game.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);
+        return game;
     }
 }

@@ -8,8 +8,7 @@
   </head>
   <body>
     <%= require('html-loader!./navbar.html').default %>
-    <!-- https://dev.to/joxx/building-a-tab-component-with-pure-css-using-radio-and-label-tags-200b -->
-    <my-tabs name="tab">
+    <my-tab>
       <!-- Radio Buttons -->
       <div class="tabs">
         <div tabHeader="play">Player</div>
@@ -37,19 +36,25 @@
       <% if (isEditor) { %>
 
       <div tabContent="edit" id="tab-content-edit">
-        <my-tabs name="tab">
+        <my-tab id="tilemap-tab">
           <div class="tabs">
             <div tabHeader="settings">⚙️</div>
-            <div tabHeader="draw">✎</div>
+            <div tabHeader="draw-tile">✎ Tile</div>
+            <div tabHeader="draw-patch">✎ Patch</div>
             <div tabHeader="physics">🧱</div>
           </div>
           <div tabContent="settings">
-            <label for="tilemap-width">Dimensions:</label>
-            <input type="number" id="tilemap-width" min="12" max="128" step="4">
-            <input type="number" id="tilemap-height" min="16" max="128" step="4">
-            <button class="small-button" id="tilemap-change-size">Apply</button>
+            <label for="tilemap-width">Tilemap Dimensions:</label>
+            <input type="number" id="tilemap-width" min="1" max="128" step="1">
+            <input type="number" id="tilemap-height" min="1" max="128" step="1">
+            <br>
+            <label for="patch-width">Patch Dimensions:</label>
+            <input type="number" id="patch-width" min="1" max="32" step="1">
+            <input type="number" id="patch-height" min="1" max="32" step="1">
+            <br>
+            <button class="small-button" id="tilemap-settings-apply">Apply</button>
           </div>
-          <div class="container-flex" tabContent="draw">
+          <div class="container-flex" tabContent="draw-tile">
             <label for="editor-char-input">Brush:</label>
             <input type="text" id="editor-char-input" placeholder="(space)"/>
             <select id="editor-color-input">
@@ -66,11 +71,13 @@
             <span id="editor-invert-label">(inverted)</span>
             <button class="small-button" id="editor-pipette-button">⛏</button>
           </div>
+          <div class="container-flex" tabContent="draw-patch">
+          </div>
           <div tabContent="physics">
             <label for="editor-solid-input">Solid Character(s):</label>
             <input type="text" id="editor-solid-input"/>
           </div>
-        </my-tabs>
+        </my-tab>
         <canvas id="editor-canvas" width="192" height="256"></canvas>
         <p>
           <button class="square-button" id="left-button">←</button>
@@ -89,6 +96,6 @@
       </div>
 
       <% } %>
-    </div>
+    </my-tab>
   </body>
 </html>

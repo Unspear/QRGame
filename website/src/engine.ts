@@ -81,7 +81,7 @@ export class Engine {
         this.matterEngine = Matter.Engine.create({ 
             gravity: { scale: 0 }
         });
-        this.tileMap.createBodies(this.matterEngine);
+        this.tileMap.createBodies(this.matterEngine, game.solidTiles);
         this.spriteDragConstraint = new SpriteDragConstraint(this.matterEngine, this.gameCanvas);
         Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment

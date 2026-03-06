@@ -1,6 +1,6 @@
 import {Game} from './game'
 import * as PPMd from "./compressor"
-import { TileMap } from './tile';
+import { PatchMap, TileMap } from './tile';
 import { stringToCodePoints } from './util';
 
 export class Packer {
@@ -86,28 +86,62 @@ export function dataToUrl(data: Uint8Array, page: string) {
 
 export function packGame(game: Game): Uint8Array {
     const packer = new Packer();
+    // Script
     packer.packString(game.script);
+    // Tilemap
     packer.packUint16(game.tileMap.dim.w);
     packer.packUint16(game.tileMap.dim.h);
-    packer.packString(String.fromCodePoint(...game.tileMap.solidTiles));
-    packer.packString(String.fromCodePoint(...game.tileMap.tileData.codePoint));
-    packer.packUint8Array(Uint8Array.from(game.tileMap.tileData.color));
+    packer.packUint16(game.tileMap.patchDim.w);
+    packer.packUint16(game.tileMap.patchDim.h);
+    const codePoints = [];
+    const colors = [];
+    for(const data of game.tileMap.tileData) {
+        codePoints.push(...data.codePoint);
+        colors.push(...data.color);
+    }
+    packer.packString(String.fromCodePoint(...codePoints));
+    packer.packUint8Array(Uint8Array.from(colors));
+    // Patch Map
+    packer.packUint16(game.patchMap.dim.w);
+    packer.packUint16(game.patchMap.dim.h);
+    packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.patchId));
+    packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.transform));
+    // Solid Tiles
+    packer.packString(String.fromCodePoint(...game.solidTiles));
     return packer.getUint8Array();
 }
 
 export function unpackGame(data: Uint8Array): Game {
     const unpacker = new Unpacker(data);
+    // Script
     const script = unpacker.unpackString();
+    // Tilemap
     const tileMapDimW = unpacker.unpackUint16();
     const tileMapDimH = unpacker.unpackUint16();
-    const tileMapSolidTiles = unpacker.unpackString();
-    const tileMapCodePoints = unpacker.unpackString();
+    const tileMapPatchDimW = unpacker.unpackUint16();
+    const tileMapPatchDimH = unpacker.unpackUint16();
+    const tileMapCodePoints = stringToCodePoints(unpacker.unpackString());
     const tileMapColors = unpacker.unpackUint8Array();
-    const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH});
-    tileMap.solidTiles = stringToCodePoints(tileMapSolidTiles);
-    tileMap.tileData.codePoint = stringToCodePoints(tileMapCodePoints);
-    tileMap.tileData.color = [...tileMapColors];
-    return new Game(script, tileMap);
+    const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH}, {w: tileMapPatchDimW, h: tileMapPatchDimH});
+    const patchCount = tileMap.tileData.length;
+    const patchSize = tileMapDimW * tileMapDimH;
+    for(let p = 0; p < patchCount; p++) {
+        tileMap.tileData[p].codePoint = tileMapCodePoints.slice(patchSize * p, patchSize * (p + 1));
+        tileMap.tileData[p].color = [...tileMapColors.slice(patchSize * p, patchSize * (p + 1))];
+    }
+    // Patch Map
+    const patchMapDimW = unpacker.unpackUint16();
+    const patchMapDimH = unpacker.unpackUint16();
+    const patchMapPatchIds = unpacker.unpackUint8Array();
+    const patchMapTransforms = unpacker.unpackUint8Array();
+    const patchMap = new PatchMap({w: patchMapDimW, h: patchMapDimH});
+    patchMap.tileData.patchId = [...patchMapPatchIds];
+    patchMap.tileData.transform = [...patchMapTransforms];
+    // Solid tiles
+    const tileMapSolidTiles = unpacker.unpackString();
+    let game = new Game(script, tileMap, patchMap);
+    game.solidTiles = stringToCodePoints(tileMapSolidTiles);
+    return game;
 }
 
 export function urlToGame() {
