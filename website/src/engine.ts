@@ -39,8 +39,10 @@ export class Engine {
         // Fill Background
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-        this.ctx.fillStyle = "white";
-        this.ctx.drawImage(pressPlayImage, 0, 0);
+        pressPlayImage.decode().then(() => {
+            this.ctx.fillStyle = "white";
+            this.ctx.drawImage(pressPlayImage, 0, 0);
+        })
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);
