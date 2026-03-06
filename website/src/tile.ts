@@ -43,12 +43,12 @@ export class TileMap {
     }
     getTile(coords: Point, patchIndex: number = 0): SingleTileData | null {
         const index = this.getIndex(coords);
-        if (index === null)
+        if (index == null)
         {
             return null;
         }
         let patch = this.tileData[patchIndex];
-        if (patch === null) {
+        if (patch == null) {
             return null;
         }
         return {codePoint: patch.codePoint[index], color: patch.color[index]};

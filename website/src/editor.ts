@@ -150,14 +150,16 @@ export class Editor {
             };
             const newPatchCount = that.getAndValidateInputNumber(that.patchCountInput, 1, 128, 1);
             const newTileMap = new TileMap(patchDim, newPatchCount);
-            for (let y = 0; y < patchDim.h; y++) {
-                for (let x = 0; x < patchDim.w; x++) {
-                    const coords = {x: x, y: y};
-                    const getTileResult = that.tileMap.getTile(coords);
-                    if (getTileResult !== null) {
-                        newTileMap.setTile(getTileResult, coords);
+            for (let i = 0; i < newPatchCount; i++) {
+                for (let y = 0; y < patchDim.h; y++) {
+                    for (let x = 0; x < patchDim.w; x++) {
+                        const coords = {x: x, y: y};
+                        const getTileResult = that.tileMap.getTile(coords, i);
+                        if (getTileResult !== null) {
+                            newTileMap.setTile(getTileResult, coords, i);
+                        }
                     }
-                }
+                }     
             }
             that.tileMap = newTileMap;
 
