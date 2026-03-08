@@ -31,6 +31,7 @@ export class Engine {
     lua!: LuaEngine;
     luaFrame!: () => void;
     paused: boolean;
+    currentSpeak: SamJsSpeakPromise | undefined;
     constructor(gameCanvas: HTMLCanvasElement) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
@@ -80,6 +81,9 @@ export class Engine {
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new Camera();
+        if (this.currentSpeak) {
+            this.currentSpeak.abort("Interrupted");
+        }
         // Create physics engine
         (Matter.Resolver as any)._restingThresh = 1;
         this.matterEngine = Matter.Engine.create({ 
@@ -107,7 +111,10 @@ export class Engine {
         this.lua.global.set('say', (string: string) => {
             // Replace non-ascii and control characters with space
             const ascii = string.replace(/[^\x20-\x7E]/g, " ");
-            this.textToSpeech.speak(ascii);
+            if (this.currentSpeak) {
+                this.currentSpeak.abort("Interrupted");
+            }
+            this.currentSpeak = this.textToSpeech.speak(ascii);
         });
         this.lua.global.set('camera', this.camera);
         // Load Script
