@@ -2,6 +2,80 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/games/airHockey.ts":
+/*!********************************!*\
+  !*** ./src/games/airHockey.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+
+let script = `-- Paddles
+local top = createSprite('----', 8, 96, 32)
+top.width = 32
+top.physics = true
+top.static = true
+local bottom = copySprite(top)
+bottom.y = 256 - 32
+-- Ball
+local ball = createSprite('⬤', 4, 96, 128)
+ball.width = 16
+ball.physics = true
+-- Control Paddles
+function drag(pos)
+  local x = math.min(math.max(pos.x, 32), 192-32)
+  if pos.y < 64 then
+    top.x = x
+  elseif pos.y > (256-64) then
+    bottom.x = x 
+  end
+end
+-- Score
+top.score = 0
+bottom.score = 0
+local topScore = createSprite('', 12, 20, 4)
+topScore.px = 0
+topScore.py = 0
+local bottomScore = createSprite('', 12, 192-20, 256-4)
+bottomScore.px = 1
+bottomScore.py = 1
+-- Update score and reset ball
+function newRound()
+    topScore.char = tostring(top.score)
+    bottomScore.char = tostring(bottom.score)
+    ball.x = 96
+    local dirY = math.random(0, 1)*2-1
+    ball.y = 128-dirY*64
+    ball.velY = dirY*3
+    ball.velX = (math.random(0, 1)*2-1)*1.5
+end
+newRound()
+-- Frame
+function frame()
+    if ball.y < 0 then
+        top.score = top.score + 1
+        newRound()
+    end
+    if ball.y > 256 then
+        bottom.score = bottom.score + 1
+        newRound()
+    end
+end`;
+let tiles = '{"tileMap":{"dim":{"w":12,"h":1},"count":1,"tileData":[{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9]}]},"patchMap":{"dim":{"w":1,"h":16},"tileData":{"patchId":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}';
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+    let parsed = JSON.parse(tiles);
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
+    game.solidTiles = ['#'.codePointAt(0)];
+    return game;
+}
+
+
+/***/ }),
+
 /***/ "./src/games/daisy.ts":
 /*!****************************!*\
   !*** ./src/games/daisy.ts ***!
@@ -105,80 +179,6 @@ let tiles = `{"tileMap":{"dim":{"w":4,"h":4},"count":4,"tileData":[{"codePoint":
 
 /***/ }),
 
-/***/ "./src/games/pong.ts":
-/*!***************************!*\
-  !*** ./src/games/pong.ts ***!
-  \***************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
-
-let script = `-- Paddles
-local top = createSprite('----', 8, 96, 32)
-top.width = 32
-top.physics = true
-top.static = true
-local bottom = copySprite(top)
-bottom.y = 256 - 32
--- Ball
-local ball = createSprite('⬤', 4, 96, 128)
-ball.width = 16
-ball.physics = true
--- Control Paddles
-function drag(pos)
-  local x = math.min(math.max(pos.x, 32), 192-32)
-  if pos.y < 64 then
-    top.x = x
-  elseif pos.y > (256-64) then
-    bottom.x = x 
-  end
-end
--- Score
-top.score = 0
-bottom.score = 0
-local topScore = createSprite('', 12, 20, 4)
-topScore.px = 0
-topScore.py = 0
-local bottomScore = createSprite('', 12, 192-20, 256-4)
-bottomScore.px = 1
-bottomScore.py = 1
--- Update score and reset ball
-function newRound()
-    topScore.char = tostring(top.score)
-    bottomScore.char = tostring(bottom.score)
-    ball.x = 96
-    local dirY = math.random(0, 1)*2-1
-    ball.y = 128-dirY*64
-    ball.velY = dirY*3
-    ball.velX = (math.random(0, 1)*2-1)*1.5
-end
-newRound()
--- Frame
-function frame()
-    if ball.y < 0 then
-        top.score = top.score + 1
-        newRound()
-    end
-    if ball.y > 256 then
-        bottom.score = bottom.score + 1
-        newRound()
-    end
-end`;
-let tiles = '{"tileMap":{"dim":{"w":12,"h":1},"count":1,"tileData":[{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9]}]},"patchMap":{"dim":{"w":1,"h":16},"tileData":{"patchId":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}';
-/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
-    let parsed = JSON.parse(tiles);
-    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
-    game.solidTiles = ['#'.codePointAt(0)];
-    return game;
-}
-
-
-/***/ }),
-
 /***/ "./src/library.ts":
 /*!************************!*\
   !*** ./src/library.ts ***!
@@ -190,19 +190,35 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _games_pong__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/pong */ "./src/games/pong.ts");
+/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/airHockey */ "./src/games/airHockey.ts");
 /* harmony import */ var _games_daisy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./games/daisy */ "./src/games/daisy.ts");
 /* harmony import */ var _games_infinity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games/infinity */ "./src/games/infinity.ts");
 
 
 
 
-const games = {
-    "none": new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
-    "pong": (0,_games_pong__WEBPACK_IMPORTED_MODULE_1__["default"])(),
-    "daisy": (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])(),
-    "infinity": (0,_games_infinity__WEBPACK_IMPORTED_MODULE_3__["default"])(),
-};
+const games = [
+    {
+        game: new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
+        title: "Blank Game",
+        description: "An empty game with no code or level data"
+    },
+    {
+        game: (0,_games_airHockey__WEBPACK_IMPORTED_MODULE_1__["default"])(),
+        title: "Air Hockey",
+        description: "A 2-player air hockey game"
+    },
+    {
+        game: (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])(),
+        title: "Daisy Bell",
+        description: "A demo showing text-to-speech and sprite manipulation"
+    },
+    {
+        game: (0,_games_infinity__WEBPACK_IMPORTED_MODULE_3__["default"])(),
+        title: "Repeating Pattern",
+        description: "A demo showing camera movement and the tile patch system"
+    }
+];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
 
 
@@ -223,6 +239,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _compressor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compressor */ "./src/compressor.ts");
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
 /* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./games/airHockey */ "./src/games/airHockey.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__]);
 ([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
@@ -230,6 +247,7 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_com
 
 
 const brotli = await brotli_wasm__WEBPACK_IMPORTED_MODULE_3__["default"];
+
 
 
 
@@ -303,8 +321,8 @@ const benchmarkButton = document.getElementById('benchmark-button');
 const benchmarkTable = document.getElementById('benchmark-table');
 benchmarkButton.onclick = async function () {
     let promises = [];
-    for (const key in _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
-        promises.push(benchmarkGame(_library__WEBPACK_IMPORTED_MODULE_1__["default"][key]));
+    for (const entry of _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+        promises.push(benchmarkGame(entry.game));
     }
     let values = await Promise.all(promises);
     // Add column header
@@ -340,13 +358,13 @@ function testPPMd(data) {
 }
 ppmdButton.onclick = async function () {
     const zeroBytes = testPPMd(new Uint8Array(10240));
-    const pong = testPPMd(basicGameToData(_library__WEBPACK_IMPORTED_MODULE_1__["default"]["pong"]));
+    const airHockey = testPPMd(basicGameToData((0,_games_airHockey__WEBPACK_IMPORTED_MODULE_7__["default"])()));
     const randomBytesArray = new Uint8Array(10240);
     for (let i = 0; i < randomBytesArray.byteLength; i++) {
         randomBytesArray[i] = Math.floor(Math.random() * 256);
     }
     const randomBytes = testPPMd(randomBytesArray);
-    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Pong: ${pong} <br> Random Bytes: ${randomBytes}`;
+    ppmdParagraph.innerHTML = `Zero bytes: ${zeroBytes} <br> Air Hockey: ${airHockey} <br> Random Bytes: ${randomBytes}`;
     ppmdButton.remove();
 };
 

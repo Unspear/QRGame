@@ -9,12 +9,16 @@ body {
     margin-inline: auto;
     width: min(calc(192px * 3), 100%);
 }
+article {
+    margin: 0px 10px
+}
 #tab-content-code {
   max-width: 95%;
   margin-inline: auto;
 }
 p {
-    text-align: center;
+    text-align: left;
+    margin: 0.2rem 0rem 0.5rem;
 }
 .cm-editor {
     outline: 2px solid grey;
@@ -92,5 +96,8 @@ div[tabHeader][selected] {
 .hidden {
     display: none;
 }
+h1, h2, h3, h4, h5, h6 {
+    margin: 0.5rem 0rem
+}
 
-/*# sourceMappingURL=20ee11d81a1cd010d3ba.css.map*/
+/*# sourceMappingURL=0d8e4ab2903dc15c0a51.css.map*/

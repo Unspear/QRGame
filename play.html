@@ -5,11 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Game</title>
-  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="20ee11d81a1cd010d3ba.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
+  <link rel="icon" href="icon-16.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="src_page_js-src_pack_ts.bundle.js"></script><script defer src="src_player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="0d8e4ab2903dc15c0a51.css" rel="stylesheet"><link rel="manifest" href="./manifest.0f4a245839d90efdf9b3803888b31564.json" /></head>
   <body>
     <nav>
     <div>
-        <a href="index.html">Index</a>
+        <a href="index.html">Home</a>
         <a href="play.html">Play</a>
         <a href="edit.html">Edit</a>
         <a href="test.html">Test</a>
@@ -20,7 +20,7 @@
       <div class="tabs">
         <div tabHeader="play">Player</div>
         
-        <div tabHeader="share" style="flex-grow: 0;"><img src="./icon-16.png"></div>
+        <div tabHeader="share" style="flex-grow: 0; display: flex; align-items: center;">Share <img src="./icon-16.png" width="16", height="16" style="margin-left: 4px;"></div>
       </div>
       <!-- Tab Content -->
       <div tabContent="play" id="tab-content-play">
@@ -31,8 +31,8 @@
 
       <div tabContent="share" id="tab-content-share">
         <p>
-          <button id="url-button">URL to Clipboard</button>
-          <button id="qr-button">QR to Clipboard</button>
+          <button id="url-button">Copy URL</button>
+          <button id="qr-button">Copy QR Code</button>
         </p>
         <canvas id="qr-canvas"></canvas>
       </div>
