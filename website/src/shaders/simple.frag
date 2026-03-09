@@ -10,6 +10,9 @@ out vec4 outColor;
 uniform mediump sampler2D uSampler;
 
 void main() {
-  //vec4 value = texture(uSampler, fTexCoord);
-  outColor = (1.0 > 0.5) ? fFrontColor : fBackColor;
+  float value = texture(uSampler, fTexCoord).a;
+  outColor = (value > 0.5) ? fFrontColor : fBackColor;
+  if (outColor.a < 0.5) {
+    discard;
+  }
 }

@@ -14,8 +14,3 @@ for(const entry of library) {
     p.appendChild(document.createTextNode(" - " + entry.description));
     demoParent.appendChild(p);
 }
-
-// Source: https://indigocode.dev/tutorials/webgl/01-hello-triangle
-// Source: https://webgl2fundamentals.org/webgl/lessons/webgl-instanced-drawing.html
-let canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
-let renderer = new Renderer(canvas);

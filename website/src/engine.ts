@@ -145,6 +145,7 @@ export class Engine {
                     this.luaFrame();
                 }
                 this.camera.frame(FRAME_TIME)
+                
                 // Physics
                 for (let sprite of this.sprites) {
                     sprite.prePhysicsUpdate(this.matterEngine)
