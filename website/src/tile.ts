@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import charRenderer from './render'
+import charRenderer from './oldRender'
 import { Dimensions, Point } from './util';
 import { CHAR_WIDTH } from './constants';
 

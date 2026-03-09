@@ -1,5 +1,5 @@
 import Chars from './chars.png';
-import CharsText from './chars.txt?raw'
+import CharsText from './chars.txt'
 import { CHAR_WIDTH, PALETTE } from './constants';
 
 type SpriteSheetEntry = {
@@ -26,7 +26,7 @@ class CharRenderer {
             let l = lines[i].split(',');
             this.spriteSheetData[parseInt(l[0])] = {
                 index: i,
-                isFullWidth: l[1] > 0
+                isFullWidth: parseInt(l[1]) > 0
             }
         }
     }

@@ -56,7 +56,7 @@ module.exports = {
         type: 'asset/resource',
       },
       {
-        resourceQuery: /raw/,
+        test: /\.(txt|vert|frag)$/i,
         type: 'asset/source',
       },
     ],

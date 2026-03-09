@@ -1,4 +1,4 @@
-import charRenderer from './render'
+import charRenderer from './oldRender'
 import { CHAR_WIDTH, PALETTE } from './constants';
 import * as Matter from 'matter-js'
 import { Point } from './util';
