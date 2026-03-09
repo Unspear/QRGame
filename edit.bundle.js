@@ -2,18 +2,18 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/edit.ts":
-/*!*********************!*\
-  !*** ./src/edit.ts ***!
-  \*********************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
+/***/ "./edit.ts"
+/*!*****************!*\
+  !*** ./edit.ts ***!
+  \*****************/
+(module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
-/* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./editor */ "./src/editor.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
-/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./player */ "./src/player.ts");
+/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./page.js");
+/* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./editor */ "./editor.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pack */ "./pack.ts");
+/* harmony import */ var _player__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./player */ "./player.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_2__, _player__WEBPACK_IMPORTED_MODULE_3__]);
 ([_pack__WEBPACK_IMPORTED_MODULE_2__, _player__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
@@ -26,26 +26,26 @@ const player = new _player__WEBPACK_IMPORTED_MODULE_3__.Player(() => editor.getG
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
 
-/***/ }),
+/***/ },
 
-/***/ "./src/editor.ts":
-/*!***********************!*\
-  !*** ./src/editor.ts ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./editor.ts"
+/*!*******************!*\
+  !*** ./editor.ts ***!
+  \*******************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Editor: () => (/* binding */ Editor)
 /* harmony export */ });
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! codemirror */ "./node_modules/@codemirror/view/dist/index.js");
-/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "./node_modules/codemirror/dist/index.js");
-/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @codemirror/language */ "./node_modules/@codemirror/language/dist/index.js");
-/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "./node_modules/@codemirror/legacy-modes/mode/lua.js");
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./src/util.ts");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! codemirror */ "../node_modules/codemirror/dist/index.js");
+/* harmony import */ var codemirror__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! codemirror */ "../node_modules/@codemirror/view/dist/index.js");
+/* harmony import */ var _codemirror_language__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @codemirror/language */ "../node_modules/@codemirror/language/dist/index.js");
+/* harmony import */ var _codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @codemirror/legacy-modes/mode/lua */ "../node_modules/@codemirror/legacy-modes/mode/lua.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./camera */ "./camera.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./game.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile */ "./tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./util.ts");
 
 
 
@@ -103,8 +103,8 @@ class Editor {
         this.state = EditorState.Brush;
         //Code
         const codeContent = document.getElementById('tab-content-code');
-        this.scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_0__.EditorView({
-            extensions: [codemirror__WEBPACK_IMPORTED_MODULE_1__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_2__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__.lua)],
+        this.scriptInput = new codemirror__WEBPACK_IMPORTED_MODULE_1__.EditorView({
+            extensions: [codemirror__WEBPACK_IMPORTED_MODULE_0__.basicSetup, _codemirror_language__WEBPACK_IMPORTED_MODULE_2__.StreamLanguage.define(_codemirror_legacy_modes_mode_lua__WEBPACK_IMPORTED_MODULE_3__.lua)],
             parent: codeContent
         });
         //Canvas
@@ -342,7 +342,7 @@ class Editor {
 }
 
 
-/***/ })
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -364,6 +364,12 @@ class Editor {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -380,7 +386,6 @@ class Editor {
 /******/ 		var webpackQueues = hasSymbol ? Symbol("webpack queues") : "__webpack_queues__";
 /******/ 		var webpackExports = hasSymbol ? Symbol("webpack exports") : "__webpack_exports__";
 /******/ 		var webpackError = hasSymbol ? Symbol("webpack error") : "__webpack_error__";
-/******/ 		
 /******/ 		
 /******/ 		var resolveQueue = (queue) => {
 /******/ 			if(queue && queue.d < 1) {
@@ -588,7 +593,7 @@ class Editor {
 /******/ 	/* webpack/runtime/load script */
 /******/ 	(() => {
 /******/ 		var inProgress = {};
-/******/ 		var dataWebpackPrefix = "qrgame:";
+/******/ 		// data-webpack is not used as build has no uniqueName
 /******/ 		// loadScript function to load a script via script tag
 /******/ 		__webpack_require__.l = (url, done, key, chunkId) => {
 /******/ 			if(inProgress[url]) { inProgress[url].push(done); return; }
@@ -597,7 +602,7 @@ class Editor {
 /******/ 				var scripts = document.getElementsByTagName("script");
 /******/ 				for(var i = 0; i < scripts.length; i++) {
 /******/ 					var s = scripts[i];
-/******/ 					if(s.getAttribute("src") == url || s.getAttribute("data-webpack") == dataWebpackPrefix + key) { script = s; break; }
+/******/ 					if(s.getAttribute("src") == url) { script = s; break; }
 /******/ 				}
 /******/ 			}
 /******/ 			if(!script) {
@@ -608,7 +613,7 @@ class Editor {
 /******/ 				if (__webpack_require__.nc) {
 /******/ 					script.setAttribute("nonce", __webpack_require__.nc);
 /******/ 				}
-/******/ 				script.setAttribute("data-webpack", dataWebpackPrefix + key);
+/******/ 		
 /******/ 		
 /******/ 				script.src = url;
 /******/ 			}
@@ -749,7 +754,7 @@ class Editor {
 /******/ 			return __webpack_require__.O(result);
 /******/ 		}
 /******/ 		
-/******/ 		var chunkLoadingGlobal = self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || [];
+/******/ 		var chunkLoadingGlobal = self["webpackChunk"] = self["webpackChunk"] || [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();
@@ -759,7 +764,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","src_page_js-src_pack_ts","src_player_ts"], () => (__webpack_require__("./src/edit.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","page_js-pack_ts","player_ts"], () => (__webpack_require__("./edit.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

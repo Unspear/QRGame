@@ -1,17 +1,17 @@
 {
   "icons": [
     {
-      "src": "./icon_512x512.8cb743aa42a58125bc0cf2c5069fa943.png",
+      "src": "./icon_512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "./icon_192x192.d5e735e2cd51dae7350e2820cb62dbcd.png",
+      "src": "./icon_192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./icon_16x16.248f2a51cae0f4960d59a0aee1bf2151.png",
+      "src": "./icon_16.png",
       "sizes": "16x16",
       "type": "image/png"
     }
@@ -22,5 +22,8 @@
   "display": "standalone",
   "start_url": ".",
   "description": "Description!",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "launch_handler": {
+    "client_mode": "auto"
+  }
 }

@@ -2,17 +2,17 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/games/airHockey.ts":
-/*!********************************!*\
-  !*** ./src/games/airHockey.ts ***!
-  \********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./games/airHockey.ts"
+/*!****************************!*\
+  !*** ./games/airHockey.ts ***!
+  \****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./game.ts");
 
 let script = `-- Paddles
 local top = createSprite('----', 8, 96, 32)
@@ -74,19 +74,19 @@ let tiles = '{"tileMap":{"dim":{"w":12,"h":1},"count":1,"tileData":[{"codePoint"
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/games/daisy.ts":
-/*!****************************!*\
-  !*** ./src/games/daisy.ts ***!
-  \****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./games/daisy.ts"
+/*!************************!*\
+  !*** ./games/daisy.ts ***!
+  \************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./game.ts");
 
 let script = `
 local sprites = {}
@@ -126,19 +126,19 @@ Of a bicycle built for two!
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/games/infinity.ts":
-/*!*******************************!*\
-  !*** ./src/games/infinity.ts ***!
-  \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./games/infinity.ts"
+/*!***************************!*\
+  !*** ./games/infinity.ts ***!
+  \***************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./src/game.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./game.ts");
 
 let script = `function frame()
   camera.x = camera.x + FRAME_TIME * 30
@@ -153,22 +153,22 @@ let tiles = `{"tileMap":{"dim":{"w":4,"h":4},"count":4,"tileData":[{"codePoint":
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/library.ts":
-/*!************************!*\
-  !*** ./src/library.ts ***!
-  \************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./library.ts"
+/*!********************!*\
+  !*** ./library.ts ***!
+  \********************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/airHockey */ "./src/games/airHockey.ts");
-/* harmony import */ var _games_daisy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./games/daisy */ "./src/games/daisy.ts");
-/* harmony import */ var _games_infinity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games/infinity */ "./src/games/infinity.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./game */ "./game.ts");
+/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/airHockey */ "./games/airHockey.ts");
+/* harmony import */ var _games_daisy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./games/daisy */ "./games/daisy.ts");
+/* harmony import */ var _games_infinity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games/infinity */ "./games/infinity.ts");
 
 
 
@@ -198,24 +198,24 @@ const games = [
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/test.ts":
-/*!*********************!*\
-  !*** ./src/test.ts ***!
-  \*********************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
+/***/ "./test.ts"
+/*!*****************!*\
+  !*** ./test.ts ***!
+  \*****************/
+(module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./src/page.js");
-/* harmony import */ var _library__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./library */ "./src/library.ts");
-/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! fflate */ "./node_modules/fflate/esm/browser.js");
-/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! brotli-wasm */ "./node_modules/brotli-wasm/index.web.js");
-/* harmony import */ var _compressor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compressor */ "./src/compressor.ts");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
-/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./games/airHockey */ "./src/games/airHockey.ts");
+/* harmony import */ var _page__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./page */ "./page.js");
+/* harmony import */ var _library__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./library */ "./library.ts");
+/* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! fflate */ "../node_modules/fflate/esm/browser.js");
+/* harmony import */ var brotli_wasm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! brotli-wasm */ "../node_modules/brotli-wasm/index.web.js");
+/* harmony import */ var _compressor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compressor */ "./compressor.ts");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./game.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pack */ "./pack.ts");
+/* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./games/airHockey */ "./games/airHockey.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__]);
 ([_compressor__WEBPACK_IMPORTED_MODULE_4__, _pack__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
@@ -347,7 +347,7 @@ ppmdButton.onclick = async function () {
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 
-/***/ })
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -369,6 +369,12 @@ __webpack_async_result__();
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -385,7 +391,6 @@ __webpack_async_result__();
 /******/ 		var webpackQueues = hasSymbol ? Symbol("webpack queues") : "__webpack_queues__";
 /******/ 		var webpackExports = hasSymbol ? Symbol("webpack exports") : "__webpack_exports__";
 /******/ 		var webpackError = hasSymbol ? Symbol("webpack error") : "__webpack_error__";
-/******/ 		
 /******/ 		
 /******/ 		var resolveQueue = (queue) => {
 /******/ 			if(queue && queue.d < 1) {
@@ -611,7 +616,7 @@ __webpack_async_result__();
 /******/ 			return __webpack_require__.O(result);
 /******/ 		}
 /******/ 		
-/******/ 		var chunkLoadingGlobal = self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || [];
+/******/ 		var chunkLoadingGlobal = self["webpackChunk"] = self["webpackChunk"] || [];
 /******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
 /******/ 	})();
@@ -621,7 +626,7 @@ __webpack_async_result__();
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js","src_page_js-src_pack_ts"], () => (__webpack_require__("./src/test.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js","page_js-pack_ts"], () => (__webpack_require__("./test.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

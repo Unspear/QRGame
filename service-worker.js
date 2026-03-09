@@ -78,7 +78,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
   workbox.precacheAndRoute([{
-    "url": "0d8e4ab2903dc15c0a51.css",
+    "url": "388aae3f50c9db2aa2ab.css",
     "revision": null
   }, {
     "url": "3f53db599ee755d90efd.wasm",
@@ -93,56 +93,68 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "8ab9f6a5f4328a5e0cae.png",
     "revision": null
   }, {
-    "url": "_9995.bundle.js",
-    "revision": "31c7f5828c1cc95849d66c63f6e87f41"
+    "url": "_4118.bundle.js",
+    "revision": "49d444f0e0eb1c3e27fa06b7908b8e11"
   }, {
     "url": "c2d13a665429ea85e8de.png",
     "revision": null
   }, {
+    "url": "d72e699c6e39e1315ca6.json",
+    "revision": null
+  }, {
     "url": "edit.bundle.js",
-    "revision": "5a0338204e3a9ed733ae16a6fac7bebe"
+    "revision": "5a5c8d84d6b5b882becbc0f4e88b8c12"
   }, {
     "url": "edit.html",
-    "revision": "3e9227654b2a033cfdbb591f3a7defca"
+    "revision": "6a8fe43b91f99c524cd46ca592911336"
+  }, {
+    "url": "favicon.png",
+    "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "icon-16.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
+    "url": "icon-192.png",
+    "revision": "4ef5eabbc5ce433e107ff92d2c3ed755"
+  }, {
+    "url": "icon-512.png",
+    "revision": "9e211cbc65c7ba616f140a5743981e29"
+  }, {
     "url": "index.bundle.js",
-    "revision": "3e980aa9202f5d4d835c0a5a4e0cc628"
+    "revision": "13d25ab7b12f1149221e786aedf32ae3"
   }, {
     "url": "index.html",
-    "revision": "538ab08ff0cc3220f43f219f69cd290d"
+    "revision": "94334765465c306126e0a74591499755"
+  }, {
+    "url": "page_js-pack_ts.bundle.js",
+    "revision": "d00401e3e3ca4a1e7237619b5dadb1b0"
   }, {
     "url": "play.bundle.js",
-    "revision": "b10cc409c9ce42953ede09952f725cee"
+    "revision": "e0ef3e9fe76064343e9035852c3e2667"
   }, {
     "url": "play.html",
-    "revision": "8ada0366b5ec2527fafe6582492ff087"
+    "revision": "68c901f1a23074b8e37a4f8afe81b120"
   }, {
-    "url": "src_page_js-src_pack_ts.bundle.js",
-    "revision": "a7a60bdba388d05d1152b58f704419b7"
-  }, {
-    "url": "src_player_ts.bundle.js",
-    "revision": "5a78e9d7eb99eeabe9823715890cf6d9"
+    "url": "player_ts.bundle.js",
+    "revision": "c13c8c13e62ae2273cd091cc94eed294"
   }, {
     "url": "test.bundle.js",
-    "revision": "a141b382a55393c9a143326017de6b9b"
+    "revision": "16cc68d435e33260c45d4883a0e4b0fc"
   }, {
     "url": "test.html",
-    "revision": "5320dde88331744cd7c2f19d075e72b5"
+    "revision": "9ea0783e2f24afe6cbee2382dcdbe0d0"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js.bundle.js",
-    "revision": "ecb71e3bd29e11fa6be1ae02ca5a5c99"
+    "revision": "8d90ea14d30c855f3fe0f7e662f713cc"
   }, {
     "url": "vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js",
-    "revision": "8167d382401d442b99c7d389b8b601d4"
+    "revision": "b6545d97fc74e7c80a5be3eca0a936a2"
   }, {
     "url": "vendors-node_modules_matter-js_build_matter_js.bundle.js",
-    "revision": "fcf4548b169b68267c110283433027fe"
+    "revision": "f72b1988b2dd9d40f3afa5803fe384fd"
   }, {
     "url": "vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js",
-    "revision": "e703ead720c7b33a868205afce182dc6"
+    "revision": "63cd1419d5164b46a0a42e993e5e92e8"
   }], {});
 
 }));

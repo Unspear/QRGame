@@ -1,6 +1,6 @@
-/*!*****************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./src/style.css ***!
-  \*****************************************************************/
+/*!**************************************************************!*\
+  !*** css ../node_modules/css-loader/dist/cjs.js!./style.css ***!
+  \**************************************************************/
 body {
     font-family: Verdana;
     /*Put page into central column*/
@@ -100,4 +100,4 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0.5rem 0rem
 }
 
-/*# sourceMappingURL=0d8e4ab2903dc15c0a51.css.map*/
+/*# sourceMappingURL=388aae3f50c9db2aa2ab.css.map*/

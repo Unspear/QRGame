@@ -1,10 +1,10 @@
-(self["webpackChunkqrgame"] = self["webpackChunkqrgame"] || []).push([["src_player_ts"],{
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["player_ts"],{
 
-/***/ "./src/camera.ts":
-/*!***********************!*\
-  !*** ./src/camera.ts ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./camera.ts"
+/*!*******************!*\
+  !*** ./camera.ts ***!
+  \*******************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -45,32 +45,32 @@ class Camera {
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/engine.ts":
-/*!***********************!*\
-  !*** ./src/engine.ts ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./engine.ts"
+/*!*******************!*\
+  !*** ./engine.ts ***!
+  \*******************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Engine: () => (/* binding */ Engine)
 /* harmony export */ });
-/* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! wasmoon */ "./node_modules/wasmoon/dist/index.js");
+/* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! wasmoon */ "../node_modules/wasmoon/dist/index.js");
 /* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(wasmoon__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint */ "./src/spriteDragConstraint.ts");
-/* harmony import */ var _sprite__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite */ "./src/sprite.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile */ "./src/tile.ts");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./src/util.ts");
-/* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "./node_modules/sam-js/dist/samjs.esm.min.js");
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera */ "./src/camera.ts");
-/* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "./node_modules/wasmoon/dist/glue.wasm");
-/* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./press-play.png */ "./src/press-play.png");
+/* harmony import */ var _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint */ "./spriteDragConstraint.ts");
+/* harmony import */ var _sprite__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite */ "./sprite.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./constants.ts");
+/* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile */ "./tile.ts");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./util.ts");
+/* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "../node_modules/sam-js/dist/samjs.esm.min.js");
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera */ "./camera.ts");
+/* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "../node_modules/wasmoon/dist/glue.wasm");
+/* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./press-play.png */ "./press-play.png");
 
 
 
@@ -101,6 +101,7 @@ class Engine {
     lua;
     luaFrame;
     paused;
+    currentSpeak;
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
@@ -146,6 +147,9 @@ class Engine {
         const gamePatchMap = _tile__WEBPACK_IMPORTED_MODULE_5__.PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new _camera__WEBPACK_IMPORTED_MODULE_8__.Camera();
+        if (this.currentSpeak) {
+            this.currentSpeak.abort("Interrupted");
+        }
         // Create physics engine
         matter_js__WEBPACK_IMPORTED_MODULE_1__.Resolver._restingThresh = 1;
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.create({
@@ -173,7 +177,10 @@ class Engine {
         this.lua.global.set('say', (string) => {
             // Replace non-ascii and control characters with space
             const ascii = string.replace(/[^\x20-\x7E]/g, " ");
-            this.textToSpeech.speak(ascii);
+            if (this.currentSpeak) {
+                this.currentSpeak.abort("Interrupted");
+            }
+            this.currentSpeak = this.textToSpeech.speak(ascii);
         });
         this.lua.global.set('camera', this.camera);
         // Load Script
@@ -237,13 +244,13 @@ class Engine {
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/player.ts":
-/*!***********************!*\
-  !*** ./src/player.ts ***!
-  \***********************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
+/***/ "./player.ts"
+/*!*******************!*\
+  !*** ./player.ts ***!
+  \*******************/
+(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
@@ -251,10 +258,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Player: () => (/* binding */ Player)
 /* harmony export */ });
-/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lean-qr */ "./node_modules/lean-qr/index.mjs");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game */ "./src/game.ts");
-/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./engine */ "./src/engine.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pack */ "./src/pack.ts");
+/* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lean-qr */ "../node_modules/lean-qr/index.mjs");
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game */ "./game.ts");
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./engine */ "./engine.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pack */ "./pack.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_3__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 _pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_async_dependencies_result__[0];
@@ -320,33 +327,22 @@ class Player {
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
 
-/***/ }),
+/***/ },
 
-/***/ "./src/press-play.png":
-/*!****************************!*\
-  !*** ./src/press-play.png ***!
-  \****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-module.exports = __webpack_require__.p + "c2d13a665429ea85e8de.png";
-
-/***/ }),
-
-/***/ "./src/sprite.ts":
-/*!***********************!*\
-  !*** ./src/sprite.ts ***!
-  \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./sprite.ts"
+/*!*******************!*\
+  !*** ./sprite.ts ***!
+  \*******************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Sprite: () => (/* binding */ Sprite)
 /* harmony export */ });
-/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render */ "./src/render.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
+/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render */ "./render.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./constants.ts");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_2__);
 
 
@@ -572,20 +568,20 @@ class Sprite {
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "./src/spriteDragConstraint.ts":
-/*!*************************************!*\
-  !*** ./src/spriteDragConstraint.ts ***!
-  \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./spriteDragConstraint.ts"
+/*!*********************************!*\
+  !*** ./spriteDragConstraint.ts ***!
+  \*********************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SpriteDragConstraint: () => (/* binding */ SpriteDragConstraint)
 /* harmony export */ });
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
 
 class SpriteDragConstraint {
@@ -660,17 +656,28 @@ class SpriteDragConstraint {
 }
 
 
-/***/ }),
+/***/ },
 
-/***/ "?3254":
+/***/ "./press-play.png"
+/*!************************!*\
+  !*** ./press-play.png ***!
+  \************************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+module.exports = __webpack_require__.p + "c2d13a665429ea85e8de.png";
+
+/***/ },
+
+/***/ "?6690"
 /*!*********************!*\
   !*** url (ignored) ***!
   \*********************/
-/***/ (() => {
+() {
 
 /* (ignored) */
 
-/***/ })
+/***/ }
 
 }]);
-//# sourceMappingURL=src_player_ts.bundle.js.map
+//# sourceMappingURL=player_ts.bundle.js.map
