@@ -1,18 +1,19 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
-const WebpackPwaManifest = require('webpack-pwa-manifest');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+  context: path.join(__dirname, 'src'),
   mode: 'development',
   devtool: 'source-map',
   target: 'web',
   entry: {
-    index: './src/index.ts',
-    play: './src/play.ts',
-    edit: './src/edit.ts',
-    test: './src/test.ts'
+    index: './index.ts',
+    play: './play.ts',
+    edit: './edit.ts',
+    test: './test.ts'
   },
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
@@ -61,64 +62,48 @@ module.exports = {
     ],
   },
   plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {from: "copy"}
+      ]
+    }),
     new MiniCssExtractPlugin({
       filename: "[contenthash].css",
     }),
     new HtmlWebpackPlugin({
       chunks: ["index"],
-      template: 'src/index.html',
-      favicon: 'src/icon-16.png',
+      template: 'index.html',
+      favicon: 'favicon.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["play"],
-      template: 'src/engine.html',
+      template: 'engine.html',
       templateParameters: {
         isEditor: false,
       },
       filename: 'play.html',
-      favicon: 'src/icon-16.png',
+      favicon: 'favicon.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["edit"],
-      template: 'src/engine.html',
+      template: 'engine.html',
       templateParameters: {
         isEditor: true,
       },
       filename: 'edit.html',
-      favicon: 'src/icon-16.png',
+      favicon: 'favicon.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["test"],
-      template: 'src/test.html',
+      template: 'test.html',
       filename: 'test.html',
-      favicon: 'src/icon-16.png',
+      favicon: 'favicon.png',
     }),
     new WorkboxPlugin.GenerateSW({
        // these options encourage the ServiceWorkers to get in there fast
        // and not allow any straggling "old" SWs to hang around
        clientsClaim: true,
        skipWaiting: true
-     }),
-    new WebpackPwaManifest({
-      name: 'QR Game',
-      short_name: 'QR Game',
-      description: 'Description!',
-      background_color: '#ffffff',
-      publicPath: './',
-      icons: [
-        {
-          src: path.resolve('src/icon-16.png'),
-          size: 16,
-        },
-        {
-          src: path.resolve('src/icon-192.png'),
-          size: 192,
-        },
-        {
-          src: path.resolve('src/icon-512.png'),
-          size: 512,
-        }
-      ]
     })
   ]
 };
