@@ -1,8 +1,15 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
-out vec4 outputColor;
+in vec2 fTexCoord;
+in vec4 fBackColor;
+in vec4 fFrontColor;
+
+out vec4 outColor;
+
+uniform mediump sampler2D uSampler;
 
 void main() {
-    outputColor = vec4(0.294, 0.0, 0.51, 1.0);
+  //vec4 value = texture(uSampler, fTexCoord);
+  outColor = (1.0 > 0.5) ? fFrontColor : fBackColor;
 }
