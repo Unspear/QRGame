@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
-import charRenderer from './oldRender'
 import { Dimensions, Point } from './util';
 import { CHAR_WIDTH } from './constants';
+import { Renderer } from './render';
 
 type SingleTileData = {
     codePoint: number;
@@ -75,11 +75,11 @@ export class TileMap {
         patch.codePoint[index] = newTileData.codePoint;
         patch.color[index] = newTileData.color;
     }
-    draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
+    draw(renderer: Renderer, viewOffset: Point) {
         for (let i = 0; i < this.count; i++) {
             let patch = this.tileData[i]!;
             let offset = i * this.dim.w * CHAR_WIDTH;
-            charRenderer.draw(ctx, patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
+            renderer.draw(patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
         }
     }
     drawOutline(ctx: CanvasRenderingContext2D, viewOffset: Point) {
@@ -178,8 +178,8 @@ export class PatchMap {
             y: patchCoords.y * (this.dim.h + 1) * CHAR_WIDTH,
         }
     }
-    draw(ctx: CanvasRenderingContext2D, viewOffset: Point) {
-        charRenderer.draw(ctx, this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
+    draw(renderer: Renderer, viewOffset: Point) {
+        renderer.draw(this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
     drawOutline(ctx: CanvasRenderingContext2D, viewOffset: Point) {
         ctx.lineWidth = 1;

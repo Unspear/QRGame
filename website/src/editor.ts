@@ -6,6 +6,7 @@ import { Game } from './game';
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { MyTabElement } from './tab';
+import { Renderer } from './render';
 
 enum EditorState {
     Brush,
@@ -48,7 +49,7 @@ export class Editor {
     exportButton: HTMLButtonElement;
     importButton: HTMLButtonElement;
     // Other
-    ctx: CanvasRenderingContext2D;
+    renderer: Renderer;
     heldDown: boolean;
     camera: Camera;
     tileMap: TileMap;
@@ -91,7 +92,7 @@ export class Editor {
         //Import/Export
         this.exportButton = document.getElementById('export-button') as HTMLButtonElement;
         this.importButton = document.getElementById('import-button') as HTMLButtonElement;
-        this.ctx = this.canvas.getContext('2d')!;
+        this.renderer = new Renderer(this.canvas);
         this.heldDown = false;
         this.camera = new Camera();
         // Place tile while pointer is held
@@ -273,15 +274,15 @@ export class Editor {
     }
     draw() {
         // Fill Background
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.ctx, this.camera.getViewOffset());
-            this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.patchMap.draw(this.renderer, this.camera.getViewOffset());
+            //this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
         } else {
-            this.tileMap.draw(this.ctx, this.camera.getViewOffset());
-            this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.tileMap.draw(this.renderer, this.camera.getViewOffset());
+            //this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
         }
+        this.renderer.endFrame();
     }
     getGame(): Game {
         let game = new Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);

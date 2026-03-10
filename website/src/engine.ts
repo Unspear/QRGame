@@ -10,6 +10,7 @@ import { Camera } from './camera'
 import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
+import { Renderer } from './render'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
@@ -18,8 +19,8 @@ export class Engine {
     gameCanvas: HTMLCanvasElement;
     textToSpeech: SamJs;
     luaFactory: LuaFactory;
-    ctx: CanvasRenderingContext2D;
     downPointers: Set<number>;
+    renderer: Renderer;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
     game!: Game;
@@ -36,14 +37,7 @@ export class Engine {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
         this.luaFactory = new LuaFactory(glueUrl);
-        this.ctx = gameCanvas.getContext('2d')!;
-        // Fill Background
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-        pressPlayImage.decode().then(() => {
-            this.ctx.fillStyle = "white";
-            this.ctx.drawImage(pressPlayImage, 0, 0);
-        })
+        this.renderer = new Renderer(this.gameCanvas);
         this.downPointers = new Set();
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);
@@ -145,7 +139,7 @@ export class Engine {
                     this.luaFrame();
                 }
                 this.camera.frame(FRAME_TIME)
-                
+
                 // Physics
                 for (let sprite of this.sprites) {
                     sprite.prePhysicsUpdate(this.matterEngine)
@@ -156,14 +150,13 @@ export class Engine {
                 }
                 // Rendering
                 // Fill Background
-                this.ctx.fillStyle = "black";
-                this.ctx.fillRect(0, 0, this.gameCanvas.width, this.gameCanvas.height);
-                // Draw Tilemap
+                this.renderer.beginFrame();
                 let viewOffset = this.camera.getViewOffset();
-                this.tileMap.draw(this.ctx, viewOffset);
+                // Draw Tilemap
+                this.tileMap.draw(this.renderer, viewOffset);
                 // Draw Sprites
                 for (let sprite of this.sprites) {
-                    sprite.draw(this.ctx, viewOffset)
+                    sprite.draw(this.renderer, viewOffset)
                 }
             }
             if (elapsed > FRAME_TIME_MS * 5) {

@@ -1,7 +1,7 @@
-import charRenderer from './oldRender'
 import { CHAR_WIDTH, PALETTE } from './constants';
 import * as Matter from 'matter-js'
 import { Point } from './util';
+import { Renderer } from './render';
 
 export class Sprite {
     char: string;
@@ -217,8 +217,8 @@ export class Sprite {
             this.#y = this.#physBody.position.y + CHAR_WIDTH * this.#py - CHAR_WIDTH * 0.5;
         }
     }
-    draw(context: CanvasRenderingContext2D, viewOffset: Point) {
+    draw(renderer: Renderer, viewOffset: Point) {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
-        charRenderer.draw(context, codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
+        renderer.draw(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }
 }

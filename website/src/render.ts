@@ -31,6 +31,7 @@ export class Renderer {
     #iBackColorLoc: number;
     #iFrontColorLoc: number;
     #iTexIndexLoc: number;
+    #iHalfWidth: number;
     #uView: WebGLUniformLocation;
     // VAO
     #vao: WebGLVertexArrayObject;
@@ -74,6 +75,7 @@ export class Renderer {
         this.#iBackColorLoc = this.#gl.getAttribLocation(this.#program, 'iBackColor');
         this.#iFrontColorLoc = this.#gl.getAttribLocation(this.#program, 'iFrontColor');
         this.#iTexIndexLoc = this.#gl.getAttribLocation(this.#program, 'iTexIndex');
+        this.#iHalfWidth = this.#gl.getAttribLocation(this.#program, 'iHalfWidth');
         this.#uView = this.#gl.getUniformLocation(this.#program, 'uView')!;
         // Make VAO
         this.#vao = this.#gl.createVertexArray();
@@ -96,12 +98,12 @@ export class Renderer {
         const texCoordBuffer = this.#gl.createBuffer();
         this.#gl.bindBuffer(GL.ARRAY_BUFFER, texCoordBuffer);
         this.#gl.bufferData(GL.ARRAY_BUFFER, new Float32Array([
-            0, 0,
             0, 1,
-            1, 1,
             0, 0,
-            1, 1,
             1, 0,
+            0, 1,
+            1, 0,
+            1, 1,
         ]), GL.STATIC_DRAW);
         this.#gl.enableVertexAttribArray(this.#vTexCoordLoc);
         this.#gl.vertexAttribPointer(this.#vTexCoordLoc, 2, GL.FLOAT, false, 0, 0);
@@ -117,18 +119,22 @@ export class Renderer {
         this.#gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
         this.#instanceData = new Float32Array(this.#instanceStride * 16384);
         this.#gl.bufferData(GL.ARRAY_BUFFER, this.#instanceData, GL.DYNAMIC_DRAW);
+        const BPE = Float32Array.BYTES_PER_ELEMENT;// Bytes per element
         this.#gl.enableVertexAttribArray(this.#iBackColorLoc);
-        this.#gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, instanceStride * 4, 0 * 4);
+        this.#gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 0 * BPE);
         this.#gl.vertexAttribDivisor(this.#iBackColorLoc, 1);
         this.#gl.enableVertexAttribArray(this.#iFrontColorLoc);
-        this.#gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, instanceStride * 4, 4 * 4);
+        this.#gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 4 * BPE);
         this.#gl.vertexAttribDivisor(this.#iFrontColorLoc, 1);
         this.#gl.enableVertexAttribArray(this.#iOffsetLoc);
-        this.#gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, instanceStride * 4, 8 * 4);
+        this.#gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
         this.#gl.vertexAttribDivisor(this.#iOffsetLoc, 1);
         this.#gl.enableVertexAttribArray(this.#iTexIndexLoc);
-        this.#gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, instanceStride * 4, 10 * 4);
+        this.#gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
         this.#gl.vertexAttribDivisor(this.#iTexIndexLoc, 1);
+        this.#gl.enableVertexAttribArray(this.#iHalfWidth);
+        this.#gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
+        this.#gl.vertexAttribDivisor(this.#iHalfWidth, 1);
         // Draw
         let that = this;
         spriteSheet.decode().then(function() {
@@ -149,14 +155,17 @@ export class Renderer {
         });
     }
     beginFrame() {
-        this.#gl.clearColor(1, 0, 1, 1);
+        this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
         this.#gl.useProgram(this.#program);
         this.#gl.uniform4fv(this.#uView, [0, 0, this.#gl.canvas.width, this.#gl.canvas.height]);
         this.#gl.bindVertexArray(this.#vao);
     }
-    addInstanceData(x: number, y: number, color: number, codepoint: number) {
+    endFrame() {
+        this.#gl.flush();
+    }
+    addInstanceData(x: number, y: number, color: number, codepoint: number, compact: boolean = false) {
         let start = this.#numInstances * this.#instanceStride;
         let values = PALETTE_FRACTIONS[color % 8];
         if (color >= 8) {
@@ -169,7 +178,9 @@ export class Renderer {
         if (!(codepoint in spriteSheetData)) {
             codepoint = 0;// NUL character
         }
-        this.#instanceData.set([x, y, spriteSheetData[codepoint].index], start);
+        const data = spriteSheetData[codepoint];
+        const isFullWidth = !compact || data.isFullWidth;
+        this.#instanceData.set([x, y, data.index, isFullWidth ? 0.0 : 1.0], start);
         this.#numInstances++;
     }
     drawInstances() {
@@ -209,7 +220,8 @@ export class Renderer {
         let roundedY = Math.round(posY - height * pivotY);
         for (let i = 0; i < codePoints.length; i++) {
             let offset = offsets[i];
-            this.addInstanceData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i]);
+            this.addInstanceData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
         }
+        this.drawInstances();
     }
 }
