@@ -46,6 +46,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./game */ "./game.ts");
 /* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./tile */ "./tile.ts");
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./util.ts");
+/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./render */ "./render.ts");
+
 
 
 
@@ -93,7 +95,7 @@ class Editor {
     exportButton;
     importButton;
     // Other
-    ctx;
+    renderer;
     heldDown;
     camera;
     tileMap;
@@ -136,7 +138,7 @@ class Editor {
         //Import/Export
         this.exportButton = document.getElementById('export-button');
         this.importButton = document.getElementById('import-button');
-        this.ctx = this.canvas.getContext('2d');
+        this.renderer = new _render__WEBPACK_IMPORTED_MODULE_8__.Renderer(this.canvas);
         this.heldDown = false;
         this.camera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
         // Place tile while pointer is held
@@ -323,16 +325,16 @@ class Editor {
     }
     draw() {
         // Fill Background
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.ctx, this.camera.getViewOffset());
-            this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.patchMap.draw(this.renderer, this.camera.getViewOffset());
+            //this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
         }
         else {
-            this.tileMap.draw(this.ctx, this.camera.getViewOffset());
-            this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.tileMap.draw(this.renderer, this.camera.getViewOffset());
+            //this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
         }
+        this.renderer.endFrame();
     }
     getGame() {
         let game = new _game__WEBPACK_IMPORTED_MODULE_5__.Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
