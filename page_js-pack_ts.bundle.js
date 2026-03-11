@@ -483,28 +483,18 @@ class TileMap {
         for (let i = 0; i < this.count; i++) {
             let patch = this.tileData[i];
             let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
-            renderer.draw(patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
+            renderer.drawCharacters(patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
         }
     }
-    drawOutline(ctx, viewOffset) {
+    drawOutline(renderer, viewOffset) {
         for (let i = 0; i < this.count; i++) {
             let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'aquamarine';
-            ctx.lineDashOffset = 0.5;
-            ctx.setLineDash([6, 2]);
-            ctx.beginPath();
-            const margin = 0.0;
+            const margin = -1.5;
             const x0 = offset + viewOffset.x - margin;
             const x1 = offset + viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
             const y0 = viewOffset.y - margin;
             const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
-            ctx.lineTo(x0, y0);
-            ctx.lineTo(x1, y0);
-            ctx.lineTo(x1, y1);
-            ctx.lineTo(x0, y1);
-            ctx.closePath();
-            ctx.stroke();
+            renderer.drawBox(x0, y0, x1, y1);
         }
     }
     createBodies(matterEngine, solidTiles) {
@@ -570,25 +560,15 @@ class PatchMap {
         };
     }
     draw(renderer, viewOffset) {
-        renderer.draw(this.tileData.patchId.map(n => n + 0x30 /**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
+        renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30 /**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
-    drawOutline(ctx, viewOffset) {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'aquamarine';
-        ctx.lineDashOffset = 0.5;
-        ctx.setLineDash([6, 2]);
-        ctx.beginPath();
-        const margin = 0;
+    drawOutline(renderer, viewOffset) {
+        const margin = -1.5;
         const x0 = viewOffset.x - margin;
         const x1 = viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
         const y0 = viewOffset.y - margin;
         const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
-        ctx.lineTo(x0, y0);
-        ctx.lineTo(x1, y0);
-        ctx.lineTo(x1, y1);
-        ctx.lineTo(x0, y1);
-        ctx.closePath();
-        ctx.stroke();
+        renderer.drawBox(x0, y0, x1, y1);
     }
     createTileMap(patchSource) {
         let tileMap = new TileMap({ w: patchSource.dim.w * this.dim.w, h: patchSource.dim.h * this.dim.h });

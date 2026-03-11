@@ -12,34 +12,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Camera: () => (/* binding */ Camera)
 /* harmony export */ });
 class Camera {
-    #currentPos;
-    #targetPos;
+    #pos;
     constructor() {
-        this.#currentPos = { x: 0, y: 0 };
-        this.#targetPos = { x: 0, y: 0 };
+        this.#pos = { x: 0, y: 0 };
     }
     set x(value) {
-        this.#targetPos.x = value;
+        this.#pos.x = value;
     }
     set y(value) {
-        this.#targetPos.y = value;
+        this.#pos.y = value;
     }
     get x() {
-        return this.#targetPos.x;
+        return this.#pos.x;
     }
     get y() {
-        return this.#targetPos.y;
+        return this.#pos.y;
     }
-    frame(deltaTime) {
-        this.#currentPos.x = this.#targetPos.x;
-        this.#currentPos.y = this.#targetPos.y;
-    }
-    getTargetPos() {
-        return Object.assign({}, this.#targetPos);
+    getPos() {
+        return Object.assign({}, this.#pos);
     }
     getViewOffset() {
-        let offsetX = -this.#currentPos.x;
-        let offsetY = -this.#currentPos.y;
+        let offsetX = -this.#pos.x;
+        let offsetY = -this.#pos.y;
         return { x: offsetX, y: offsetY };
     }
 }
@@ -185,56 +179,39 @@ class Engine {
         this.luaTap = this.lua.global.get('tap');
         this.luaDrag = this.lua.global.get('drag');
         // Start
-        requestAnimationFrame(this.#mainLoop.bind(this));
+        this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value) {
-        this.paused = value;
+        this.renderer.paused = value;
     }
     isPaused() {
-        return this.paused;
+        return this.renderer.paused;
     }
-    #mainLoop(timestamp) {
-        if (this.#previousTimestamp === undefined) {
-            this.#previousTimestamp = timestamp;
+    #doFrame() {
+        // Frame
+        if (this.luaFrame) {
+            this.luaFrame();
         }
-        const elapsed = timestamp - this.#previousTimestamp;
-        if (elapsed > _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS) {
-            if (this.gameCanvas.checkVisibility() && !this.paused) {
-                // Frame
-                if (this.luaFrame) {
-                    this.luaFrame();
-                }
-                this.camera.frame(_constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
-                // Physics
-                for (let sprite of this.sprites) {
-                    sprite.prePhysicsUpdate(this.matterEngine);
-                }
-                matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.update(this.matterEngine, _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS);
-                for (let sprite of this.sprites) {
-                    sprite.postPhysicsUpdate(this.matterEngine);
-                }
-                // Rendering
-                // Fill Background
-                this.renderer.beginFrame();
-                let viewOffset = this.camera.getViewOffset();
-                // Draw Tilemap
-                this.tileMap.draw(this.renderer, viewOffset);
-                // Draw Sprites
-                for (let sprite of this.sprites) {
-                    sprite.draw(this.renderer, viewOffset);
-                }
-            }
-            if (elapsed > _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS * 5) {
-                console.log("Elapsed time is large, skipping frames");
-                this.#previousTimestamp = timestamp;
-            }
-            else {
-                this.#previousTimestamp += _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS;
-            }
+        // Physics
+        for (let sprite of this.sprites) {
+            sprite.prePhysicsUpdate(this.matterEngine);
         }
-        requestAnimationFrame((t) => this.#mainLoop(t));
+        matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.update(this.matterEngine, _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME_MS);
+        for (let sprite of this.sprites) {
+            sprite.postPhysicsUpdate(this.matterEngine);
+        }
+        // Rendering
+        // Fill Background
+        this.renderer.beginFrame();
+        let viewOffset = this.camera.getViewOffset();
+        // Draw Tilemap
+        this.tileMap.draw(this.renderer, viewOffset);
+        // Draw Sprites
+        for (let sprite of this.sprites) {
+            sprite.draw(this.renderer, viewOffset);
+        }
+        this.renderer.endFrame();
     }
-    #previousTimestamp;
 }
 
 
@@ -337,9 +314,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _chars_png__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./chars.png */ "./chars.png");
 /* harmony import */ var _chars_txt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chars.txt */ "./chars.txt");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./constants.ts");
-/* harmony import */ var _shaders_simple_vert__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./shaders/simple.vert */ "./shaders/simple.vert");
-/* harmony import */ var _shaders_simple_frag__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./shaders/simple.frag */ "./shaders/simple.frag");
-
+/* harmony import */ var _shaders_sprite_vert__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./shaders/sprite.vert */ "./shaders/sprite.vert");
+/* harmony import */ var _shaders_sprite_frag__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./shaders/sprite.frag */ "./shaders/sprite.frag");
+/* harmony import */ var _shaders_line_vert__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./shaders/line.vert */ "./shaders/line.vert");
+/* harmony import */ var _shaders_line_frag__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shaders/line.frag */ "./shaders/line.frag");
 
 
 
@@ -356,9 +334,49 @@ for (let i = 0; i < lines.length; i++) {
     };
 }
 const GL = WebGL2RenderingContext;
-class Renderer {
-    #gl;
-    // Shader Locations
+function createProgram(gl, vertexSource, fragmentSource) {
+    const vertexShader = gl.createShader(GL.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, vertexSource);
+    gl.compileShader(vertexShader);
+    if (!gl.getShaderParameter(vertexShader, GL.COMPILE_STATUS)) {
+        const errorMessage = gl.getShaderInfoLog(vertexShader);
+        console.log(`Failed to compile vertex shader: ${errorMessage}`);
+        return null;
+    }
+    const fragmentShader = gl.createShader(GL.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, fragmentSource);
+    gl.compileShader(fragmentShader);
+    if (!gl.getShaderParameter(fragmentShader, GL.COMPILE_STATUS)) {
+        const errorMessage = gl.getShaderInfoLog(fragmentShader);
+        console.log(`Failed to compile fragment shader: ${errorMessage}`);
+        return null;
+    }
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, GL.LINK_STATUS)) {
+        const errorMessage = gl.getProgramInfoLog(program);
+        console.log(`Failed to link GPU program: ${errorMessage}`);
+        return null;
+    }
+    return program;
+}
+function createTexture(gl, image) {
+    const texture = gl.createTexture();
+    gl.bindTexture(GL.TEXTURE_2D, texture);
+    gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, image);
+    gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+    gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+    gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+    gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+    gl.bindTexture(GL.TEXTURE_2D, null);
+    return texture;
+}
+
+
+class SpritePipeline {
+    #program;
     #vPositionLoc;
     #vTexCoordLoc;
     #iOffsetLoc;
@@ -367,58 +385,31 @@ class Renderer {
     #iTexIndexLoc;
     #iHalfWidth;
     #uView;
-    // VAO
     #vao;
-    // Stuff
     #numInstances;
     #instanceStride;
     #numVertices;
     #instanceBuffer;
-    #program;
-    // Buffer
     #instanceData;
-    constructor(canvas) {
-        this.#gl = canvas.getContext("webgl2"); //{ antialias: false }
-        // Shader Program
-        const vertexShader = this.#gl.createShader(GL.VERTEX_SHADER);
-        this.#gl.shaderSource(vertexShader, _shaders_simple_vert__WEBPACK_IMPORTED_MODULE_3__);
-        this.#gl.compileShader(vertexShader);
-        if (!this.#gl.getShaderParameter(vertexShader, GL.COMPILE_STATUS)) {
-            const errorMessage = this.#gl.getShaderInfoLog(vertexShader);
-            console.log(`Failed to compile vertex shader: ${errorMessage}`);
-        }
-        const fragmentShader = this.#gl.createShader(GL.FRAGMENT_SHADER);
-        this.#gl.shaderSource(fragmentShader, _shaders_simple_frag__WEBPACK_IMPORTED_MODULE_4__);
-        this.#gl.compileShader(fragmentShader);
-        if (!this.#gl.getShaderParameter(fragmentShader, GL.COMPILE_STATUS)) {
-            const errorMessage = this.#gl.getShaderInfoLog(fragmentShader);
-            console.log(`Failed to compile fragment shader: ${errorMessage}`);
-        }
-        this.#program = this.#gl.createProgram();
-        this.#gl.attachShader(this.#program, vertexShader);
-        this.#gl.attachShader(this.#program, fragmentShader);
-        this.#gl.linkProgram(this.#program);
-        if (!this.#gl.getProgramParameter(this.#program, GL.LINK_STATUS)) {
-            const errorMessage = this.#gl.getProgramInfoLog(this.#program);
-            console.log(`Failed to link GPU program: ${errorMessage}`);
-        }
+    #texture;
+    constructor(gl) {
+        this.#program = createProgram(gl, _shaders_sprite_vert__WEBPACK_IMPORTED_MODULE_3__, _shaders_sprite_frag__WEBPACK_IMPORTED_MODULE_4__);
         // Shader Locations
-        this.#vPositionLoc = this.#gl.getAttribLocation(this.#program, 'vPosition');
-        this.#vTexCoordLoc = this.#gl.getAttribLocation(this.#program, 'vTexCoord');
-        this.#iOffsetLoc = this.#gl.getAttribLocation(this.#program, 'iOffset');
-        this.#iBackColorLoc = this.#gl.getAttribLocation(this.#program, 'iBackColor');
-        this.#iFrontColorLoc = this.#gl.getAttribLocation(this.#program, 'iFrontColor');
-        this.#iTexIndexLoc = this.#gl.getAttribLocation(this.#program, 'iTexIndex');
-        this.#iHalfWidth = this.#gl.getAttribLocation(this.#program, 'iHalfWidth');
-        this.#uView = this.#gl.getUniformLocation(this.#program, 'uView');
+        this.#vPositionLoc = gl.getAttribLocation(this.#program, 'vPosition');
+        this.#vTexCoordLoc = gl.getAttribLocation(this.#program, 'vTexCoord');
+        this.#iOffsetLoc = gl.getAttribLocation(this.#program, 'iOffset');
+        this.#iBackColorLoc = gl.getAttribLocation(this.#program, 'iBackColor');
+        this.#iFrontColorLoc = gl.getAttribLocation(this.#program, 'iFrontColor');
+        this.#iTexIndexLoc = gl.getAttribLocation(this.#program, 'iTexIndex');
+        this.#iHalfWidth = gl.getAttribLocation(this.#program, 'iHalfWidth');
+        this.#uView = gl.getUniformLocation(this.#program, 'uView');
         // Make VAO
-        this.#vao = this.#gl.createVertexArray();
-        this.#gl.bindVertexArray(this.#vao);
+        this.#vao = gl.createVertexArray();
+        gl.bindVertexArray(this.#vao);
         this.#numVertices = 6;
-        // Position Buffer
-        const positionBuffer = this.#gl.createBuffer();
-        this.#gl.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
-        this.#gl.bufferData(GL.ARRAY_BUFFER, new Float32Array([
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(GL.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(GL.ARRAY_BUFFER, new Float32Array([
             0, 16,
             0, 0,
             16, 0,
@@ -426,12 +417,12 @@ class Renderer {
             16, 0,
             16, 16,
         ]), GL.STATIC_DRAW);
-        this.#gl.enableVertexAttribArray(this.#vPositionLoc);
-        this.#gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.#vPositionLoc);
+        gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, 0, 0);
         // Position Buffer
-        const texCoordBuffer = this.#gl.createBuffer();
-        this.#gl.bindBuffer(GL.ARRAY_BUFFER, texCoordBuffer);
-        this.#gl.bufferData(GL.ARRAY_BUFFER, new Float32Array([
+        const texCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(GL.ARRAY_BUFFER, texCoordBuffer);
+        gl.bufferData(GL.ARRAY_BUFFER, new Float32Array([
             0, 1,
             0, 0,
             1, 0,
@@ -439,8 +430,8 @@ class Renderer {
             1, 0,
             1, 1,
         ]), GL.STATIC_DRAW);
-        this.#gl.enableVertexAttribArray(this.#vTexCoordLoc);
-        this.#gl.vertexAttribPointer(this.#vTexCoordLoc, 2, GL.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.#vTexCoordLoc);
+        gl.vertexAttribPointer(this.#vTexCoordLoc, 2, GL.FLOAT, false, 0, 0);
         // Sprite Buffer
         //vec4 iBackColor; 16 bytes
         //vec4 iFrontColor; 16 bytes
@@ -449,50 +440,34 @@ class Renderer {
         //float pad; 4 bytes
         this.#instanceStride = 12;
         this.#numInstances = 0;
-        this.#instanceBuffer = this.#gl.createBuffer();
-        this.#gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
+        this.#instanceBuffer = gl.createBuffer();
+        gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
         this.#instanceData = new Float32Array(this.#instanceStride * 16384);
-        this.#gl.bufferData(GL.ARRAY_BUFFER, this.#instanceData, GL.DYNAMIC_DRAW);
+        gl.bufferData(GL.ARRAY_BUFFER, this.#instanceData, GL.DYNAMIC_DRAW);
         const BPE = Float32Array.BYTES_PER_ELEMENT; // Bytes per element
-        this.#gl.enableVertexAttribArray(this.#iBackColorLoc);
-        this.#gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 0 * BPE);
-        this.#gl.vertexAttribDivisor(this.#iBackColorLoc, 1);
-        this.#gl.enableVertexAttribArray(this.#iFrontColorLoc);
-        this.#gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 4 * BPE);
-        this.#gl.vertexAttribDivisor(this.#iFrontColorLoc, 1);
-        this.#gl.enableVertexAttribArray(this.#iOffsetLoc);
-        this.#gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
-        this.#gl.vertexAttribDivisor(this.#iOffsetLoc, 1);
-        this.#gl.enableVertexAttribArray(this.#iTexIndexLoc);
-        this.#gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
-        this.#gl.vertexAttribDivisor(this.#iTexIndexLoc, 1);
-        this.#gl.enableVertexAttribArray(this.#iHalfWidth);
-        this.#gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
-        this.#gl.vertexAttribDivisor(this.#iHalfWidth, 1);
+        gl.enableVertexAttribArray(this.#iBackColorLoc);
+        gl.enableVertexAttribArray(this.#iFrontColorLoc);
+        gl.enableVertexAttribArray(this.#iOffsetLoc);
+        gl.enableVertexAttribArray(this.#iTexIndexLoc);
+        gl.enableVertexAttribArray(this.#iHalfWidth);
+        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
+        gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
+        gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
+        gl.vertexAttribDivisor(this.#iBackColorLoc, 1);
+        gl.vertexAttribDivisor(this.#iFrontColorLoc, 1);
+        gl.vertexAttribDivisor(this.#iOffsetLoc, 1);
+        gl.vertexAttribDivisor(this.#iTexIndexLoc, 1);
+        gl.vertexAttribDivisor(this.#iHalfWidth, 1);
         // Draw
         let that = this;
+        this.#texture = createTexture(gl, spriteSheet);
         spriteSheet.decode().then(function () {
-            const texture = that.#gl.createTexture();
-            that.#gl.bindTexture(GL.TEXTURE_2D, texture);
-            that.#gl.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, spriteSheet);
-            that.#gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
-            that.#gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-            that.#gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
-            that.#gl.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+            that.#texture = createTexture(gl, spriteSheet);
         });
     }
-    beginFrame() {
-        this.#gl.clearColor(0, 0, 0, 1);
-        this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
-        this.#gl.useProgram(this.#program);
-        this.#gl.uniform4fv(this.#uView, [0, 0, this.#gl.canvas.width, this.#gl.canvas.height]);
-        this.#gl.bindVertexArray(this.#vao);
-    }
-    endFrame() {
-        this.#gl.flush();
-    }
-    addInstanceData(x, y, color, codepoint, compact = false) {
+    addData(x, y, color, codepoint, compact = false) {
         let start = this.#numInstances * this.#instanceStride;
         let values = _constants__WEBPACK_IMPORTED_MODULE_2__.PALETTE_FRACTIONS[color % 8];
         if (color >= 8) {
@@ -510,13 +485,140 @@ class Renderer {
         this.#instanceData.set([x, y, data.index, isFullWidth ? 0.0 : 1.0], start);
         this.#numInstances++;
     }
-    drawInstances() {
-        this.#gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
-        this.#gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#instanceData, 0, this.#numInstances * this.#instanceStride * Float32Array.BYTES_PER_ELEMENT);
-        this.#gl.drawArraysInstanced(GL.TRIANGLES, 0, this.#numVertices, this.#numInstances);
+    draw(gl, view) {
+        if (this.#numInstances === 0) {
+            return;
+        }
+        // Shaders
+        gl.useProgram(this.#program);
+        gl.uniform4fv(this.#uView, view);
+        gl.bindTexture(GL.TEXTURE_2D, this.#texture);
+        // Attributes
+        gl.bindVertexArray(this.#vao);
+        // Instance Data
+        gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
+        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#instanceData, 0, this.#numInstances * this.#instanceStride * Float32Array.BYTES_PER_ELEMENT);
+        // Draw
+        gl.drawArraysInstanced(GL.TRIANGLES, 0, this.#numVertices, this.#numInstances);
         this.#numInstances = 0;
     }
-    draw(codePoints, colors, posX, posY, pivotX, pivotY, wrap, compact) {
+}
+
+
+class LinePipeline {
+    #program;
+    #vColorLoc;
+    #vPositionLoc;
+    #vOffsetLoc;
+    #uViewLoc;
+    #uLinePatternLoc;
+    #vao;
+    #vertexStride;
+    #numVertices;
+    #vertexBuffer;
+    #vertexData;
+    constructor(gl) {
+        this.#program = createProgram(gl, _shaders_line_vert__WEBPACK_IMPORTED_MODULE_5__, _shaders_line_frag__WEBPACK_IMPORTED_MODULE_6__);
+        // Shader Locations
+        this.#vPositionLoc = gl.getAttribLocation(this.#program, 'vPosition');
+        this.#vColorLoc = gl.getAttribLocation(this.#program, 'vColor');
+        this.#vOffsetLoc = gl.getAttribLocation(this.#program, 'vOffset');
+        this.#uViewLoc = gl.getUniformLocation(this.#program, 'uView');
+        this.#uLinePatternLoc = gl.getUniformLocation(this.#program, 'uLinePattern');
+        // Make VAO
+        this.#vao = gl.createVertexArray();
+        gl.bindVertexArray(this.#vao);
+        this.#vertexStride = 8;
+        this.#numVertices = 0;
+        this.#vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(GL.ARRAY_BUFFER, this.#vertexBuffer);
+        this.#vertexData = new Float32Array(this.#vertexStride * 16384);
+        gl.bufferData(GL.ARRAY_BUFFER, this.#vertexData, GL.DYNAMIC_DRAW);
+        const BPE = Float32Array.BYTES_PER_ELEMENT; // Bytes per element
+        gl.enableVertexAttribArray(this.#vColorLoc);
+        gl.enableVertexAttribArray(this.#vPositionLoc);
+        gl.enableVertexAttribArray(this.#vOffsetLoc);
+        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, false, this.#vertexStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, this.#vertexStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#vOffsetLoc, 1, GL.FLOAT, false, this.#vertexStride * BPE, 6 * BPE);
+    }
+    addData(x, y, r, g, b, a, offset) {
+        let start = this.#numVertices * this.#vertexStride;
+        this.#vertexData.set([r, g, b, a, x, y, offset, 0], start);
+        this.#numVertices++;
+    }
+    draw(gl, view, pattern) {
+        if (this.#numVertices === 0) {
+            return;
+        }
+        // Shaders
+        gl.useProgram(this.#program);
+        gl.uniform4fv(this.#uViewLoc, view);
+        gl.uniform3fv(this.#uLinePatternLoc, [pattern.offset, pattern.interval, pattern.dashLength]);
+        // Attributes
+        gl.bindVertexArray(this.#vao);
+        // Instance Data
+        gl.bindBuffer(GL.ARRAY_BUFFER, this.#vertexBuffer);
+        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#vertexData, 0, this.#numVertices * this.#vertexStride * Float32Array.BYTES_PER_ELEMENT);
+        // Draw
+        gl.drawArrays(GL.LINES, 0, this.#numVertices);
+        this.#numVertices = 0;
+    }
+}
+class Renderer {
+    #gl;
+    #previousTimestamp;
+    #frameCallback;
+    #spritePipeline;
+    #linePipeline;
+    paused;
+    renderTime;
+    constructor(canvas) {
+        this.#gl = canvas.getContext("webgl2"); //{ antialias: false }
+        this.#spritePipeline = new SpritePipeline(this.#gl);
+        this.#linePipeline = new LinePipeline(this.#gl);
+        this.paused = false;
+        this.renderTime = 0;
+    }
+    startRenderLoop(frameCallback) {
+        this.#frameCallback = frameCallback;
+        requestAnimationFrame((t) => this.#renderFrame(t));
+    }
+    #renderFrame(timestamp) {
+        if (this.#previousTimestamp === undefined) {
+            this.#previousTimestamp = timestamp;
+        }
+        if (this.#gl.canvas.checkVisibility() && !this.paused) {
+            const elapsed = timestamp - this.#previousTimestamp;
+            if (elapsed >= _constants__WEBPACK_IMPORTED_MODULE_2__.FRAME_TIME_MS) {
+                this.#frameCallback();
+                this.renderTime += _constants__WEBPACK_IMPORTED_MODULE_2__.FRAME_TIME;
+                if (elapsed > _constants__WEBPACK_IMPORTED_MODULE_2__.FRAME_TIME_MS * 5) {
+                    console.log("Elapsed time is large, skipping frames");
+                    this.#previousTimestamp = timestamp;
+                }
+                else {
+                    this.#previousTimestamp += _constants__WEBPACK_IMPORTED_MODULE_2__.FRAME_TIME_MS;
+                }
+            }
+        }
+        else {
+            this.#previousTimestamp = timestamp;
+        }
+        requestAnimationFrame((t) => this.#renderFrame(t));
+    }
+    beginFrame() {
+        this.#gl.clearColor(0, 0, 0, 1);
+        this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
+    }
+    endFrame() {
+        const viewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
+        this.#spritePipeline.draw(this.#gl, viewData);
+        this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2 });
+        this.#gl.flush();
+    }
+    drawCharacters(codePoints, colors, posX, posY, pivotX, pivotY, wrap, compact) {
         console.assert(codePoints.length == colors.length);
         // Find layout
         let offsets = [];
@@ -546,9 +648,23 @@ class Renderer {
         let roundedY = Math.round(posY - height * pivotY);
         for (let i = 0; i < codePoints.length; i++) {
             let offset = offsets[i];
-            this.addInstanceData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
+            this.#spritePipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
         }
-        this.drawInstances();
+    }
+    drawBox(x0, y0, x1, y1) {
+        let totalOffset = 0;
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(x0 - x1);
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, totalOffset);
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(y0 - y1);
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, totalOffset);
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(x0 - x1);
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(y0 - y1);
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
     }
 }
 
@@ -787,7 +903,7 @@ class Sprite {
     }
     draw(renderer, viewOffset) {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
-        renderer.draw(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact);
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact);
     }
 }
 
@@ -915,9 +1031,31 @@ module.exports = "0,1\r\n1,1\r\n2,1\r\n3,1\r\n4,1\r\n5,1\r\n6,1\r\n7,1\r\n8,1\r\
 
 /***/ },
 
-/***/ "./shaders/simple.frag"
+/***/ "./shaders/line.frag"
+/*!***************************!*\
+  !*** ./shaders/line.frag ***!
+  \***************************/
+(module) {
+
+"use strict";
+module.exports = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec4 fColor;\r\nin float fOffset;\r\n\r\nuniform vec3 uLinePattern;\r\n\r\nout vec4 outColor;\r\n\r\nvoid main() {\r\n  outColor = fColor;\r\n  float offset = fOffset + uLinePattern[0] + 0.001;\r\n  offset = mod(offset, uLinePattern[1]);\r\n  if (offset < uLinePattern[2]) {\r\n    outColor.rgb = vec3(0);\r\n  }\r\n}";
+
+/***/ },
+
+/***/ "./shaders/line.vert"
+/*!***************************!*\
+  !*** ./shaders/line.vert ***!
+  \***************************/
+(module) {
+
+"use strict";
+module.exports = "#version 300 es\r\nin vec2 vPosition;\r\nin vec4 vColor;\r\nin float vOffset;\r\n\r\nuniform highp vec4 uView;\r\n\r\nout vec4 fColor;\r\nout float fOffset;\r\n\r\nconst int atlasWidth = 64;\r\n\r\nvoid main() {\r\n  vec2 pos = (vPosition + uView.xy) / uView.zw * 2.0 - 1.0;\r\n  pos.y *= -1.0;\r\n  gl_Position = vec4(pos, 0.0, 1.0);\r\n  fColor = vColor;\r\n  fOffset = vOffset;\r\n}";
+
+/***/ },
+
+/***/ "./shaders/sprite.frag"
 /*!*****************************!*\
-  !*** ./shaders/simple.frag ***!
+  !*** ./shaders/sprite.frag ***!
   \*****************************/
 (module) {
 
@@ -926,9 +1064,9 @@ module.exports = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 fTexC
 
 /***/ },
 
-/***/ "./shaders/simple.vert"
+/***/ "./shaders/sprite.vert"
 /*!*****************************!*\
-  !*** ./shaders/simple.vert ***!
+  !*** ./shaders/sprite.vert ***!
   \*****************************/
 (module) {
 

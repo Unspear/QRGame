@@ -103,7 +103,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "99082e60523673d355457ba13f762b54"
+    "revision": "6447d12a21e863ed3281e384886cae33"
   }, {
     "url": "edit.html",
     "revision": "1b260cc1cf7934d634b4cb4774efa7c9"
@@ -127,7 +127,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "062cbb65e6838683bb67660497a3f724"
   }, {
     "url": "page_js-pack_ts.bundle.js",
-    "revision": "03706b27eb8069061bb4d7b1a6188c72"
+    "revision": "8cfc85585a99a217cc18f706a3c831a1"
   }, {
     "url": "play.bundle.js",
     "revision": "e0ef3e9fe76064343e9035852c3e2667"
@@ -136,7 +136,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "7ac9eca63c78cd1debea5e677ba9e2e2"
   }, {
     "url": "player_ts.bundle.js",
-    "revision": "dcc88b9f4420095c345d5d8b607ef913"
+    "revision": "a2aa2c32833598e929da4d0587455566"
   }, {
     "url": "test.bundle.js",
     "revision": "16cc68d435e33260c45d4883a0e4b0fc"
