@@ -2,9 +2,17 @@
 precision highp float;
 
 in vec4 fColor;
+in float fOffset;
+
+uniform vec3 uLinePattern;
 
 out vec4 outColor;
 
 void main() {
   outColor = fColor;
+  float offset = fOffset + uLinePattern[0];
+  offset = mod(offset, uLinePattern[1]);
+  if (offset < uLinePattern[2]) {
+    discard;
+  }
 }

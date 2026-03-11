@@ -198,11 +198,19 @@ class SpritePipeline {
 import lineVertexSource from "./shaders/line.vert"
 import lineFragmentSource from "./shaders/line.frag";
 
+type LinePattern = {
+    offset: number;
+    interval: number;
+    dashLength: number;
+}
+
 class LinePipeline {
     #program: WebGLProgram;
     #vColorLoc: number;
     #vPositionLoc: number;
-    #uView: WebGLUniformLocation;
+    #vOffsetLoc: number;
+    #uViewLoc: WebGLUniformLocation;
+    #uLinePatternLoc: WebGLUniformLocation;
     #vao: WebGLVertexArrayObject;
     #vertexStride: number;
     #numVertices: number;
@@ -213,7 +221,9 @@ class LinePipeline {
         // Shader Locations
         this.#vPositionLoc = gl.getAttribLocation(this.#program, 'vPosition');
         this.#vColorLoc = gl.getAttribLocation(this.#program, 'vColor');
-        this.#uView = gl.getUniformLocation(this.#program, 'uView')!;
+        this.#vOffsetLoc = gl.getAttribLocation(this.#program, 'vOffset');
+        this.#uViewLoc = gl.getUniformLocation(this.#program, 'uView')!;
+        this.#uLinePatternLoc = gl.getUniformLocation(this.#program, 'uLinePattern')!;
         // Make VAO
         this.#vao = gl.createVertexArray();
         gl.bindVertexArray(this.#vao);
@@ -226,21 +236,24 @@ class LinePipeline {
         const BPE = Float32Array.BYTES_PER_ELEMENT;// Bytes per element
         gl.enableVertexAttribArray(this.#vColorLoc);
         gl.enableVertexAttribArray(this.#vPositionLoc);
+        gl.enableVertexAttribArray(this.#vOffsetLoc);
         gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, false, this.#vertexStride * BPE, 0 * BPE);
         gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, this.#vertexStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#vOffsetLoc, 1, GL.FLOAT, false, this.#vertexStride * BPE, 6 * BPE);
     }
-    addData(x: number, y: number, r: number, g: number, b: number, a: number) {
+    addData(x: number, y: number, r: number, g: number, b: number, a: number, offset: number) {
         let start = this.#numVertices * this.#vertexStride;
-        this.#vertexData.set([r, g, b, a, x, y, 0, 0], start);
+        this.#vertexData.set([r, g, b, a, x, y, offset, 0], start);
         this.#numVertices++;
     }
-    draw(gl: WebGL2RenderingContext, view: ViewData) {
+    draw(gl: WebGL2RenderingContext, view: ViewData, pattern: LinePattern) {
         if (this.#numVertices === 0) { 
             return;
         }
         // Shaders
         gl.useProgram(this.#program);
-        gl.uniform4fv(this.#uView, view);
+        gl.uniform4fv(this.#uViewLoc, view);
+        gl.uniform3fv(this.#uLinePatternLoc, [pattern.offset, pattern.interval, pattern.dashLength]);
         // Attributes
         gl.bindVertexArray(this.#vao);
         // Instance Data
@@ -256,10 +269,12 @@ export class Renderer {
     #gl: WebGL2RenderingContext;
     #spritePipeline: SpritePipeline;
     #linePipeline: LinePipeline;
+    lineOffset: number;
     constructor(canvas: HTMLCanvasElement) {
         this.#gl = canvas.getContext("webgl2")!;//{ antialias: false }
         this.#spritePipeline = new SpritePipeline(this.#gl);
         this.#linePipeline = new LinePipeline(this.#gl);
+        this.lineOffset = 0.1;
     }
     beginFrame() {
         this.#gl.clearColor(0, 0, 0, 1);
@@ -269,7 +284,7 @@ export class Renderer {
     endFrame() {
         const viewData: ViewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
         this.#spritePipeline.draw(this.#gl, viewData);
-        this.#linePipeline.draw(this.#gl, viewData);
+        this.#linePipeline.draw(this.#gl, viewData, { offset: this.lineOffset, interval: 2, dashLength: 1});
         this.#gl.flush();
     }
     drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean) {
@@ -307,16 +322,16 @@ export class Renderer {
         }
     }
     drawBox(x0: number, y0: number, x1: number, y1: number) {
-        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1);
-        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1);
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, 0);
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, Math.abs(x0 - x1));
 
-        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1);
-        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1);
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, 0);
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, Math.abs(y0 - y1));
 
-        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1);
-        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1);
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, 0);
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, Math.abs(x0 - x1));
 
-        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1);
-        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1);
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, 0);
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, Math.abs(y0 - y1));
     }
 }
