@@ -1,7 +1,6 @@
 import './page'
 import {gameToUrl} from './pack'
 import library from './library'
-import { Renderer } from './render';
 
 const demoParent = document.getElementById("demos") as HTMLElement;
 

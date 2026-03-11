@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { SpriteDragConstraint } from './spriteDragConstraint'
 import { Sprite } from './sprite'
-import { FRAME_TIME, FRAME_TIME_MS } from './constants'
+import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import SamJs from 'sam-js'
@@ -83,7 +83,23 @@ export class Engine {
         this.matterEngine = Matter.Engine.create({ 
             gravity: { scale: 0 }
         });
-        this.tileMap.createBodies(this.matterEngine, game.solidTiles);
+        // Create bodies
+        const options = {
+            restitution: 1.0,
+            frictionAir: 0.0,
+            friction: 0.0,
+            isStatic: true
+        };
+        for (let y = 0; y < this.tileMap.dim.h; y++) {
+            for (let x = 0; x < this.tileMap.dim.w; x++) {
+                const tile = this.tileMap.getTile({x: x, y: y})!;
+                if (game.solidTiles.includes(tile.codePoint)) {
+                    const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
+                    Matter.Composite.add(this.matterEngine.world, physBody);
+                }
+            }
+        }
+        // Create sprite drag constraint
         this.spriteDragConstraint = new SpriteDragConstraint(this.matterEngine, this.gameCanvas);
         Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment

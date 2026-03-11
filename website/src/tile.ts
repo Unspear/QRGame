@@ -1,4 +1,3 @@
-import Matter from 'matter-js';
 import { Dimensions, Point } from './util';
 import { CHAR_WIDTH } from './constants';
 import { Renderer } from './render';
@@ -91,23 +90,6 @@ export class TileMap {
             const y0 = viewOffset.y - margin;
             const y1 = viewOffset.y + this.dim.h * CHAR_WIDTH + margin;
             renderer.drawBox(x0, y0, x1, y1);
-        }
-    }
-    createBodies(matterEngine: Matter.Engine, solidTiles: number[]) {
-        const options = {
-            restitution: 1.0,
-            frictionAir: 0.0,
-            friction: 0.0,
-            isStatic: true
-        };
-        for (let y = 0; y < this.dim.h; y++) {
-            for (let x = 0; x < this.dim.w; x++) {
-                const tile: SingleTileData = this.getTile({x: x, y: y})!;
-                if (solidTiles.includes(tile.codePoint)) {
-                    const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
-                    Matter.Composite.add(matterEngine.world, physBody);
-                }
-            }
         }
     }
 }
