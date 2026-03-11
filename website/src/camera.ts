@@ -1,34 +1,28 @@
 import { Point } from "./util";
 
 export class Camera {
-    #currentPos: Point;
-    #targetPos: Point;
+    #pos: Point;
     constructor() {
-        this.#currentPos = {x: 0, y: 0};
-        this.#targetPos = {x: 0, y: 0};
+        this.#pos = {x: 0, y: 0};
     }
     set x(value) {
-        this.#targetPos.x = value;
+        this.#pos.x = value;
     }
     set y(value) {
-        this.#targetPos.y = value;
+        this.#pos.y = value;
     }
     get x() {
-        return this.#targetPos.x;
+        return this.#pos.x;
     }
     get y() {
-        return this.#targetPos.y;
+        return this.#pos.y;
     }
-    frame(deltaTime: number) {
-        this.#currentPos.x = this.#targetPos.x;
-        this.#currentPos.y = this.#targetPos.y;
-    }
-    getTargetPos(): Point {
-        return Object.assign({}, this.#targetPos);
+    getPos(): Point {
+        return Object.assign({}, this.#pos);
     }
     getViewOffset(): Point {
-        let offsetX = -this.#currentPos.x;
-        let offsetY = -this.#currentPos.y;
+        let offsetX = -this.#pos.x;
+        let offsetY = -this.#pos.y;
         return {x: offsetX, y: offsetY};
     }
 }

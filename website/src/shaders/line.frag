@@ -10,9 +10,9 @@ out vec4 outColor;
 
 void main() {
   outColor = fColor;
-  float offset = fOffset + uLinePattern[0];
+  float offset = fOffset + uLinePattern[0] + 0.001;
   offset = mod(offset, uLinePattern[1]);
   if (offset < uLinePattern[2]) {
-    discard;
+    outColor.rgb = vec3(0);
   }
 }

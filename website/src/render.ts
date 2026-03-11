@@ -1,6 +1,8 @@
 import Chars from './chars.png';
 import CharsText from './chars.txt'
-import { CHAR_WIDTH, PALETTE, PALETTE_FRACTIONS } from './constants';
+import { CHAR_WIDTH, FRAME_TIME, PALETTE_FRACTIONS } from './constants';
+import { FRAME_TIME_MS } from './constants'
+
 
 type SpriteSheetEntry = {
   index: number;
@@ -267,14 +269,43 @@ class LinePipeline {
 
 export class Renderer {
     #gl: WebGL2RenderingContext;
+    #previousTimestamp: DOMHighResTimeStamp | undefined;
+    #frameCallback: (() => void) | undefined;
     #spritePipeline: SpritePipeline;
     #linePipeline: LinePipeline;
-    lineOffset: number;
+    paused: boolean;
+    renderTime: number;
     constructor(canvas: HTMLCanvasElement) {
         this.#gl = canvas.getContext("webgl2")!;//{ antialias: false }
         this.#spritePipeline = new SpritePipeline(this.#gl);
         this.#linePipeline = new LinePipeline(this.#gl);
-        this.lineOffset = 0.1;
+        this.paused = false;
+        this.renderTime = 0;
+    }
+    startRenderLoop(frameCallback: () => void) {
+        this.#frameCallback = frameCallback;
+        requestAnimationFrame((t) => this.#renderFrame(t));
+    }
+    #renderFrame(timestamp: DOMHighResTimeStamp) {
+        if (this.#previousTimestamp === undefined) {
+            this.#previousTimestamp = timestamp;
+        }
+        if ((this.#gl.canvas as HTMLCanvasElement).checkVisibility() && !this.paused) {
+            const elapsed = timestamp - this.#previousTimestamp;
+            if (elapsed >= FRAME_TIME_MS) {
+                this.#frameCallback!();
+                this.renderTime += FRAME_TIME;
+                if (elapsed > FRAME_TIME_MS * 5) {
+                    console.log("Elapsed time is large, skipping frames")
+                    this.#previousTimestamp = timestamp;
+                } else {
+                    this.#previousTimestamp += FRAME_TIME_MS;
+                }
+            }
+        } else {
+            this.#previousTimestamp = timestamp;
+        }
+        requestAnimationFrame((t) => this.#renderFrame(t));
     }
     beginFrame() {
         this.#gl.clearColor(0, 0, 0, 1);
@@ -284,7 +315,7 @@ export class Renderer {
     endFrame() {
         const viewData: ViewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
         this.#spritePipeline.draw(this.#gl, viewData);
-        this.#linePipeline.draw(this.#gl, viewData, { offset: this.lineOffset, interval: 2, dashLength: 1});
+        this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2});
         this.#gl.flush();
     }
     drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean) {
@@ -322,16 +353,22 @@ export class Renderer {
         }
     }
     drawBox(x0: number, y0: number, x1: number, y1: number) {
-        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, 0);
-        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, Math.abs(x0 - x1));
+        let totalOffset = 0;
 
-        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, 0);
-        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, Math.abs(y0 - y1));
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(x0 - x1);
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, totalOffset);
 
-        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, 0);
-        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, Math.abs(x0 - x1));
+        this.#linePipeline.addData(x1, y0, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(y0 - y1);
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, totalOffset);
 
-        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, 0);
-        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, Math.abs(y0 - y1));
+        this.#linePipeline.addData(x1, y1, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(x0 - x1);
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
+
+        this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
+        totalOffset += Math.abs(y0 - y1);
+        this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
     }
 }

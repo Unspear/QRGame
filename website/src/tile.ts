@@ -85,7 +85,7 @@ export class TileMap {
     drawOutline(renderer: Renderer, viewOffset: Point) {
         for (let i = 0; i < this.count; i++) {
             let offset = i * this.dim.w * CHAR_WIDTH;
-            const margin = -0.5;
+            const margin = -1.5;
             const x0 = offset + viewOffset.x - margin;
             const x1 = offset + viewOffset.x + this.dim.w * CHAR_WIDTH + margin;
             const y0 = viewOffset.y - margin;
@@ -172,7 +172,7 @@ export class PatchMap {
         renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
     }
     drawOutline(renderer: Renderer, viewOffset: Point) {
-        const margin = -0.5;
+        const margin = -1.5;
         const x0 = viewOffset.x - margin;
         const x1 = viewOffset.x + this.dim.w * CHAR_WIDTH + margin;
         const y0 = viewOffset.y - margin;

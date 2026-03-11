@@ -7,6 +7,7 @@ import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { MyTabElement } from './tab';
 import { Renderer } from './render';
+import { FRAME_TIME } from './constants';
 
 enum EditorState {
     Brush,
@@ -101,25 +102,21 @@ export class Editor {
             if (this.tileMapTab.currentTab === TabDrawTile) {
                 if (this.state === EditorState.Brush) {
                     this.setTileFromEvent(event);
-                    this.draw();
                 } else {
                     this.setBrushFromEvent(event);
                 }
             } else if (this.tileMapTab.currentTab === TabDrawPatch){
                 this.setPatchFromEvent(event);
-                this.draw();
             }
         });
         window.addEventListener('pointerup', (event) => {
             this.heldDown = false;
             if (this.tileMapTab.currentTab === TabDrawTile) {
                 if (this.state === EditorState.Brush) {
-                    this.draw();
                 } else {
                     this.state = EditorState.Brush;
                 }
             } else if (this.tileMapTab.currentTab === TabDrawPatch) {
-                this.draw();
             }
         });
         this.canvas.addEventListener('pointermove', (event) => {
@@ -127,11 +124,9 @@ export class Editor {
                 if (this.tileMapTab.currentTab === TabDrawTile) {
                     if (this.state === EditorState.Brush) {
                         this.setTileFromEvent(event);
-                        this.draw();
                     }
                 } else if (this.tileMapTab.currentTab === TabDrawPatch) {
                     this.setPatchFromEvent(event);
-                    this.draw();
                 }
             }
         });
@@ -141,7 +136,6 @@ export class Editor {
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
         let that = this;
         this.tileMapTab.updateListeners.push(function(currentTab: string): void {
-            that.draw();
         });
         this.applySettingsButton.onclick = function(){
             // Make new tilemap with new size and copy data
@@ -179,12 +173,11 @@ export class Editor {
                 }
             }
             that.patchMap = newPatchMap;
-            that.draw();
         };
-        this.leftButton.onclick = function(){that.camera.x -= 64; that.updateCamera();};
-        this.upButton.onclick = function(){that.camera.y -= 64; that.updateCamera();};
-        this.rightButton.onclick = function(){that.camera.x += 64; that.updateCamera();};
-        this.downButton.onclick = function(){that.camera.y += 64; that.updateCamera();};
+        this.leftButton.onclick = function(){that.camera.x -= 64;};
+        this.upButton.onclick = function(){that.camera.y -= 64;};
+        this.rightButton.onclick = function(){that.camera.x += 64;};
+        this.downButton.onclick = function(){that.camera.y += 64;};
         this.exportButton.onclick = function(){
             let serialised = JSON.stringify({tileMap: that.tileMap, patchMap: that.patchMap});
             navigator.clipboard.writeText(serialised);
@@ -194,7 +187,6 @@ export class Editor {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
                 that.tileMap = TileMap.Copy(serialised.tileMap as TileMap);
                 that.patchMap = PatchMap.Copy(serialised.patchMap as PatchMap);
-                that.draw();
             } catch(err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
@@ -221,8 +213,7 @@ export class Editor {
         this.widthInput.valueAsNumber = this.patchMap.dim.w;
         this.heightInput.valueAsNumber = this.patchMap.dim.h;
         this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
-        // Update Canvas
-        this.draw();
+        this.renderer.startRenderLoop(() => this.draw());
     }
     getAndValidateInputNumber(input: HTMLInputElement, min: number, max: number, step: number): number {
         let value = input.valueAsNumber;
@@ -268,12 +259,7 @@ export class Editor {
             this.invertedInput.checked = tileData.color > 8;
         }
     }
-    updateCamera() {
-        this.camera.frame(1000.0);
-        this.draw();
-    }
     draw() {
-        // Fill Background
         this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
             this.patchMap.draw(this.renderer, this.camera.getViewOffset());

@@ -118,56 +118,38 @@ export class Engine {
         this.luaTap = this.lua.global.get('tap');
         this.luaDrag = this.lua.global.get('drag');
         // Start
-        requestAnimationFrame(this.#mainLoop.bind(this));
+        this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value: boolean) {
-        this.paused = value;
+        this.renderer.paused = value;
     }
     isPaused(): boolean {
-        return this.paused;
+        return this.renderer.paused;
     }
-    #mainLoop(timestamp: DOMHighResTimeStamp) {
-        if (this.#previousTimestamp === undefined) {
-            this.#previousTimestamp = timestamp;
+    #doFrame() {
+        // Frame
+        if (this.luaFrame)
+        {
+            this.luaFrame();
         }
-        const elapsed = timestamp - this.#previousTimestamp;
-        if (elapsed > FRAME_TIME_MS) {
-            if (this.gameCanvas.checkVisibility() && !this.paused) {
-                // Frame
-                if (this.luaFrame)
-                {
-                    this.luaFrame();
-                }
-                this.camera.frame(FRAME_TIME)
-
-                // Physics
-                for (let sprite of this.sprites) {
-                    sprite.prePhysicsUpdate(this.matterEngine)
-                }
-                Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
-                for (let sprite of this.sprites) {
-                    sprite.postPhysicsUpdate(this.matterEngine)
-                }
-                // Rendering
-                // Fill Background
-                this.renderer.beginFrame();
-                let viewOffset = this.camera.getViewOffset();
-                // Draw Tilemap
-                this.tileMap.draw(this.renderer, viewOffset);
-                // Draw Sprites
-                for (let sprite of this.sprites) {
-                    sprite.draw(this.renderer, viewOffset)
-                }
-                this.renderer.endFrame();
-            }
-            if (elapsed > FRAME_TIME_MS * 5) {
-                console.log("Elapsed time is large, skipping frames")
-                this.#previousTimestamp = timestamp;
-            } else {
-                this.#previousTimestamp += FRAME_TIME_MS;
-            }
+        // Physics
+        for (let sprite of this.sprites) {
+            sprite.prePhysicsUpdate(this.matterEngine)
         }
-        requestAnimationFrame((t) => this.#mainLoop(t));
+        Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
+        for (let sprite of this.sprites) {
+            sprite.postPhysicsUpdate(this.matterEngine)
+        }
+        // Rendering
+        // Fill Background
+        this.renderer.beginFrame();
+        let viewOffset = this.camera.getViewOffset();
+        // Draw Tilemap
+        this.tileMap.draw(this.renderer, viewOffset);
+        // Draw Sprites
+        for (let sprite of this.sprites) {
+            sprite.draw(this.renderer, viewOffset)
+        }
+        this.renderer.endFrame();
     }
-    #previousTimestamp: DOMHighResTimeStamp | undefined;
 }
