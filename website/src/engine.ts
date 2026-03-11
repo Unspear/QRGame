@@ -158,6 +158,7 @@ export class Engine {
                 for (let sprite of this.sprites) {
                     sprite.draw(this.renderer, viewOffset)
                 }
+                this.renderer.endFrame();
             }
             if (elapsed > FRAME_TIME_MS * 5) {
                 console.log("Elapsed time is large, skipping frames")

@@ -277,10 +277,10 @@ export class Editor {
         this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
             this.patchMap.draw(this.renderer, this.camera.getViewOffset());
-            //this.patchMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.patchMap.drawOutline(this.renderer, this.camera.getViewOffset());
         } else {
             this.tileMap.draw(this.renderer, this.camera.getViewOffset());
-            //this.tileMap.drawOutline(this.ctx, this.camera.getViewOffset());
+            this.tileMap.drawOutline(this.renderer, this.camera.getViewOffset());
         }
         this.renderer.endFrame();
     }

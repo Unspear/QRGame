@@ -219,6 +219,6 @@ export class Sprite {
     }
     draw(renderer: Renderer, viewOffset: Point) {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
-        renderer.draw(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
     }
 }
