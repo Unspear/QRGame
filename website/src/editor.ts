@@ -52,7 +52,8 @@ export class Editor {
     // Other
     renderer: Renderer;
     heldDown: boolean;
-    camera: Camera;
+    patchCamera: Camera;
+    tileCamera: Camera;
     tileMap: TileMap;
     patchMap: PatchMap;
     state: EditorState;
@@ -95,7 +96,8 @@ export class Editor {
         this.importButton = document.getElementById('import-button') as HTMLButtonElement;
         this.renderer = new Renderer(this.canvas);
         this.heldDown = false;
-        this.camera = new Camera();
+        this.patchCamera = new Camera();
+        this.tileCamera = new Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.heldDown = true;
@@ -174,10 +176,10 @@ export class Editor {
             }
             that.patchMap = newPatchMap;
         };
-        this.leftButton.onclick = function(){that.camera.x -= 64;};
-        this.upButton.onclick = function(){that.camera.y -= 64;};
-        this.rightButton.onclick = function(){that.camera.x += 64;};
-        this.downButton.onclick = function(){that.camera.y += 64;};
+        this.leftButton.onclick = function(){that.getCurrentCamera().x -= 64;};
+        this.upButton.onclick = function(){that.getCurrentCamera().y -= 64;};
+        this.rightButton.onclick = function(){that.getCurrentCamera().x += 64;};
+        this.downButton.onclick = function(){that.getCurrentCamera().y += 64;};
         this.exportButton.onclick = function(){
             let serialised = JSON.stringify({tileMap: that.tileMap, patchMap: that.patchMap});
             navigator.clipboard.writeText(serialised);
@@ -223,7 +225,7 @@ export class Editor {
     }
     getCoordFromEvent(event: PointerEvent): Util.Point {
         let pixel = Util.getPointerPos(this.canvas, event);
-        let viewOffset = this.camera.getViewOffset();
+        let viewOffset = this.getCurrentCamera().getViewOffset();
         pixel.x -= viewOffset.x;
         pixel.y -= viewOffset.y;
         return Util.pixelToTile(pixel);
@@ -259,14 +261,17 @@ export class Editor {
             this.invertedInput.checked = tileData.color > 8;
         }
     }
+    getCurrentCamera() {
+        return (this.tileMapTab.currentTab === TabDrawPatch) ? this.patchCamera : this.tileCamera;
+    }
     draw() {
         this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.renderer, this.camera.getViewOffset());
-            this.patchMap.drawOutline(this.renderer, this.camera.getViewOffset());
+            this.patchMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.patchMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
         } else {
-            this.tileMap.draw(this.renderer, this.camera.getViewOffset());
-            this.tileMap.drawOutline(this.renderer, this.camera.getViewOffset());
+            this.tileMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.tileMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
         }
         this.renderer.endFrame();
     }
