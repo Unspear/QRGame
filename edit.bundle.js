@@ -67,6 +67,9 @@ class Editor {
     scriptInput;
     // Canvas
     canvas;
+    // Info
+    infoTitle;
+    infoDescription;
     // Tabs
     tileMapTab;
     // Settings
@@ -97,7 +100,8 @@ class Editor {
     // Other
     renderer;
     heldDown;
-    camera;
+    patchCamera;
+    tileCamera;
     tileMap;
     patchMap;
     state;
@@ -111,6 +115,9 @@ class Editor {
         });
         //Canvas
         this.canvas = document.getElementById('editor-canvas');
+        //Info
+        this.infoTitle = document.getElementById('info-title');
+        this.infoDescription = document.getElementById('info-description');
         //Tabs
         this.tileMapTab = document.getElementById('tilemap-tab');
         //Settings
@@ -140,7 +147,8 @@ class Editor {
         this.importButton = document.getElementById('import-button');
         this.renderer = new _render__WEBPACK_IMPORTED_MODULE_8__.Renderer(this.canvas);
         this.heldDown = false;
-        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
+        this.patchCamera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
+        this.tileCamera = new _camera__WEBPACK_IMPORTED_MODULE_4__.Camera();
         // Place tile while pointer is held
         this.canvas.addEventListener('pointerdown', (event) => {
             this.heldDown = true;
@@ -223,10 +231,10 @@ class Editor {
             }
             that.patchMap = newPatchMap;
         };
-        this.leftButton.onclick = function () { that.camera.x -= 64; };
-        this.upButton.onclick = function () { that.camera.y -= 64; };
-        this.rightButton.onclick = function () { that.camera.x += 64; };
-        this.downButton.onclick = function () { that.camera.y += 64; };
+        this.leftButton.onclick = function () { that.getCurrentCamera().x -= 64; };
+        this.upButton.onclick = function () { that.getCurrentCamera().y -= 64; };
+        this.rightButton.onclick = function () { that.getCurrentCamera().x += 64; };
+        this.downButton.onclick = function () { that.getCurrentCamera().y += 64; };
         this.exportButton.onclick = function () {
             let serialised = JSON.stringify({ tileMap: that.tileMap, patchMap: that.patchMap });
             navigator.clipboard.writeText(serialised);
@@ -249,6 +257,8 @@ class Editor {
             that.state = EditorState.Pipette;
         };
         // Load input game into editor
+        this.infoTitle.value = inputGame.metadata.title;
+        this.infoDescription.value = inputGame.metadata.description;
         const transaction = this.scriptInput.state.update({ changes: {
                 from: 0,
                 to: this.scriptInput.state.doc.length,
@@ -273,7 +283,7 @@ class Editor {
     }
     getCoordFromEvent(event) {
         let pixel = _util__WEBPACK_IMPORTED_MODULE_7__.getPointerPos(this.canvas, event);
-        let viewOffset = this.camera.getViewOffset();
+        let viewOffset = this.getCurrentCamera().getViewOffset();
         pixel.x -= viewOffset.x;
         pixel.y -= viewOffset.y;
         return _util__WEBPACK_IMPORTED_MODULE_7__.pixelToTile(pixel);
@@ -309,20 +319,26 @@ class Editor {
             this.invertedInput.checked = tileData.color > 8;
         }
     }
+    getCurrentCamera() {
+        return (this.tileMapTab.currentTab === TabDrawPatch) ? this.patchCamera : this.tileCamera;
+    }
     draw() {
         this.renderer.beginFrame();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.renderer, this.camera.getViewOffset());
-            this.patchMap.drawOutline(this.renderer, this.camera.getViewOffset());
+            this.patchMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.patchMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
         }
         else {
-            this.tileMap.draw(this.renderer, this.camera.getViewOffset());
-            this.tileMap.drawOutline(this.renderer, this.camera.getViewOffset());
+            this.tileMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.tileMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
         }
         this.renderer.endFrame();
     }
     getGame() {
-        let game = new _game__WEBPACK_IMPORTED_MODULE_5__.Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
+        let game = new _game__WEBPACK_IMPORTED_MODULE_5__.Game({
+            title: this.infoTitle.value,
+            description: this.infoDescription.value
+        }, this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
         game.solidTiles = _util__WEBPACK_IMPORTED_MODULE_7__.stringToCodePoints(this.solidCharInput.value);
         return game;
     }
@@ -751,7 +767,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","page_js-pack_ts","player_ts"], () => (__webpack_require__("./edit.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","page_js-pack_ts","player_ts"], () => (__webpack_require__("./edit.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

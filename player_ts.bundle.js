@@ -144,7 +144,23 @@ class Engine {
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.create({
             gravity: { scale: 0 }
         });
-        this.tileMap.createBodies(this.matterEngine, game.solidTiles);
+        // Create bodies
+        const options = {
+            restitution: 1.0,
+            frictionAir: 0.0,
+            friction: 0.0,
+            isStatic: true
+        };
+        for (let y = 0; y < this.tileMap.dim.h; y++) {
+            for (let x = 0; x < this.tileMap.dim.w; x++) {
+                const tile = this.tileMap.getTile({ x: x, y: y });
+                if (game.solidTiles.includes(tile.codePoint)) {
+                    const physBody = matter_js__WEBPACK_IMPORTED_MODULE_1__.Bodies.rectangle((x + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_4__.CHAR_WIDTH, (y + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_4__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_4__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_4__.CHAR_WIDTH, options);
+                    matter_js__WEBPACK_IMPORTED_MODULE_1__.Composite.add(this.matterEngine.world, physBody);
+                }
+            }
+        }
+        // Create sprite drag constraint
         this.spriteDragConstraint = new _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint(this.matterEngine, this.gameCanvas);
         matter_js__WEBPACK_IMPORTED_MODULE_1__.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
         // Setup Lua Environment
@@ -230,59 +246,81 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Player: () => (/* binding */ Player)
 /* harmony export */ });
 /* harmony import */ var lean_qr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lean-qr */ "../node_modules/lean-qr/index.mjs");
-/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./game */ "./game.ts");
-/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./engine */ "./engine.ts");
-/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./pack */ "./pack.ts");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_3__]);
+/* harmony import */ var _engine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./engine */ "./engine.ts");
+/* harmony import */ var _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pack */ "./pack.ts");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pack__WEBPACK_IMPORTED_MODULE_2__]);
 var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-_pack__WEBPACK_IMPORTED_MODULE_3__ = __webpack_async_dependencies_result__[0];
-
+_pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_async_dependencies_result__[0];
 
 
 
 class Player {
     canvas;
-    playPauseButton;
+    playButton;
+    pauseButton;
     reloadButton;
+    playMenuDiv;
     urlButton;
     qrButton;
     qrCanvas;
+    gameTitle;
+    gameDescription;
+    game;
     gameProvider;
     constructor(gameProvider) {
         this.gameProvider = gameProvider;
+        this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas');
-        this.playPauseButton = document.getElementById('play-pause-button');
+        this.playButton = document.getElementById('play-button');
+        this.pauseButton = document.getElementById('pause-button');
         this.reloadButton = document.getElementById('reload-button');
+        this.playMenuDiv = document.getElementById('play-menu');
         this.urlButton = document.getElementById('url-button');
         this.qrButton = document.getElementById('qr-button');
         this.qrCanvas = document.getElementById('qr-canvas');
-        const engine = new _engine__WEBPACK_IMPORTED_MODULE_2__.Engine(this.canvas);
+        this.gameTitle = document.getElementById('game-title');
+        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameDescription = document.getElementById('game-description');
+        this.gameDescription.innerText = this.game.metadata.description;
+        const engine = new _engine__WEBPACK_IMPORTED_MODULE_1__.Engine(this.canvas);
         const qrGenerateOptions = {
             minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_0__.correction.L
         };
         const qrImageOptions = {
             on: [0, 0, 0, 255],
-            off: [255, 255, 255, 255]
+            off: [255, 255, 255, 255],
+            pad: 1,
         };
-        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         // Buttons
-        let that = this;
-        this.playPauseButton.onclick = async function () {
+        this.playButton.onclick = () => {
             if (engine.game === undefined) {
-                engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
+                engine.play(this.game);
             }
-            engine.setPaused(!engine.isPaused());
-        };
-        this.reloadButton.onclick = async function () {
-            engine.play(gameProvider() ?? new _game__WEBPACK_IMPORTED_MODULE_1__.Game());
             engine.setPaused(false);
-            (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
+            this.playMenuDiv.classList.toggle("hidden", true);
+            this.playButton.classList.toggle("hidden", true);
+            this.pauseButton.classList.toggle("hidden", false);
+            this.canvas.classList.toggle("hidden", false);
         };
-        this.urlButton.onclick = async function () {
-            navigator.clipboard.writeText((0,_pack__WEBPACK_IMPORTED_MODULE_3__.gameToUrl)(engine.game));
+        this.pauseButton.onclick = () => {
+            engine.setPaused(true);
+            this.playMenuDiv.classList.toggle("hidden", false);
+            this.playButton.classList.toggle("hidden", false);
+            this.pauseButton.classList.toggle("hidden", true);
+            this.canvas.classList.toggle("hidden", true);
         };
-        this.qrButton.onclick = async function () {
-            that.qrCanvas.toBlob(function (blob) {
+        this.reloadButton.onclick = () => {
+            this.game = gameProvider();
+            engine.play(this.game);
+            engine.setPaused(false);
+            (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        };
+        this.urlButton.onclick = () => {
+            navigator.clipboard.writeText((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game));
+        };
+        this.qrButton.onclick = () => {
+            this.qrCanvas.toBlob(function (blob) {
                 if (blob !== null) {
                     const item = new ClipboardItem({ "image/png": blob });
                     navigator.clipboard.write([item]);
@@ -575,6 +613,9 @@ class Renderer {
     renderTime;
     constructor(canvas) {
         this.#gl = canvas.getContext("webgl2"); //{ antialias: false }
+        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
+        this.#gl.clearColor(0, 0, 0, 1);
+        this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         this.#spritePipeline = new SpritePipeline(this.#gl);
         this.#linePipeline = new LinePipeline(this.#gl);
         this.paused = false;
@@ -608,9 +649,7 @@ class Renderer {
         requestAnimationFrame((t) => this.#renderFrame(t));
     }
     beginFrame() {
-        this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
     }
     endFrame() {
         const viewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
@@ -702,6 +741,7 @@ class Sprite {
     #physIsStatic;
     #physIsSensor;
     #physIsDrag;
+    #physBounce;
     #physVelX;
     #physVelY;
     #physWantsBody;
@@ -719,6 +759,7 @@ class Sprite {
         this.#physBody = null;
         this.#physWidth = _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH;
         this.#physHeight = _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH;
+        this.#physBounce = false;
         this.#physIsStatic = false;
         this.#physIsSensor = false;
         this.#physIsDrag = false;
@@ -816,6 +857,15 @@ class Sprite {
     get drag() {
         return this.#physIsDrag;
     }
+    set bounce(value) {
+        this.#physBounce = value;
+        if (this.#physBody) {
+            this.#physBody.restitution = value ? 1.0 : 1.0;
+        }
+    }
+    get bounce() {
+        return this.#physBounce;
+    }
     set velX(value) {
         this.#physVelX = value;
     }
@@ -868,7 +918,7 @@ class Sprite {
             // Create Body
             const options = {
                 inertia: Infinity, // Prevent rotation
-                restitution: 1.0,
+                restitution: this.#physBounce ? 1.0 : 0.0,
                 frictionAir: 0.0,
                 friction: 0.0,
                 isSensor: this.#physIsSensor,

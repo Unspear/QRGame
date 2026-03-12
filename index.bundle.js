@@ -25,6 +25,7 @@ bottom.y = 256 - 32
 local ball = createSprite('⬤', 4, 96, 128)
 ball.width = 16
 ball.physics = true
+ball.bounce = true
 -- Control Paddles
 function drag(pos)
   local x = math.min(math.max(pos.x, 32), 192-32)
@@ -68,7 +69,7 @@ end`;
 let tiles = '{"tileMap":{"dim":{"w":12,"h":1},"count":1,"tileData":[{"codePoint":[35,32,32,32,32,32,32,32,32,32,32,35],"color":[9,0,0,0,0,0,0,0,0,0,0,9]}]},"patchMap":{"dim":{"w":1,"h":16},"tileData":{"patchId":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}';
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
     let parsed = JSON.parse(tiles);
-    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game({ title: "Air Hockey", description: "A 2-player air hockey game" }, script, parsed.tileMap, parsed.patchMap);
     game.solidTiles = ['#'.codePointAt(0)];
     return game;
 }
@@ -122,7 +123,7 @@ But you'll look sweet upon the seat
 Of a bicycle built for two!
 ]])`;
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
-    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script);
+    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game({ title: "Daisy Bell", description: "A demo showing text-to-speech and sprite manipulation" }, script);
 }
 
 
@@ -149,7 +150,37 @@ end`;
 let tiles = `{"tileMap":{"dim":{"w":4,"h":4},"count":4,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[12,12,12,12,12,10,10,12,12,10,10,12,12,12,12,12]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[9,9,9,9,9,8,8,9,9,8,8,9,9,9,9,9]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[13,13,13,13,13,14,14,13,13,14,14,13,13,13,13,13]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[15,15,15,15,15,11,11,15,15,11,11,15,15,15,15,15]}]},"patchMap":{"dim":{"w":12,"h":4},"tileData":{"patchId":[0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,0,1,2,3,0,1,2,3,0,2,3,0,1,2,3,0,1,2,3,0,1,3,0,1,2,3,0,1,2,3,0,1,2],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}`;
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
     let parsed = JSON.parse(tiles);
-    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, parsed.tileMap, parsed.patchMap);
+    return new _game__WEBPACK_IMPORTED_MODULE_0__.Game({ title: "Infinity", description: "A demo showing camera movement and the tile patch system" }, script, parsed.tileMap, parsed.patchMap);
+}
+
+
+/***/ },
+
+/***/ "./games/platformer.ts"
+/*!*****************************!*\
+  !*** ./games/platformer.ts ***!
+  \*****************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _game__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../game */ "./game.ts");
+
+let script = `local player = createSprite('🕴', 0, 96, 128)
+player.width = 8
+player.physics = true
+function frame()
+  player.velY = player.velY + FRAME_TIME
+  camera.x = player.x - 96
+end`;
+let tiles = '{"tileMap":{"dim":{"w":4,"h":4},"count":12,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,47,32,32,47,126,95,47,32,32,32,32],"color":[14,14,14,14,14,8,14,14,8,8,8,8,14,14,14,14]},{"codePoint":[35,35,35,35,91,61,61,61,61,91,61,61,61,61,91,61],"color":[10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]},"patchMap":{"dim":{"w":36,"h":4},"tileData":{"patchId":[0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}';
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+    let parsed = JSON.parse(tiles);
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game({ title: "Platformer", description: "A platformer" }, script, parsed.tileMap, parsed.patchMap);
+    game.solidTiles = ['#'.codePointAt(0)];
+    return game;
 }
 
 
@@ -173,13 +204,13 @@ _pack__WEBPACK_IMPORTED_MODULE_1__ = __webpack_async_dependencies_result__[0];
 
 
 const demoParent = document.getElementById("demos");
-for (const entry of _library__WEBPACK_IMPORTED_MODULE_2__["default"]) {
+for (const game of _library__WEBPACK_IMPORTED_MODULE_2__["default"]) {
     let p = document.createElement('p');
     let a = document.createElement('a');
-    a.href = (0,_pack__WEBPACK_IMPORTED_MODULE_1__.gameToUrl)(entry.game, "play");
-    a.text = entry.title;
+    a.href = (0,_pack__WEBPACK_IMPORTED_MODULE_1__.gameToUrl)(game, "play");
+    a.text = game.metadata.title;
     p.appendChild(a);
-    p.appendChild(document.createTextNode(" - " + entry.description));
+    p.appendChild(document.createTextNode(" - " + game.metadata.description));
     demoParent.appendChild(p);
 }
 
@@ -202,33 +233,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _games_airHockey__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./games/airHockey */ "./games/airHockey.ts");
 /* harmony import */ var _games_daisy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./games/daisy */ "./games/daisy.ts");
 /* harmony import */ var _games_infinity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./games/infinity */ "./games/infinity.ts");
+/* harmony import */ var _games_platformer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./games/platformer */ "./games/platformer.ts");
 
 
 
 
-const games = [
-    {
-        game: new _game__WEBPACK_IMPORTED_MODULE_0__.Game(""),
-        title: "Blank Game",
-        description: "An empty game with no code or level data"
-    },
-    {
-        game: (0,_games_airHockey__WEBPACK_IMPORTED_MODULE_1__["default"])(),
-        title: "Air Hockey",
-        description: "A 2-player air hockey game"
-    },
-    {
-        game: (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])(),
-        title: "Daisy Bell",
-        description: "A demo showing text-to-speech and sprite manipulation"
-    },
-    {
-        game: (0,_games_infinity__WEBPACK_IMPORTED_MODULE_3__["default"])(),
-        title: "Repeating Pattern",
-        description: "A demo showing camera movement and the tile patch system"
-    }
-];
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (games);
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ([new _game__WEBPACK_IMPORTED_MODULE_0__.Game(), (0,_games_airHockey__WEBPACK_IMPORTED_MODULE_1__["default"])(), (0,_games_daisy__WEBPACK_IMPORTED_MODULE_2__["default"])(), (0,_games_infinity__WEBPACK_IMPORTED_MODULE_3__["default"])(), (0,_games_platformer__WEBPACK_IMPORTED_MODULE_4__["default"])()]);
 
 
 /***/ }
@@ -259,7 +270,7 @@ const games = [
 /******/ 			e.code = 'MODULE_NOT_FOUND';
 /******/ 			throw e;
 /******/ 		}
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -510,7 +521,7 @@ const games = [
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js","page_js-pack_ts"], () => (__webpack_require__("./index.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["page_js-pack_ts"], () => (__webpack_require__("./index.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

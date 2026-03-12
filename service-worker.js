@@ -78,7 +78,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
   workbox.precacheAndRoute([{
-    "url": "388aae3f50c9db2aa2ab.css",
+    "url": "2c27e2d002fb0963f29b.svg",
     "revision": null
   }, {
     "url": "3f53db599ee755d90efd.wasm",
@@ -90,7 +90,16 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "5a875fe39a17f0cc9c81.wasm",
     "revision": null
   }, {
+    "url": "6cbc13b89c6fa5275a41.svg",
+    "revision": null
+  }, {
+    "url": "7abd1f71baf49114aeb8.svg",
+    "revision": null
+  }, {
     "url": "84576ba241a5e4a9a110.wasm",
+    "revision": null
+  }, {
+    "url": "86dba0d8d03edcf7ca0a.svg",
     "revision": null
   }, {
     "url": "8ab9f6a5f4328a5e0cae.png",
@@ -103,10 +112,13 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "edit.bundle.js",
-    "revision": "6447d12a21e863ed3281e384886cae33"
+    "revision": "abd6fdc995be326635caafd1fce14bff"
   }, {
     "url": "edit.html",
-    "revision": "1b260cc1cf7934d634b4cb4774efa7c9"
+    "revision": "ae0eefbd5991d5894b01f8fd6a64c7f3"
+  }, {
+    "url": "f96725c2900464888d52.css",
+    "revision": null
   }, {
     "url": "favicon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -115,34 +127,34 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
   }, {
     "url": "icon-192.png",
-    "revision": "4ef5eabbc5ce433e107ff92d2c3ed755"
+    "revision": "cc695c8520e83239c6535e4ba79363c3"
   }, {
     "url": "icon-512.png",
-    "revision": "9e211cbc65c7ba616f140a5743981e29"
+    "revision": "79aa064863ba7d727fd8bdb9ac2b5259"
   }, {
     "url": "index.bundle.js",
-    "revision": "13d25ab7b12f1149221e786aedf32ae3"
+    "revision": "a95b1df6bf4566fd79a146ce49f49ee4"
   }, {
     "url": "index.html",
-    "revision": "062cbb65e6838683bb67660497a3f724"
+    "revision": "735bd78a309291f8aa809d8313a2fa44"
   }, {
     "url": "page_js-pack_ts.bundle.js",
-    "revision": "8cfc85585a99a217cc18f706a3c831a1"
+    "revision": "b291d7f22ddace9e6246b80a07ffb51e"
   }, {
     "url": "play.bundle.js",
-    "revision": "e0ef3e9fe76064343e9035852c3e2667"
+    "revision": "997c8909627c74670c070be2c22cb3f3"
   }, {
     "url": "play.html",
-    "revision": "7ac9eca63c78cd1debea5e677ba9e2e2"
+    "revision": "bdd252acc2571a5274d457408ad50720"
   }, {
     "url": "player_ts.bundle.js",
-    "revision": "a2aa2c32833598e929da4d0587455566"
+    "revision": "1d4cd9861039eefd1483c666a21f393f"
   }, {
     "url": "test.bundle.js",
-    "revision": "16cc68d435e33260c45d4883a0e4b0fc"
+    "revision": "f53c71577b568afb2f9a97b76852dac8"
   }, {
     "url": "test.html",
-    "revision": "a359836d9a038f348bea3795699e0099"
+    "revision": "03b6fdfb5e8ca217924e2efb9067e31e"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js.bundle.js",
     "revision": "8d90ea14d30c855f3fe0f7e662f713cc"
@@ -150,11 +162,8 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js",
     "revision": "b6545d97fc74e7c80a5be3eca0a936a2"
   }, {
-    "url": "vendors-node_modules_matter-js_build_matter_js.bundle.js",
-    "revision": "f72b1988b2dd9d40f3afa5803fe384fd"
-  }, {
-    "url": "vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js",
-    "revision": "63cd1419d5164b46a0a42e993e5e92e8"
+    "url": "vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js",
+    "revision": "60688f07cb3f293f6b6e9d7b1646ce91"
   }], {});
 
 }));

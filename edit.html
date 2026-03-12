@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="4d10eef7edbee652c0b1.json">
     <title>QR Game</title>
-  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js.bundle.js"></script><script defer src="vendors-node_modules_sam-js_dist_samjs_esm_min_js-node_modules_wasmoon_dist_index_js-node_mod-cf248f.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="388aae3f50c9db2aa2ab.css" rel="stylesheet"></head>
+  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="f96725c2900464888d52.css" rel="stylesheet"></head>
   <body>
     <nav>
-    <div>
+    <div class="bar">
         <a href="index.html">Home</a>
         <a href="play.html">Play</a>
         <a href="edit.html">Edit</a>
@@ -20,30 +20,52 @@
       <!-- Radio Buttons -->
       <div class="tabs">
         <div tabHeader="play">Player</div>
-        
+        <div tabHeader="info">Info</div>
         <div tabHeader="edit">Level</div>
         <div tabHeader="code">Code</div>
-        
-        <div tabHeader="share" style="flex-grow: 0; display: flex; align-items: center;">Share <img src="./icon-16.png" width="16", height="16" style="margin-left: 4px;"></div>
       </div>
       <!-- Tab Content -->
-      <div tabContent="play" id="tab-content-play">
-          <button class="square-button" id="play-pause-button">⏯</button>
-          <button class="square-button" id="reload-button">↻</button>
-          <canvas id="game-canvas" width="192" height="256"></canvas>
-      </div>
-
-      <div tabContent="share" id="tab-content-share">
-        <p>
-          <button id="url-button">Copy URL</button>
-          <button id="qr-button">Copy QR Code</button>
-        </p>
+      <div tabContent="play">
+        <div class="play-bar">
+    <h1 id="game-title"></h1>
+    <div style="flex-grow: 1;"></div>
+    <button class="icon-button hidden" id="pause-button" title="Pause">
+        <img src="6cbc13b89c6fa5275a41.svg" width="60" height="60"/>
+    </button>
+    <button class="icon-button" id="play-button" title="Play">
+        <img src="2c27e2d002fb0963f29b.svg" width="60" height="60"/>
+    </button>
+</div>
+<div>
+    <canvas id="game-canvas" width="192" height="256" class="hidden"></canvas>
+    <div id="play-menu">
+        <p id="game-description"></p>
+        <div style="flex-grow: 1;"></div>
         <canvas id="qr-canvas"></canvas>
+        <div style="display: flex; flex-direction: row; gap: 0.8rem;">
+            <button class="icon-button" id="reload-button" title="Reload">
+                <img src="7abd1f71baf49114aeb8.svg" width="60" height="60"/>
+            </button>
+            <button class="icon-button" id="url-button">
+                <img src="86dba0d8d03edcf7ca0a.svg" width="60" height="60"/>
+                URL
+            </button>
+            <button class="icon-button" id="qr-button">
+                <img src="86dba0d8d03edcf7ca0a.svg" width="60" height="60"/>
+                QR
+            </button>
+        </div>
+    </div>
+</div>
       </div>
-      
-      
-
-      <div tabContent="edit" id="tab-content-edit">
+      <div tabContent="info">
+        <label for="info-title">Game Title:</label>
+        <input type="text" id="info-title"/>
+        <br>
+        <label for="info-description">Game Description:</label>
+        <input type="text" id="info-description"/>
+      </div>
+      <div tabContent="edit">
         <my-tab id="tilemap-tab">
           <div class="tabs">
             <div tabHeader="settings">Level Settings</div>
@@ -93,10 +115,10 @@
         </my-tab>
         <canvas id="editor-canvas" width="192" height="256"></canvas>
         <p>
-          <button class="square-button" id="left-button">←</button>
-          <button class="square-button" id="up-button">↑</button>
-          <button class="square-button" id="down-button">↓</button>
-          <button class="square-button" id="right-button">→</button>
+          <button class="icon-button" id="left-button">←</button>
+          <button class="icon-button" id="up-button">↑</button>
+          <button class="icon-button" id="down-button">↓</button>
+          <button class="icon-button" id="right-button">→</button>
         </p>
         <p>
           <button id="export-button">Copy Level</button>
@@ -107,8 +129,6 @@
       <div tabContent="code" id="tab-content-code">
           <!-- Code editor will be inserted here from JS -->
       </div>
-
-      
     </my-tab>
   </body>
 </html>

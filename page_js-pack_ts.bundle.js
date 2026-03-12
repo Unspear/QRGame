@@ -103,22 +103,22 @@ const FRAME_TIME = 1.0 / 60.0;
 const FRAME_TIME_MS = FRAME_TIME * 1000.0;
 const CHAR_WIDTH = 16;
 const PALETTE = [
-    '#ffffff', // 1 0 0
-    '#636363', // 0.5 0 0
-    '#cc2222', // 0.545 0.2036 27.36
-    '#e5882A', // 0.7116 0.1515 60.23
-    '#ffcc00', // 0.8652 0.1768 90.38
-    '#88cc44', // 0.7729 0.1803 132.16
-    '#3377dd', // 0.5804 0.1704 258.65
-    '#8e20bd', // 0.5012 0.2271 312.5
+    '#ffffff',
+    '#636363',
+    '#e91313',
+    '#e5882A',
+    '#ffcc00',
+    '#00B000',
+    '#3377dd',
+    '#8e20bd',
 ];
 const PALETTE_FRACTIONS = [
     [1.00, 1.00, 1.00],
     [0.39, 0.39, 0.39],
-    [0.80, 0.13, 0.13],
+    [0.91, 0.07, 0.07],
     [0.90, 0.53, 0.16],
     [1.00, 0.80, 0.00],
-    [0.53, 0.80, 0.27],
+    [0.00, 0.70, 0.00],
     [0.20, 0.47, 0.87],
     [0.56, 0.13, 0.74]
 ];
@@ -139,11 +139,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tile */ "./tile.ts");
 
 class Game {
+    metadata;
     script;
     tileMap;
     patchMap;
     solidTiles;
-    constructor(script = "", tileMap = null, patchMap = null) {
+    constructor(metadata = { title: "Game", description: "An empty game" }, script = "", tileMap = null, patchMap = null) {
+        this.metadata = metadata;
         this.script = script;
         this.tileMap = tileMap ? _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap.Copy(tileMap) : new _tile__WEBPACK_IMPORTED_MODULE_0__.TileMap({ w: 12, h: 16 });
         this.patchMap = patchMap ? _tile__WEBPACK_IMPORTED_MODULE_0__.PatchMap.Copy(patchMap) : new _tile__WEBPACK_IMPORTED_MODULE_0__.PatchMap({ w: 1, h: 1 });
@@ -265,6 +267,9 @@ function dataToUrl(data, page) {
 }
 function packGame(game) {
     const packer = new Packer();
+    // Info
+    packer.packString(game.metadata.title);
+    packer.packString(game.metadata.description);
     // Script
     packer.packString(game.script);
     // Tilemap
@@ -290,6 +295,9 @@ function packGame(game) {
 }
 function unpackGame(data) {
     const unpacker = new Unpacker(data);
+    // Info
+    const infoTitle = unpacker.unpackString();
+    const infoDescription = unpacker.unpackString();
     // Script
     const script = unpacker.unpackString();
     // Tilemap
@@ -314,7 +322,7 @@ function unpackGame(data) {
     patchMap.tileData.transform = [...patchMapTransforms];
     // Solid tiles
     const tileMapSolidTiles = unpacker.unpackString();
-    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game(script, tileMap, patchMap);
+    let game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game({ title: infoTitle, description: infoDescription }, script, tileMap, patchMap);
     game.solidTiles = (0,_util__WEBPACK_IMPORTED_MODULE_3__.stringToCodePoints)(tileMapSolidTiles);
     return game;
 }
@@ -413,10 +421,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PatchMap: () => (/* binding */ PatchMap),
 /* harmony export */   TileMap: () => (/* binding */ TileMap)
 /* harmony export */ });
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./constants.ts");
-
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./constants.ts");
 
 class TileMap {
     dim;
@@ -482,36 +487,19 @@ class TileMap {
     draw(renderer, viewOffset) {
         for (let i = 0; i < this.count; i++) {
             let patch = this.tileData[i];
-            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
+            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH;
             renderer.drawCharacters(patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
         }
     }
     drawOutline(renderer, viewOffset) {
         for (let i = 0; i < this.count; i++) {
-            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH;
+            let offset = i * this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH;
             const margin = -1.5;
             const x0 = offset + viewOffset.x - margin;
-            const x1 = offset + viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
+            const x1 = offset + viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH + margin;
             const y0 = viewOffset.y - margin;
-            const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
+            const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH + margin;
             renderer.drawBox(x0, y0, x1, y1);
-        }
-    }
-    createBodies(matterEngine, solidTiles) {
-        const options = {
-            restitution: 1.0,
-            frictionAir: 0.0,
-            friction: 0.0,
-            isStatic: true
-        };
-        for (let y = 0; y < this.dim.h; y++) {
-            for (let x = 0; x < this.dim.w; x++) {
-                const tile = this.getTile({ x: x, y: y });
-                if (solidTiles.includes(tile.codePoint)) {
-                    const physBody = matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies.rectangle((x + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, (y + 0.5) * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH, options);
-                    matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite.add(matterEngine.world, physBody);
-                }
-            }
         }
     }
 }
@@ -555,8 +543,8 @@ class PatchMap {
     }
     getPatchDrawOffset(patchCoords) {
         return {
-            x: patchCoords.x * (this.dim.w + 1) * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH,
-            y: patchCoords.y * (this.dim.h + 1) * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH,
+            x: patchCoords.x * (this.dim.w + 1) * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH,
+            y: patchCoords.y * (this.dim.h + 1) * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH,
         };
     }
     draw(renderer, viewOffset) {
@@ -565,9 +553,9 @@ class PatchMap {
     drawOutline(renderer, viewOffset) {
         const margin = -1.5;
         const x0 = viewOffset.x - margin;
-        const x1 = viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
+        const x1 = viewOffset.x + this.dim.w * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH + margin;
         const y0 = viewOffset.y - margin;
-        const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_1__.CHAR_WIDTH + margin;
+        const y1 = viewOffset.y + this.dim.h * _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH + margin;
         renderer.drawBox(x0, y0, x1, y1);
     }
     createTileMap(patchSource) {
