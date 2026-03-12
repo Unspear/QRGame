@@ -14,9 +14,13 @@ export class Player {
     urlButton: HTMLButtonElement;
     qrButton: HTMLButtonElement;
     qrCanvas: HTMLCanvasElement;
+    gameTitle: HTMLElement;
+    gameDescription: HTMLElement;
+    game: Game;
     gameProvider: GameProvider;
     constructor(gameProvider: GameProvider) {
         this.gameProvider = gameProvider;
+        this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
         this.playButton = document.getElementById('play-button') as HTMLButtonElement;
         this.pauseButton = document.getElementById('pause-button') as HTMLButtonElement;
@@ -25,6 +29,10 @@ export class Player {
         this.urlButton = document.getElementById('url-button') as HTMLButtonElement;
         this.qrButton = document.getElementById('qr-button') as HTMLButtonElement;
         this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+        this.gameTitle = document.getElementById('game-title') as HTMLElement;
+        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameDescription = document.getElementById('game-description') as HTMLElement;
+        this.gameDescription.innerText = this.game.metadata.description;
 
         const engine = new Engine(this.canvas);
         const qrGenerateOptions = {
@@ -35,36 +43,36 @@ export class Player {
             off: [255, 255, 255, 255],
             pad: 1,
         }
-        generate(gameToUrl(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         // Buttons
-        let that = this;
-        this.playButton.onclick = async function(){
+        this.playButton.onclick = () => {
             if (engine.game === undefined) {
-                engine.play(gameProvider());
+                engine.play(this.game);
             }
             engine.setPaused(false);
-            that.playMenuDiv.classList.toggle("hidden", true);
-            that.playButton.classList.toggle("hidden", true);
-            that.pauseButton.classList.toggle("hidden", false);
-            that.canvas.classList.toggle("hidden", false);
+            this.playMenuDiv.classList.toggle("hidden", true);
+            this.playButton.classList.toggle("hidden", true);
+            this.pauseButton.classList.toggle("hidden", false);
+            this.canvas.classList.toggle("hidden", false);
         };
-         this.pauseButton.onclick = async function(){
+         this.pauseButton.onclick = () => {
             engine.setPaused(true);
-            that.playMenuDiv.classList.toggle("hidden", false);
-            that.playButton.classList.toggle("hidden", false);
-            that.pauseButton.classList.toggle("hidden", true);
-            that.canvas.classList.toggle("hidden", true);
+            this.playMenuDiv.classList.toggle("hidden", false);
+            this.playButton.classList.toggle("hidden", false);
+            this.pauseButton.classList.toggle("hidden", true);
+            this.canvas.classList.toggle("hidden", true);
         };
-        this.reloadButton.onclick = async function(){
-            engine.play(gameProvider());
+        this.reloadButton.onclick = () => {
+            this.game = gameProvider();
+            engine.play(this.game);
             engine.setPaused(false);
-            generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
+            generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         };
-        this.urlButton.onclick = async function(){
-            navigator.clipboard.writeText(gameToUrl(engine.game ?? gameProvider()));
+        this.urlButton.onclick = () => {
+            navigator.clipboard.writeText(gameToUrl(this.game));
         };
-        this.qrButton.onclick = async function(){
-            that.qrCanvas.toBlob(function(blob) {
+        this.qrButton.onclick = () => {
+            this.qrCanvas.toBlob(function(blob) {
                 if (blob !== null) {
                     const item = new ClipboardItem({ "image/png": blob });
                     navigator.clipboard.write([item]); 

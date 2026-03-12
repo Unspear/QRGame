@@ -86,6 +86,9 @@ export function dataToUrl(data: Uint8Array, page: string) {
 
 export function packGame(game: Game): Uint8Array {
     const packer = new Packer();
+    // Info
+    packer.packString(game.metadata.title);
+    packer.packString(game.metadata.description);
     // Script
     packer.packString(game.script);
     // Tilemap
@@ -112,6 +115,9 @@ export function packGame(game: Game): Uint8Array {
 
 export function unpackGame(data: Uint8Array): Game {
     const unpacker = new Unpacker(data);
+    // Info
+    const infoTitle = unpacker.unpackString();
+    const infoDescription = unpacker.unpackString();
     // Script
     const script = unpacker.unpackString();
     // Tilemap
@@ -136,7 +142,7 @@ export function unpackGame(data: Uint8Array): Game {
     patchMap.tileData.transform = [...patchMapTransforms];
     // Solid tiles
     const tileMapSolidTiles = unpacker.unpackString();
-    let game = new Game(script, tileMap, patchMap);
+    let game = new Game({title: infoTitle, description: infoDescription}, script, tileMap, patchMap);
     game.solidTiles = stringToCodePoints(tileMapSolidTiles);
     return game;
 }

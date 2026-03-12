@@ -1,5 +1,5 @@
 <div class="play-bar">
-    <h1>Air Hockey</h1>
+    <h1 id="game-title"></h1>
     <div style="flex-grow: 1;"></div>
     <button class="icon-button hidden" id="pause-button" title="Pause">
         <img src="icons/pause-button.svg" width="60" height="60"/>
@@ -11,7 +11,7 @@
 <div>
     <canvas id="game-canvas" width="192" height="256" class="hidden"></canvas>
     <div id="play-menu">
-        <p>Air hockey is a game</p>
+        <p id="game-description"></p>
         <div style="flex-grow: 1;"></div>
         <canvas id="qr-canvas"></canvas>
         <div style="display: flex; flex-direction: row; gap: 0.8rem;">

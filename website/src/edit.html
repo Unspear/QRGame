@@ -7,14 +7,21 @@
       <!-- Radio Buttons -->
       <div class="tabs">
         <div tabHeader="play">Player</div>
+        <div tabHeader="info">Info</div>
         <div tabHeader="edit">Level</div>
         <div tabHeader="code">Code</div>
       </div>
       <!-- Tab Content -->
-      <div tabContent="play" id="tab-content-play">
+      <div tabContent="play">
         <%= require('html-loader!./player.html').default %>
       </div>
-      <div tabContent="edit" id="tab-content-edit">
+      <div tabContent="info">
+        <label for="info-title">Game Title:</label>
+        <input type="text" id="info-title"/>
+        <label for="info-description">Game Description:</label>
+        <input type="text" id="info-description"/>
+      </div>
+      <div tabContent="edit">
         <my-tab id="tilemap-tab">
           <div class="tabs">
             <div tabHeader="settings">Level Settings</div>

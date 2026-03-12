@@ -22,6 +22,9 @@ export class Editor {
     scriptInput: EditorView;
     // Canvas
     canvas: HTMLCanvasElement;
+    // Info
+    infoTitle: HTMLInputElement;
+    infoDescription: HTMLInputElement;
     // Tabs
     tileMapTab: MyTabElement;
     // Settings
@@ -67,6 +70,9 @@ export class Editor {
         })
         //Canvas
         this.canvas = document.getElementById('editor-canvas') as HTMLCanvasElement;
+        //Info
+        this.infoTitle = document.getElementById('info-title') as HTMLInputElement;
+        this.infoDescription = document.getElementById('info-description') as HTMLInputElement;
         //Tabs
         this.tileMapTab = document.getElementById('tilemap-tab') as MyTabElement;
         //Settings
@@ -201,6 +207,8 @@ export class Editor {
             that.state = EditorState.Pipette;
         };
         // Load input game into editor
+        this.infoTitle.value = inputGame.metadata.title;
+        this.infoDescription.value = inputGame.metadata.description;
         const transaction = this.scriptInput.state.update({changes: {
             from: 0, 
             to: this.scriptInput.state.doc.length, 
@@ -276,7 +284,15 @@ export class Editor {
         this.renderer.endFrame();
     }
     getGame(): Game {
-        let game = new Game(this.scriptInput.state.doc.toString(), this.tileMap, this.patchMap);
+        let game = new Game(
+            {
+                title: this.infoTitle.value, 
+                description: this.infoDescription.value
+            },
+            this.scriptInput.state.doc.toString(),
+            this.tileMap,
+            this.patchMap
+        );
         game.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);
         return game;
     }

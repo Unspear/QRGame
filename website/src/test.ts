@@ -82,8 +82,8 @@ const benchmarkButton = document.getElementById('benchmark-button') as HTMLButto
 const benchmarkTable = document.getElementById('benchmark-table') as HTMLTableElement;
 benchmarkButton.onclick = async function (){
     let promises: Promise<readonly [string, number][]>[] = [];
-    for (const entry of library) {
-        promises.push(benchmarkGame(entry.game));
+    for (const game of library) {
+        promises.push(benchmarkGame(game));
     }
     let values = await Promise.all(promises);
     // Add column header
