@@ -11,9 +11,9 @@ export class Player {
     pauseButton: HTMLButtonElement;
     reloadButton: HTMLButtonElement;
     playMenuDiv: HTMLDivElement
-    //urlButton: HTMLButtonElement;
-    //qrButton: HTMLButtonElement;
-    //qrCanvas: HTMLCanvasElement;
+    urlButton: HTMLButtonElement;
+    qrButton: HTMLButtonElement;
+    qrCanvas: HTMLCanvasElement;
     gameProvider: GameProvider;
     constructor(gameProvider: GameProvider) {
         this.gameProvider = gameProvider;
@@ -22,25 +22,25 @@ export class Player {
         this.pauseButton = document.getElementById('pause-button') as HTMLButtonElement;
         this.reloadButton = document.getElementById('reload-button') as HTMLButtonElement;
         this.playMenuDiv = document.getElementById('play-menu') as HTMLDivElement;
-
-        //this.urlButton = document.getElementById('url-button') as HTMLButtonElement;
-        //this.qrButton = document.getElementById('qr-button') as HTMLButtonElement;
-        //this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+        this.urlButton = document.getElementById('url-button') as HTMLButtonElement;
+        this.qrButton = document.getElementById('qr-button') as HTMLButtonElement;
+        this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
 
         const engine = new Engine(this.canvas);
-        /*const qrGenerateOptions = {
+        const qrGenerateOptions = {
             minCorrectionLevel: correction.L
         }
         const qrImageOptions: ImageDataOptions = {
             on: [0, 0, 0, 255],
-            off: [255, 255, 255, 255]
+            off: [255, 255, 255, 255],
+            pad: 1,
         }
-        generate(gameToUrl(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);*/
+        generate(gameToUrl(gameProvider()), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
         // Buttons
         let that = this;
         this.playButton.onclick = async function(){
             if (engine.game === undefined) {
-                engine.play(gameProvider() ?? new Game());
+                engine.play(gameProvider());
             }
             engine.setPaused(false);
             that.playMenuDiv.classList.toggle("hidden", true);
@@ -56,12 +56,12 @@ export class Player {
             that.canvas.classList.toggle("hidden", true);
         };
         this.reloadButton.onclick = async function(){
-            engine.play(gameProvider() ?? new Game());
+            engine.play(gameProvider());
             engine.setPaused(false);
-            //generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
+            generate(gameToUrl(engine.game), qrGenerateOptions).toCanvas(that.qrCanvas, qrImageOptions);
         };
-        /*this.urlButton.onclick = async function(){
-            navigator.clipboard.writeText(gameToUrl(engine.game));
+        this.urlButton.onclick = async function(){
+            navigator.clipboard.writeText(gameToUrl(engine.game ?? gameProvider()));
         };
         this.qrButton.onclick = async function(){
             that.qrCanvas.toBlob(function(blob) {
@@ -72,6 +72,6 @@ export class Player {
                     throw "Blob was null, could not copy QR Image to clipboard";
                 }
             });
-        }*/
+        }
     }
 }

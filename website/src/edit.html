@@ -9,21 +9,11 @@
         <div tabHeader="play">Player</div>
         <div tabHeader="edit">Level</div>
         <div tabHeader="code">Code</div>
-        <div tabHeader="share" style="flex-grow: 0; display: flex; align-items: center;">Share <img src="./icon-16.png" width="16", height="16" style="margin-left: 4px;"></div>
       </div>
       <!-- Tab Content -->
       <div tabContent="play" id="tab-content-play">
         <%= require('html-loader!./player.html').default %>
       </div>
-
-      <div tabContent="share" id="tab-content-share">
-        <p>
-          <button id="url-button">Copy URL</button>
-          <button id="qr-button">Copy QR Code</button>
-        </p>
-        <canvas id="qr-canvas"></canvas>
-      </div>
-      
       <div tabContent="edit" id="tab-content-edit">
         <my-tab id="tilemap-tab">
           <div class="tabs">
@@ -74,10 +64,10 @@
         </my-tab>
         <canvas id="editor-canvas" width="192" height="256"></canvas>
         <p>
-          <button class="square-button" id="left-button">←</button>
-          <button class="square-button" id="up-button">↑</button>
-          <button class="square-button" id="down-button">↓</button>
-          <button class="square-button" id="right-button">→</button>
+          <button class="icon-button" id="left-button">←</button>
+          <button class="icon-button" id="up-button">↑</button>
+          <button class="icon-button" id="down-button">↓</button>
+          <button class="icon-button" id="right-button">→</button>
         </p>
         <p>
           <button id="export-button">Copy Level</button>

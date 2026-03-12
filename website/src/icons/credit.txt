@@ -1,8 +1,10 @@
 Icons from https://game-icons.net
 
-Pause/Play by Guard13007 under CC BY 3.0
+Guard13007 under CC BY 3.0
 https://game-icons.net/1x1/guard13007/play-button.html
 https://game-icons.net/1x1/guard13007/pause-button.html
 
+Delapouite under CC BY 3.0
 https://game-icons.net/1x1/delapouite/anticlockwise-rotation.html
-Anticlockwise Rotation by Delapouite under CC BY 3.0
+https://game-icons.net/1x1/delapouite/share.html
+https://game-icons.net/1x1/delapouite/palette.html
