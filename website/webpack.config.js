@@ -77,19 +77,13 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       chunks: ["play"],
-      template: 'engine.html',
-      templateParameters: {
-        isEditor: false,
-      },
+      template: 'play.html',
       filename: 'play.html',
       favicon: 'favicon.png',
     }),
     new HtmlWebpackPlugin({
       chunks: ["edit"],
-      template: 'engine.html',
-      templateParameters: {
-        isEditor: true,
-      },
+      template: 'edit.html',
       filename: 'edit.html',
       favicon: 'favicon.png',
     }),

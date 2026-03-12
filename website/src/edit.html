@@ -7,17 +7,13 @@
       <!-- Radio Buttons -->
       <div class="tabs">
         <div tabHeader="play">Player</div>
-        <% if (isEditor) { %>
         <div tabHeader="edit">Level</div>
         <div tabHeader="code">Code</div>
-        <% } %>
         <div tabHeader="share" style="flex-grow: 0; display: flex; align-items: center;">Share <img src="./icon-16.png" width="16", height="16" style="margin-left: 4px;"></div>
       </div>
       <!-- Tab Content -->
       <div tabContent="play" id="tab-content-play">
-          <button class="square-button" id="play-pause-button">⏯</button>
-          <button class="square-button" id="reload-button">↻</button>
-          <canvas id="game-canvas" width="192" height="256"></canvas>
+        <%= require('html-loader!./player.html').default %>
       </div>
 
       <div tabContent="share" id="tab-content-share">
@@ -28,8 +24,6 @@
         <canvas id="qr-canvas"></canvas>
       </div>
       
-      <% if (isEditor) { %>
-
       <div tabContent="edit" id="tab-content-edit">
         <my-tab id="tilemap-tab">
           <div class="tabs">
@@ -94,8 +88,6 @@
       <div tabContent="code" id="tab-content-code">
           <!-- Code editor will be inserted here from JS -->
       </div>
-
-      <% } %>
     </my-tab>
   </body>
 </html>

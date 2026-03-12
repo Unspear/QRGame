@@ -277,6 +277,9 @@ export class Renderer {
     renderTime: number;
     constructor(canvas: HTMLCanvasElement) {
         this.#gl = canvas.getContext("webgl2")!;//{ antialias: false }
+        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
+        this.#gl.clearColor(0, 0, 0, 1);
+        this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         this.#spritePipeline = new SpritePipeline(this.#gl);
         this.#linePipeline = new LinePipeline(this.#gl);
         this.paused = false;
@@ -308,9 +311,7 @@ export class Renderer {
         requestAnimationFrame((t) => this.#renderFrame(t));
     }
     beginFrame() {
-        this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-        this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
     }
     endFrame() {
         const viewData: ViewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
