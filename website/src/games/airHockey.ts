@@ -1,5 +1,4 @@
 import { Game } from "../game";
-import { TileMap } from "../tile";
 
 let script = `-- Paddles
 local top = createSprite('----', 8, 96, 32)
@@ -12,6 +11,7 @@ bottom.y = 256 - 32
 local ball = createSprite('⬤', 4, 96, 128)
 ball.width = 16
 ball.physics = true
+ball.bounce = true
 -- Control Paddles
 function drag(pos)
   local x = math.min(math.max(pos.x, 32), 192-32)

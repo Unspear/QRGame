@@ -18,6 +18,7 @@ export class Sprite {
     #physIsStatic: boolean;
     #physIsSensor: boolean;
     #physIsDrag: boolean;
+    #physBounce: boolean;
     #physVelX: number | null;
     #physVelY: number | null;
     #physWantsBody: boolean;
@@ -35,6 +36,7 @@ export class Sprite {
         this.#physBody = null;
         this.#physWidth = CHAR_WIDTH;
         this.#physHeight = CHAR_WIDTH;
+        this.#physBounce = false;
         this.#physIsStatic = false;
         this.#physIsSensor = false;
         this.#physIsDrag = false;
@@ -132,6 +134,15 @@ export class Sprite {
     get drag() {
         return this.#physIsDrag;
     }
+    set bounce(value) {
+        this.#physBounce = value;
+        if (this.#physBody) {
+            this.#physBody.restitution = value ? 1.0 : 1.0;
+        }
+    }
+    get bounce() {
+        return this.#physBounce;
+    }
     set velX(value) {
         this.#physVelX = value;
     }
@@ -184,7 +195,7 @@ export class Sprite {
             // Create Body
             const options = {
                 inertia: Infinity,// Prevent rotation
-                restitution: 1.0,
+                restitution: this.#physBounce ? 1.0 : 0.0,
                 frictionAir: 0.0,
                 friction: 0.0,
                 isSensor: this.#physIsSensor,

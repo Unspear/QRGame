@@ -1,5 +1,4 @@
 import { Game } from "../game";
-import { TileMap } from "../tile";
 let script: string = `function frame()
   camera.x = camera.x + FRAME_TIME * 30
   if camera.x > 16 * 16 then

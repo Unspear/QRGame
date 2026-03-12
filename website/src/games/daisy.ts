@@ -1,5 +1,4 @@
 import { Game } from "../game";
-import { TileMap } from "../tile";
 
 let script = `
 local sprites = {}
