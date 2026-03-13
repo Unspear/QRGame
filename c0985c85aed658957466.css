@@ -62,6 +62,17 @@ table {
     margin: 0;
     display: flex;
     align-items: center;
+    
+}
+.arrow-button {
+    font-size: 1.5rem;
+    padding: 0.1rem;
+    margin: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .small-button {
     padding: 0.1rem;
@@ -128,4 +139,4 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
 }
 
-/*# sourceMappingURL=77c6e1dcd892da04da72.css.map*/
+/*# sourceMappingURL=c0985c85aed658957466.css.map*/

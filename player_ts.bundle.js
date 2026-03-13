@@ -280,7 +280,6 @@ class Player {
         this.urlButton = document.getElementById('url-button');
         this.qrButton = document.getElementById('qr-button');
         this.qrCanvas = document.getElementById('qr-canvas');
-        this.gameTitle = document.getElementById('game-title');
         this.openEditorButton = document.getElementById('open-editor-button');
         this.closeEditorButton = document.getElementById('close-editor-button');
         if (isEditor) {
@@ -289,19 +288,10 @@ class Player {
         else {
             this.closeEditorButton.classList.toggle("hidden", true);
         }
-        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameTitle = document.getElementById('game-title');
         this.gameDescription = document.getElementById('game-description');
-        this.gameDescription.innerText = this.game.metadata.description;
         const engine = new _engine__WEBPACK_IMPORTED_MODULE_1__.Engine(this.canvas);
-        const qrGenerateOptions = {
-            minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_0__.correction.L
-        };
-        const qrImageOptions = {
-            on: [0, 0, 0, 255],
-            off: [255, 255, 255, 255],
-            pad: 1,
-        };
-        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        this.updatePlayer();
         // Buttons
         this.playButton.onclick = () => {
             if (engine.game === undefined) {
@@ -324,7 +314,7 @@ class Player {
             this.game = gameProvider();
             engine.play(this.game);
             engine.setPaused(false);
-            (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+            this.updatePlayer();
         };
         this.urlButton.onclick = () => {
             navigator.clipboard.writeText((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game));
@@ -346,6 +336,19 @@ class Player {
         this.closeEditorButton.onclick = () => {
             window.location.href = (0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game, "play");
         };
+    }
+    updatePlayer() {
+        const qrGenerateOptions = {
+            minCorrectionLevel: lean_qr__WEBPACK_IMPORTED_MODULE_0__.correction.L
+        };
+        const qrImageOptions = {
+            on: [0, 0, 0, 255],
+            off: [255, 255, 255, 255],
+            pad: 1,
+        };
+        (0,lean_qr__WEBPACK_IMPORTED_MODULE_0__.generate)((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameDescription.innerText = this.game.metadata.description;
     }
 }
 
