@@ -2,28 +2,39 @@
     <h1 id="game-title"></h1>
     <div style="flex-grow: 1;"></div>
     <button class="icon-button hidden" id="pause-button" title="Pause">
-        <img src="icons/pause-button.svg" width="60" height="60"/>
+        <img src="icons/pause-button.svg" width="40" height="40"/>
     </button>
     <button class="icon-button" id="play-button" title="Play">
-        <img src="icons/play-button.svg" width="60" height="60"/>
+        <img src="icons/play-button.svg" width="40" height="40"/>
     </button>
 </div>
 <div>
     <canvas id="game-canvas" width="192" height="256" class="hidden"></canvas>
     <div id="play-menu">
         <p id="game-description"></p>
+        <div class="flex-bar">
+            <button class="icon-button" id="close-editor-button" title="Close Editor">
+                <img src="icons/exit-door.svg" width="40" height="40"/>
+                Close Editor
+            </button>
+            <button class="icon-button" id="open-editor-button" title="Open Editor">
+                <img src="icons/palette.svg" width="40" height="40"/>
+                Open Editor
+            </button>
+            <div style="flex-grow: 1;"></div>
+            <button class="icon-button" id="reload-button" title="Reload">
+                <img src="icons/anticlockwise-rotation.svg" width="40" height="40"/>
+            </button>
+        </div>
         <div style="flex-grow: 1;"></div>
         <canvas id="qr-canvas"></canvas>
-        <div style="display: flex; flex-direction: row; gap: 0.8rem;">
-            <button class="icon-button" id="reload-button" title="Reload">
-                <img src="icons/anticlockwise-rotation.svg" width="60" height="60"/>
-            </button>
+        <div class="flex-bar">
             <button class="icon-button" id="url-button">
-                <img src="icons/share.svg" width="60" height="60"/>
+                <img src="icons/share.svg" width="40" height="40"/>
                 URL
             </button>
             <button class="icon-button" id="qr-button">
-                <img src="icons/share.svg" width="60" height="60"/>
+                <img src="icons/share.svg" width="40" height="40"/>
                 QR
             </button>
         </div>

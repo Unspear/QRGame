@@ -4,4 +4,4 @@ import {urlToGame} from './pack'
 import { Player } from './player';
 
 const editor = new Editor(urlToGame());
-const player = new Player(() => editor.getGame());
+const player = new Player(() => editor.getGame(), true);

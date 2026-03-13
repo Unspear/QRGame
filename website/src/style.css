@@ -54,7 +54,7 @@ table {
     border-collapse: collapse;
 }
 .icon-button {
-    font-size: 2rem;
+    font-size: 1.5rem;
     padding: 0.1rem;
     margin: 0;
     display: flex;
@@ -117,4 +117,10 @@ h1, h2, h3, h4, h5, h6 {
 .play-bar > h1 {
     font-size: 200%;
     padding: 0 0 0 0.5em;
+}
+.flex-bar {
+    display: flex; 
+    flex-direction: row; 
+    gap: 0.8rem; 
+    width: 100%;
 }

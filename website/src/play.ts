@@ -2,4 +2,4 @@ import './page'
 import { Player } from './player';
 import { urlToGame } from './pack';
 
-const player = new Player(urlToGame);
+const player = new Player(urlToGame, false);

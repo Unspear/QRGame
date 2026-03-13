@@ -15,10 +15,12 @@ export class Player {
     qrButton: HTMLButtonElement;
     qrCanvas: HTMLCanvasElement;
     gameTitle: HTMLElement;
+    openEditorButton: HTMLButtonElement;
+    closeEditorButton: HTMLButtonElement;
     gameDescription: HTMLElement;
     game: Game;
     gameProvider: GameProvider;
-    constructor(gameProvider: GameProvider) {
+    constructor(gameProvider: GameProvider, isEditor: boolean) {
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -30,6 +32,13 @@ export class Player {
         this.qrButton = document.getElementById('qr-button') as HTMLButtonElement;
         this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
         this.gameTitle = document.getElementById('game-title') as HTMLElement;
+        this.openEditorButton = document.getElementById('open-editor-button') as HTMLButtonElement;
+        this.closeEditorButton = document.getElementById('close-editor-button') as HTMLButtonElement;
+        if (isEditor) {
+            this.openEditorButton.classList.toggle("hidden", true);
+        }else {
+            this.closeEditorButton.classList.toggle("hidden", true);
+        }
         this.gameTitle.innerText = this.game.metadata.title;
         this.gameDescription = document.getElementById('game-description') as HTMLElement;
         this.gameDescription.innerText = this.game.metadata.description;
@@ -80,6 +89,12 @@ export class Player {
                     throw "Blob was null, could not copy QR Image to clipboard";
                 }
             });
+        }
+        this.openEditorButton.onclick = () => {
+            window.location.href = gameToUrl(this.game, "edit");
+        }
+        this.closeEditorButton.onclick = () => {
+            window.location.href = gameToUrl(this.game, "play");
         }
     }
 }
