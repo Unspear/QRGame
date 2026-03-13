@@ -31,7 +31,6 @@ export class Player {
         this.urlButton = document.getElementById('url-button') as HTMLButtonElement;
         this.qrButton = document.getElementById('qr-button') as HTMLButtonElement;
         this.qrCanvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
-        this.gameTitle = document.getElementById('game-title') as HTMLElement;
         this.openEditorButton = document.getElementById('open-editor-button') as HTMLButtonElement;
         this.closeEditorButton = document.getElementById('close-editor-button') as HTMLButtonElement;
         if (isEditor) {
@@ -39,20 +38,12 @@ export class Player {
         }else {
             this.closeEditorButton.classList.toggle("hidden", true);
         }
-        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameTitle = document.getElementById('game-title') as HTMLElement;
         this.gameDescription = document.getElementById('game-description') as HTMLElement;
-        this.gameDescription.innerText = this.game.metadata.description;
 
         const engine = new Engine(this.canvas);
-        const qrGenerateOptions = {
-            minCorrectionLevel: correction.L
-        }
-        const qrImageOptions: ImageDataOptions = {
-            on: [0, 0, 0, 255],
-            off: [255, 255, 255, 255],
-            pad: 1,
-        }
-        generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        this.updatePlayer();
+        
         // Buttons
         this.playButton.onclick = () => {
             if (engine.game === undefined) {
@@ -75,7 +66,7 @@ export class Player {
             this.game = gameProvider();
             engine.play(this.game);
             engine.setPaused(false);
-            generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+            this.updatePlayer();
         };
         this.urlButton.onclick = () => {
             navigator.clipboard.writeText(gameToUrl(this.game));
@@ -96,5 +87,18 @@ export class Player {
         this.closeEditorButton.onclick = () => {
             window.location.href = gameToUrl(this.game, "play");
         }
+    }
+    updatePlayer() {
+        const qrGenerateOptions = {
+            minCorrectionLevel: correction.L
+        }
+        const qrImageOptions: ImageDataOptions = {
+            on: [0, 0, 0, 255],
+            off: [255, 255, 255, 255],
+            pad: 1,
+        }
+        generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        this.gameTitle.innerText = this.game.metadata.title;
+        this.gameDescription.innerText = this.game.metadata.description;
     }
 }
