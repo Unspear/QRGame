@@ -21,7 +21,7 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pac
 
 
 const editor = new _editor__WEBPACK_IMPORTED_MODULE_1__.Editor((0,_pack__WEBPACK_IMPORTED_MODULE_2__.urlToGame)());
-const player = new _player__WEBPACK_IMPORTED_MODULE_3__.Player(() => editor.getGame());
+const player = new _player__WEBPACK_IMPORTED_MODULE_3__.Player(() => editor.getGame(), true);
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });

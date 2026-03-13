@@ -6,13 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="4d10eef7edbee652c0b1.json">
     <title>QR Game</title>
-  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="f96725c2900464888d52.css" rel="stylesheet"></head>
+  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="77c6e1dcd892da04da72.css" rel="stylesheet"></head>
   <body>
     <nav>
     <div class="bar">
         <a href="index.html">Home</a>
-        <a href="play.html">Play</a>
-        <a href="edit.html">Edit</a>
         <a href="test.html">Test</a>
     </div>
 </nav>
@@ -20,10 +18,10 @@
     <h1 id="game-title"></h1>
     <div style="flex-grow: 1;"></div>
     <button class="icon-button hidden" id="pause-button" title="Pause">
-        <img src="6cbc13b89c6fa5275a41.svg" width="60" height="60"/>
+        <img src="6cbc13b89c6fa5275a41.svg" width="40" height="40"/>
     </button>
     <button class="icon-button" id="play-button" title="Play">
-        <img src="2c27e2d002fb0963f29b.svg" width="60" height="60"/>
+        <img src="2c27e2d002fb0963f29b.svg" width="40" height="40"/>
     </button>
 </div>
 <div>
@@ -31,17 +29,28 @@
     <div id="play-menu">
         <p id="game-description"></p>
         <div style="flex-grow: 1;"></div>
-        <canvas id="qr-canvas"></canvas>
-        <div style="display: flex; flex-direction: row; gap: 0.8rem;">
-            <button class="icon-button" id="reload-button" title="Reload">
-                <img src="7abd1f71baf49114aeb8.svg" width="60" height="60"/>
+        <div class="flex-bar">
+            <button class="icon-button" id="close-editor-button" title="Close Editor">
+                <img src="376884e8dd79a0eec4c0.svg" width="40" height="40"/>
+                Close Editor
             </button>
+            <button class="icon-button" id="open-editor-button" title="Open Editor">
+                <img src="c90ed23523223bd8215b.svg" width="40" height="40"/>
+                Open Editor
+            </button>
+            <div style="flex-grow: 1;"></div>
+            <button class="icon-button" id="reload-button" title="Reload">
+                <img src="7abd1f71baf49114aeb8.svg" width="40" height="40"/>
+            </button>
+        </div>
+        <canvas id="qr-canvas"></canvas>
+        <div class="flex-bar">
             <button class="icon-button" id="url-button">
-                <img src="86dba0d8d03edcf7ca0a.svg" width="60" height="60"/>
+                <img src="86dba0d8d03edcf7ca0a.svg" width="40" height="40"/>
                 URL
             </button>
             <button class="icon-button" id="qr-button">
-                <img src="86dba0d8d03edcf7ca0a.svg" width="60" height="60"/>
+                <img src="86dba0d8d03edcf7ca0a.svg" width="40" height="40"/>
                 QR
             </button>
         </div>

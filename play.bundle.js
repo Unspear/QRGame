@@ -18,7 +18,7 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_pla
 
 
 
-const player = new _player__WEBPACK_IMPORTED_MODULE_1__.Player(_pack__WEBPACK_IMPORTED_MODULE_2__.urlToGame);
+const player = new _player__WEBPACK_IMPORTED_MODULE_1__.Player(_pack__WEBPACK_IMPORTED_MODULE_2__.urlToGame, false);
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });

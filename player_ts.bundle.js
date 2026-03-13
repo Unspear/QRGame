@@ -264,10 +264,12 @@ class Player {
     qrButton;
     qrCanvas;
     gameTitle;
+    openEditorButton;
+    closeEditorButton;
     gameDescription;
     game;
     gameProvider;
-    constructor(gameProvider) {
+    constructor(gameProvider, isEditor) {
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas');
@@ -279,6 +281,14 @@ class Player {
         this.qrButton = document.getElementById('qr-button');
         this.qrCanvas = document.getElementById('qr-canvas');
         this.gameTitle = document.getElementById('game-title');
+        this.openEditorButton = document.getElementById('open-editor-button');
+        this.closeEditorButton = document.getElementById('close-editor-button');
+        if (isEditor) {
+            this.openEditorButton.classList.toggle("hidden", true);
+        }
+        else {
+            this.closeEditorButton.classList.toggle("hidden", true);
+        }
         this.gameTitle.innerText = this.game.metadata.title;
         this.gameDescription = document.getElementById('game-description');
         this.gameDescription.innerText = this.game.metadata.description;
@@ -329,6 +339,12 @@ class Player {
                     throw "Blob was null, could not copy QR Image to clipboard";
                 }
             });
+        };
+        this.openEditorButton.onclick = () => {
+            window.location.href = (0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game, "edit");
+        };
+        this.closeEditorButton.onclick = () => {
+            window.location.href = (0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game, "play");
         };
     }
 }
