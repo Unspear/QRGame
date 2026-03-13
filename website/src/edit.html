@@ -71,16 +71,15 @@
           </div>
         </my-tab>
         <canvas id="editor-canvas" width="192" height="256"></canvas>
-        <p>
-          <button class="icon-button" id="left-button">←</button>
-          <button class="icon-button" id="up-button">↑</button>
-          <button class="icon-button" id="down-button">↓</button>
-          <button class="icon-button" id="right-button">→</button>
-        </p>
-        <p>
+        <div class="flex-bar" style="margin: 0.8rem 0rem;">
           <button id="export-button">Copy Level</button>
           <button id="import-button">Paste Level</button>
-        </p>
+          <div style="flex-grow: 1;"></div>
+          <button class="arrow-button" id="left-button">←</button>
+          <button class="arrow-button" id="up-button">↑</button>
+          <button class="arrow-button" id="down-button">↓</button>
+          <button class="arrow-button" id="right-button">→</button>
+        </div>
       </div>
 
       <div tabContent="code" id="tab-content-code">
