@@ -317,16 +317,36 @@ class Player {
             this.updatePlayer();
         };
         this.urlButton.onclick = () => {
-            navigator.clipboard.writeText((0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game));
+            const gameUrl = (0,_pack__WEBPACK_IMPORTED_MODULE_2__.gameToUrl)(this.game);
+            try {
+                navigator.share({ url: gameUrl });
+            }
+            catch (error) {
+                try {
+                    navigator.clipboard.writeText(gameUrl);
+                }
+                catch (error) {
+                    console.error("Failed to share URL");
+                }
+            }
         };
         this.qrButton.onclick = () => {
-            this.qrCanvas.toBlob(function (blob) {
-                if (blob !== null) {
-                    const item = new ClipboardItem({ "image/png": blob });
-                    navigator.clipboard.write([item]);
+            this.qrCanvas.toBlob((blob) => {
+                if (blob === null) {
+                    throw "Blob was null, failed to share QR code";
                 }
-                else {
-                    throw "Blob was null, could not copy QR Image to clipboard";
+                try {
+                    const files = [new File([blob], 'qr.png')];
+                    navigator.share({ files: files });
+                }
+                catch (error) {
+                    try {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item]);
+                    }
+                    catch (error) {
+                        console.error("Failed to share QR code");
+                    }
                 }
             });
         };
