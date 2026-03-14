@@ -340,6 +340,7 @@ class Player {
                     navigator.share({ files: files });
                 }
                 catch (error) {
+                    alert(error);
                     try {
                         const item = new ClipboardItem({ "image/png": blob });
                         navigator.clipboard.write([item]);
