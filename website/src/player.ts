@@ -86,7 +86,7 @@ export class Player {
                     throw "Blob was null, failed to share QR code";
                 }
                 try {
-                    const files = [new File([blob], 'qr.png')];
+                    const files = [new File([blob], 'qr.png', { type: blob.type })];
                     navigator.share({files: files});
                 } catch (error) {
                     try {
