@@ -1,6 +1,9 @@
 <div class="play-bar">
     <h1 id="game-title"></h1>
     <div style="flex-grow: 1;"></div>
+    <button class="icon-button" id="reload-button" title="Reload">
+        <img src="icons/anticlockwise-rotation.svg" width="40" height="40"/>
+    </button>
     <button class="icon-button hidden" id="pause-button" title="Pause">
         <img src="icons/pause-button.svg" width="40" height="40"/>
     </button>
@@ -12,7 +15,6 @@
     <canvas id="game-canvas" width="192" height="256" class="hidden"></canvas>
     <div id="play-menu">
         <p id="game-description"></p>
-        <div style="flex-grow: 1;"></div>
         <div class="flex-bar">
             <button class="icon-button" id="close-editor-button" title="Close Editor">
                 <img src="icons/exit-door.svg" width="40" height="40"/>
@@ -23,13 +25,6 @@
                 Open Editor
             </button>
             <div style="flex-grow: 1;"></div>
-            <button class="icon-button" id="reload-button" title="Reload">
-                <img src="icons/anticlockwise-rotation.svg" width="40" height="40"/>
-            </button>
-        </div>
-        <canvas id="qr-canvas"></canvas>
-        <div class="flex-bar">
-            <div style="flex-grow: 1;"></div>
             <button class="icon-button" id="url-button">
                 <img src="icons/share.svg" width="40" height="40"/>
                 URL
@@ -39,5 +34,6 @@
                 QR
             </button>
         </div>
+        <canvas id="qr-canvas"></canvas>
     </div>
 </div>
