@@ -66,6 +66,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "../node_modules/wasmoon/dist/glue.wasm");
 /* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./press-play.png */ "./press-play.png");
 /* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./render */ "./render.ts");
+/* harmony import */ var retro_sound__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! retro-sound */ "../node_modules/retro-sound/dist/retro-sound.js");
+
 
 
 
@@ -86,8 +88,8 @@ class Engine {
     luaFactory;
     downPointers;
     renderer;
-    luaDrag;
-    luaTap;
+    audioContext;
+    masterVolume;
     game;
     sprites;
     tileMap;
@@ -95,15 +97,23 @@ class Engine {
     matterEngine;
     spriteDragConstraint;
     lua;
-    luaFrame;
-    paused;
     currentSpeak;
+    ranScript;
+    luaFrame;
+    luaDrag;
+    luaTap;
     constructor(gameCanvas) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__);
         this.renderer = new _render__WEBPACK_IMPORTED_MODULE_11__.Renderer(this.gameCanvas);
         this.downPointers = new Set();
+        this.audioContext = new AudioContext();
+        this.masterVolume = this.audioContext.createGain();
+        this.masterVolume.gain.setValueAtTime(0.25, 0);
+        this.masterVolume.connect(this.audioContext.destination);
+        this.audioContext.suspend();
+        this.ranScript = false;
         gameCanvas.addEventListener('pointerdown', (event) => {
             this.downPointers.add(event.pointerId);
             if (this.luaDrag) {
@@ -126,11 +136,11 @@ class Engine {
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
-        this.paused = true;
     }
     async play(game) {
         // Setup (should override any existing values)
         this.game = game;
+        this.ranScript = false;
         this.sprites = [];
         const gameTileMap = _tile__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
         const gamePatchMap = _tile__WEBPACK_IMPORTED_MODULE_5__.PatchMap.Copy(game.patchMap);
@@ -187,23 +197,43 @@ class Engine {
             }
             this.currentSpeak = this.textToSpeech.speak(ascii);
         });
+        this.lua.global.set('beep', () => {
+            const FM = new retro_sound__WEBPACK_IMPORTED_MODULE_12__.Sound(this.audioContext, 'triangle')
+                .withModulator('square', 6, 600, 'detune')
+                .withModulator('square', 12, 300, 'detune')
+                .withFilter('lowpass', 1000)
+                .toDestination(this.masterVolume);
+            FM.play('A5')
+                .rampToVolumeAtTime(0, 1)
+                .waitDispose();
+        });
         this.lua.global.set('camera', this.camera);
-        // Load Script
-        this.lua.doStringSync(this.game.script);
-        // Get Lua References
-        this.luaFrame = this.lua.global.get('frame');
-        this.luaTap = this.lua.global.get('tap');
-        this.luaDrag = this.lua.global.get('drag');
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value) {
         this.renderer.paused = value;
+        if (value) {
+            this.audioContext.suspend();
+        }
+        else {
+            this.audioContext.resume();
+        }
     }
     isPaused() {
         return this.renderer.paused;
     }
     #doFrame() {
+        // Run Script
+        if (!this.ranScript) {
+            this.ranScript = true;
+            // Load Script
+            this.lua.doStringSync(this.game.script);
+            // Get Lua References
+            this.luaFrame = this.lua.global.get('frame');
+            this.luaTap = this.lua.global.get('tap');
+            this.luaDrag = this.lua.global.get('drag');
+        }
         // Frame
         if (this.luaFrame) {
             this.luaFrame();
@@ -340,7 +370,6 @@ class Player {
                     navigator.share({ files: files });
                 }
                 catch (error) {
-                    alert(error);
                     try {
                         const item = new ClipboardItem({ "image/png": blob });
                         navigator.clipboard.write([item]);

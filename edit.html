@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="3f2fc8a9c17d6fba68e3.json">
     <title>QR Game</title>
-  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="c0985c85aed658957466.css" rel="stylesheet"></head>
+  <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_retro-sound_dist_retro-sound_js-n-0a3be5.bundle.js"></script><script defer src="vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="edit.bundle.js"></script><link href="1df77c1038d7b0375af7.css" rel="stylesheet"></head>
   <body>
     <nav>
     <div class="bar">
@@ -27,6 +27,9 @@
         <div class="play-bar">
     <h1 id="game-title"></h1>
     <div style="flex-grow: 1;"></div>
+    <button class="icon-button" id="reload-button" title="Reload">
+        <img src="7abd1f71baf49114aeb8.svg" width="40" height="40"/>
+    </button>
     <button class="icon-button hidden" id="pause-button" title="Pause">
         <img src="6cbc13b89c6fa5275a41.svg" width="40" height="40"/>
     </button>
@@ -38,7 +41,6 @@
     <canvas id="game-canvas" width="192" height="256" class="hidden"></canvas>
     <div id="play-menu">
         <p id="game-description"></p>
-        <div style="flex-grow: 1;"></div>
         <div class="flex-bar">
             <button class="icon-button" id="close-editor-button" title="Close Editor">
                 <img src="376884e8dd79a0eec4c0.svg" width="40" height="40"/>
@@ -49,13 +51,6 @@
                 Open Editor
             </button>
             <div style="flex-grow: 1;"></div>
-            <button class="icon-button" id="reload-button" title="Reload">
-                <img src="7abd1f71baf49114aeb8.svg" width="40" height="40"/>
-            </button>
-        </div>
-        <canvas id="qr-canvas"></canvas>
-        <div class="flex-bar">
-            <div style="flex-grow: 1;"></div>
             <button class="icon-button" id="url-button">
                 <img src="86dba0d8d03edcf7ca0a.svg" width="40" height="40"/>
                 URL
@@ -65,6 +60,7 @@
                 QR
             </button>
         </div>
+        <canvas id="qr-canvas"></canvas>
     </div>
 </div>
       </div>
