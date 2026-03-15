@@ -258,7 +258,10 @@ export class Editor {
         }
     }
     setPatchFromEvent(event: PointerEvent) {
-        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, this.getCoordFromEvent(event));
+        const point = this.getCoordFromEvent(event);
+        point.x = Math.floor(point.x / this.tileMap.dim.w);
+        point.y = Math.floor(point.y / this.tileMap.dim.h);
+        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, point);
     }
     setBrushFromEvent(event: PointerEvent) {
         let coords = this.getCoordFromEvent(event);
@@ -276,7 +279,7 @@ export class Editor {
         this.renderer.beginFrame();
         this.renderer.viewOffset = this.getCurrentCamera().getViewOffset();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.renderer, true);
+            this.patchMap.draw(this.renderer, this.tileMap, true);
         } else {
             this.tileMap.draw(this.renderer, true);
         }

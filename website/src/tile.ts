@@ -76,9 +76,7 @@ export class TileMap {
     }
     draw(renderer: Renderer, isEditor: boolean = false) {
         for (let i = 0; i < this.count; i++) {
-            let patch = this.tileData[i]!;
-            let offset = i * this.dim.w * CHAR_WIDTH;
-            renderer.drawCharacters(patch.codePoint, patch.color, offset, 0, 0, 0, this.dim.w, false);
+            this.drawSingle(renderer, i, {x: i * this.dim.w * CHAR_WIDTH, y: 0 });
         }
         if (isEditor) {
             renderer.drawGrid(0, 0, this.dim.w * CHAR_WIDTH * this.count, this.dim.h * CHAR_WIDTH, this.dim.w * this.count, this.dim.h);
@@ -87,6 +85,10 @@ export class TileMap {
                 renderer.drawBox(offset, 0, offset + this.dim.w * CHAR_WIDTH, this.dim.h * CHAR_WIDTH, -1.5);
             }
         }
+    }
+    drawSingle(renderer: Renderer, index: number, point: Point) {
+        let patch = this.tileData[index]!;
+        renderer.drawCharacters(patch.codePoint, patch.color, point.x, point.y, 0, 0, this.dim.w, false);
     }
 }
 
@@ -146,12 +148,24 @@ export class PatchMap {
             y: patchCoords.y * (this.dim.h + 1) * CHAR_WIDTH,
         }
     }
-    draw(renderer: Renderer, isEditor: boolean = false) {
-        renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), 0, 0, 0, 0, this.dim.w, false);
+    draw(renderer: Renderer, patchSource: TileMap, isEditor: boolean = false) {
+        for (let patchX = 0; patchX < this.dim.w; patchX++) {
+            for (let patchY = 0; patchY < this.dim.h; patchY++) {
+                const index = this.getIndex({x: patchX, y: patchY})!;
+                const patchId = this.tileData.patchId[index];
+                patchSource.drawSingle(renderer, patchId, { x: patchX * patchSource.dim.w * CHAR_WIDTH, y: patchY * patchSource.dim.h * CHAR_WIDTH});
+            }
+        }
+        if (isEditor) {
+            renderer.drawGrid(0, 0, patchSource.dim.w * this.dim.w * CHAR_WIDTH, patchSource.dim.h * this.dim.h * CHAR_WIDTH, this.dim.w, this.dim.h);
+            renderer.drawBox(0, 0, patchSource.dim.w * this.dim.w * CHAR_WIDTH, patchSource.dim.h * this.dim.h * CHAR_WIDTH, -1.5);
+        }
+        //use ABCD etc. to represent patchIds
+        /*renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30), new Array(this.tileData.patchId.length).fill(0), 0, 0, 0, 0, this.dim.w, false);
         if (isEditor) {
             renderer.drawGrid(0, 0, this.dim.w * CHAR_WIDTH, this.dim.h * CHAR_WIDTH, this.dim.w, this.dim.h);
             renderer.drawBox(0, 0, this.dim.w * CHAR_WIDTH, this.dim.h * CHAR_WIDTH, -1.5);
-        }
+        }*/
     }
     createTileMap(patchSource: TileMap): TileMap {
         let tileMap = new TileMap({w: patchSource.dim.w * this.dim.w, h: patchSource.dim.h * this.dim.h});
