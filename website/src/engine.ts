@@ -11,6 +11,7 @@ import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
+import { Sound } from 'retro-sound'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
@@ -21,8 +22,8 @@ export class Engine {
     luaFactory: LuaFactory;
     downPointers: Set<number>;
     renderer: Renderer;
-    luaDrag!: (point: Util.Point) => void;
-    luaTap!: () => void;
+    audioContext: AudioContext;
+    masterVolume: GainNode;
     game!: Game;
     sprites!: Sprite[];
     tileMap!: TileMap;
@@ -30,15 +31,23 @@ export class Engine {
     matterEngine!: Matter.Engine;
     spriteDragConstraint!: SpriteDragConstraint;
     lua!: LuaEngine;
-    luaFrame!: () => void;
-    paused: boolean;
     currentSpeak: SamJsSpeakPromise | undefined;
+    ranScript: boolean;
+    luaFrame!: () => void;
+    luaDrag!: (point: Util.Point) => void;
+    luaTap!: () => void;
     constructor(gameCanvas: HTMLCanvasElement) {
         this.gameCanvas = gameCanvas;
         this.textToSpeech = new SamJs();
         this.luaFactory = new LuaFactory(glueUrl);
         this.renderer = new Renderer(this.gameCanvas);
         this.downPointers = new Set();
+        this.audioContext = new AudioContext();
+        this.masterVolume = this.audioContext.createGain();
+        this.masterVolume.gain.setValueAtTime(0.25, 0);
+        this.masterVolume.connect(this.audioContext.destination);
+        this.audioContext.suspend();
+        this.ranScript = false;
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);
             if (this.luaDrag)
@@ -65,11 +74,11 @@ export class Engine {
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
-        this.paused = true;
     }
     async play(game: Game) {
         // Setup (should override any existing values)
         this.game = game;
+        this.ranScript = false;
         this.sprites = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
@@ -126,23 +135,42 @@ export class Engine {
             }
             this.currentSpeak = this.textToSpeech.speak(ascii);
         });
+        this.lua.global.set('beep', () => {
+            const FM = new Sound(this.audioContext, 'triangle')
+            .withModulator('square', 6, 600, 'detune')
+            .withModulator('square', 12, 300, 'detune')
+            .withFilter('lowpass', 1000)
+            .toDestination(this.masterVolume);
+            FM.play('A5')
+            .rampToVolumeAtTime(0, 1)
+            .waitDispose();
+        })
         this.lua.global.set('camera', this.camera);
-        // Load Script
-        this.lua.doStringSync(this.game.script);
-        // Get Lua References
-        this.luaFrame = this.lua.global.get('frame');
-        this.luaTap = this.lua.global.get('tap');
-        this.luaDrag = this.lua.global.get('drag');
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value: boolean) {
         this.renderer.paused = value;
+        if (value) { 
+            this.audioContext.suspend();
+        }else{
+            this.audioContext.resume();
+        }
     }
     isPaused(): boolean {
         return this.renderer.paused;
     }
     #doFrame() {
+        // Run Script
+        if (!this.ranScript) {
+            this.ranScript = true;
+            // Load Script
+            this.lua.doStringSync(this.game.script);
+            // Get Lua References
+            this.luaFrame = this.lua.global.get('frame');
+            this.luaTap = this.lua.global.get('tap');
+            this.luaDrag = this.lua.global.get('drag');
+        }
         // Frame
         if (this.luaFrame)
         {

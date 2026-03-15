@@ -38,6 +38,7 @@
     "fflate": "^0.8.2",
     "lean-qr": "^2.6.0",
     "matter-js": "^0.20.0",
+    "retro-sound": "^1.0.4",
     "sam-js": "^0.3.1",
     "source-map-loader": "^5.0.0",
     "ts-loader": "^9.5.4",
