@@ -284,47 +284,47 @@ const fflateOptsDict = {
     mem: 8,
     dictionary: new TextEncoder().encode(LUA_KEYWORDS)
 };
-async function benchmarkGame(game) {
-    //console.log(JSON.stringify(game));
-    const gameData = basicGameToData(game);
-    const results = [];
-    results.push(["raw", gameData.length]);
-    for (const c of compressors) {
-        const compressed = await c.compress(gameData);
-        results.push([c.toString(), compressed.length]);
+async function benchmarkGamesAsync(target, games, name, compressionFunction) {
+    const row = target.insertRow();
+    row.insertCell().innerText = name;
+    for (const data of games) {
+        row.insertCell().innerText = (await compressionFunction(data)).length.toString();
     }
-    results.push(["fflate gzip", fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOpts).length]);
-    results.push(["fflate gzip w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOptsDict).length]);
-    results.push(["fflate zlib", fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOpts).length]);
-    results.push(["fflate zlib w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOptsDict).length]);
-    results.push(["fflate deflate", fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOpts).length]);
-    results.push(["fflate deflate w/dict", fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOptsDict).length]);
-    results.push(["brotli", brotli.compress(gameData, { quality: 11 }).length]);
-    results.push(["ppmd", _compressor__WEBPACK_IMPORTED_MODULE_4__.compress(gameData).length]);
-    results.push(["packGame", (0,_pack__WEBPACK_IMPORTED_MODULE_6__.packGame)(game).length]);
-    return results;
+}
+function benchmarkGames(target, games, name, compressionFunction) {
+    const row = target.insertRow();
+    row.insertCell().innerText = name;
+    for (const data of games) {
+        row.insertCell().innerText = compressionFunction(data).length.toString();
+    }
 }
 const benchmarkButton = document.getElementById('benchmark-button');
 const benchmarkTable = document.getElementById('benchmark-table');
 benchmarkButton.onclick = async function () {
-    let promises = [];
-    for (const game of _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
-        promises.push(benchmarkGame(game));
-    }
-    let values = await Promise.all(promises);
     // Add column header
     let firstRow = benchmarkTable.insertRow();
-    for (const entry of values[0]) {
-        let cell = firstRow.insertCell();
-        cell.innerHTML = entry[0];
+    firstRow.insertCell().innerText = "";
+    for (const entry of _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+        firstRow.insertCell().innerText = entry.metadata.title;
     }
-    // Make data
-    for (const rowData of values) {
-        let row = benchmarkTable.insertRow();
-        for (const entry of rowData) {
-            let cell = row.insertCell();
-            cell.innerHTML = entry[1].toString();
-        }
+    const data = _library__WEBPACK_IMPORTED_MODULE_1__["default"].map((game) => basicGameToData(game));
+    benchmarkGames(benchmarkTable, data, "raw", (data) => data);
+    for (const c of compressors) {
+        benchmarkGamesAsync(benchmarkTable, data, c.toString(), (data) => c.compress(data));
+    }
+    benchmarkGames(benchmarkTable, data, "fflate gzip", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate gzip w/dict", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.gzipSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "fflate zlib", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate zlib w/dict", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.zlibSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "fflate deflate", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate deflate w/dict", (gameData) => fflate__WEBPACK_IMPORTED_MODULE_2__.deflateSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "brotli", (gameData) => brotli.compress(gameData, { quality: 11 }));
+    benchmarkGames(benchmarkTable, data, "ppmd", (gameData) => _compressor__WEBPACK_IMPORTED_MODULE_4__.compress(gameData));
+    // Pack Game Properly
+    const row = benchmarkTable.insertRow();
+    row.insertCell().innerText = "packGame";
+    for (const game of _library__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+        row.insertCell().innerText = (0,_pack__WEBPACK_IMPORTED_MODULE_6__.packGame)(game).length.toString();
     }
     // Remove button
     benchmarkButton.remove();

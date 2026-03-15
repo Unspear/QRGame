@@ -157,7 +157,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "3017686bb2f937d09c9d92ddc9e10e9b"
   }, {
     "url": "test.bundle.js",
-    "revision": "f53c71577b568afb2f9a97b76852dac8"
+    "revision": "1e48bf08e383f468521683ffb2ada0d5"
   }, {
     "url": "test.html",
     "revision": "9787d062377fb8e8cfd96ad6a3f69f7c"
