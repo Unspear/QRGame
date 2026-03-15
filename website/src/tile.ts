@@ -74,21 +74,21 @@ export class TileMap {
         patch.codePoint[index] = newTileData.codePoint;
         patch.color[index] = newTileData.color;
     }
-    draw(renderer: Renderer, viewOffset: Point) {
+    draw(renderer: Renderer) {
         for (let i = 0; i < this.count; i++) {
             let patch = this.tileData[i]!;
             let offset = i * this.dim.w * CHAR_WIDTH;
-            renderer.drawCharacters(patch.codePoint, patch.color, viewOffset.x + offset, viewOffset.y, 0, 0, this.dim.w, false);
+            renderer.drawCharacters(patch.codePoint, patch.color, offset, 0, 0, 0, this.dim.w, false);
         }
     }
-    drawOutline(renderer: Renderer, viewOffset: Point) {
+    drawOutline(renderer: Renderer) {
         for (let i = 0; i < this.count; i++) {
             let offset = i * this.dim.w * CHAR_WIDTH;
             const margin = -1.5;
-            const x0 = offset + viewOffset.x - margin;
-            const x1 = offset + viewOffset.x + this.dim.w * CHAR_WIDTH + margin;
-            const y0 = viewOffset.y - margin;
-            const y1 = viewOffset.y + this.dim.h * CHAR_WIDTH + margin;
+            const x0 = offset - margin;
+            const x1 = offset + this.dim.w * CHAR_WIDTH + margin;
+            const y0 = -margin;
+            const y1 = this.dim.h * CHAR_WIDTH + margin;
             renderer.drawBox(x0, y0, x1, y1);
         }
     }
@@ -150,15 +150,15 @@ export class PatchMap {
             y: patchCoords.y * (this.dim.h + 1) * CHAR_WIDTH,
         }
     }
-    draw(renderer: Renderer, viewOffset: Point) {
-        renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), viewOffset.x, viewOffset.y, 0, 0, this.dim.w, false);
+    draw(renderer: Renderer) {
+        renderer.drawCharacters(this.tileData.patchId.map(n => n + 0x30/**use ABCD etc. to represent patchIds*/), new Array(this.tileData.patchId.length).fill(0), 0, 0, 0, 0, this.dim.w, false);
     }
-    drawOutline(renderer: Renderer, viewOffset: Point) {
+    drawOutline(renderer: Renderer) {
         const margin = -1.5;
-        const x0 = viewOffset.x - margin;
-        const x1 = viewOffset.x + this.dim.w * CHAR_WIDTH + margin;
-        const y0 = viewOffset.y - margin;
-        const y1 = viewOffset.y + this.dim.h * CHAR_WIDTH + margin;
+        const x0 = -margin;
+        const x1 = this.dim.w * CHAR_WIDTH + margin;
+        const y0 = -margin;
+        const y1 = this.dim.h * CHAR_WIDTH + margin;
         renderer.drawBox(x0, y0, x1, y1);
     }
     createTileMap(patchSource: TileMap): TileMap {

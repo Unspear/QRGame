@@ -274,12 +274,13 @@ export class Editor {
     }
     draw() {
         this.renderer.beginFrame();
+        this.renderer.viewOffset = this.getCurrentCamera().getViewOffset();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
-            this.patchMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.patchMap.draw(this.renderer);
+            this.patchMap.drawOutline(this.renderer);
         } else {
-            this.tileMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
-            this.tileMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.tileMap.draw(this.renderer);
+            this.tileMap.drawOutline(this.renderer);
         }
         this.renderer.endFrame();
     }

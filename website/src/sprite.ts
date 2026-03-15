@@ -228,8 +228,8 @@ export class Sprite {
             this.#y = this.#physBody.position.y + CHAR_WIDTH * this.#py - CHAR_WIDTH * 0.5;
         }
     }
-    draw(renderer: Renderer, viewOffset: Point) {
+    draw(renderer: Renderer) {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
-        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact)
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact)
     }
 }

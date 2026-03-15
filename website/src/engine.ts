@@ -187,12 +187,12 @@ export class Engine {
         // Rendering
         // Fill Background
         this.renderer.beginFrame();
-        let viewOffset = this.camera.getViewOffset();
+        this.renderer.viewOffset = this.camera.getViewOffset();
         // Draw Tilemap
-        this.tileMap.draw(this.renderer, viewOffset);
+        this.tileMap.draw(this.renderer);
         // Draw Sprites
         for (let sprite of this.sprites) {
-            sprite.draw(this.renderer, viewOffset)
+            sprite.draw(this.renderer)
         }
         this.renderer.endFrame();
     }

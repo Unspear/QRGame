@@ -199,6 +199,7 @@ class SpritePipeline {
 
 import lineVertexSource from "./shaders/line.vert"
 import lineFragmentSource from "./shaders/line.frag";
+import { Point } from './util';
 
 type LinePattern = {
     offset: number;
@@ -275,6 +276,7 @@ export class Renderer {
     #linePipeline: LinePipeline;
     paused: boolean;
     renderTime: number;
+    viewOffset: Point;
     constructor(canvas: HTMLCanvasElement) {
         this.#gl = canvas.getContext("webgl2")!;//{ antialias: false }
         this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
@@ -284,6 +286,7 @@ export class Renderer {
         this.#linePipeline = new LinePipeline(this.#gl);
         this.paused = false;
         this.renderTime = 0;
+        this.viewOffset = {x: 0, y: 0};
     }
     startRenderLoop(frameCallback: () => void) {
         this.#frameCallback = frameCallback;
@@ -314,7 +317,7 @@ export class Renderer {
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     }
     endFrame() {
-        const viewData: ViewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
+        const viewData: ViewData = [this.viewOffset.x, this.viewOffset.y, this.#gl.canvas.width, this.#gl.canvas.height];
         this.#spritePipeline.draw(this.#gl, viewData);
         this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2});
         this.#gl.flush();
