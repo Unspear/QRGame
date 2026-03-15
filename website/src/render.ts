@@ -143,8 +143,8 @@ class SpritePipeline {
         gl.enableVertexAttribArray(this.#iOffsetLoc);
         gl.enableVertexAttribArray(this.#iTexIndexLoc);
         gl.enableVertexAttribArray(this.#iHalfWidth);
-        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 0 * BPE);
-        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
         gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
         gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
@@ -240,7 +240,7 @@ class LinePipeline {
         gl.enableVertexAttribArray(this.#vColorLoc);
         gl.enableVertexAttribArray(this.#vPositionLoc);
         gl.enableVertexAttribArray(this.#vOffsetLoc);
-        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, false, this.#vertexStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, true, this.#vertexStride * BPE, 0 * BPE);
         gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, this.#vertexStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#vOffsetLoc, 1, GL.FLOAT, false, this.#vertexStride * BPE, 6 * BPE);
     }
@@ -278,7 +278,9 @@ export class Renderer {
     renderTime: number;
     viewOffset: Point;
     constructor(canvas: HTMLCanvasElement) {
-        this.#gl = canvas.getContext("webgl2")!;//{ antialias: false }
+        this.#gl = canvas.getContext("webgl2", { premultipliedAlpha: false })!;//{ antialias: false }
+        this.#gl.enable(GL.BLEND);
+        this.#gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
         this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
         this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
@@ -356,7 +358,12 @@ export class Renderer {
             this.#spritePipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
         }
     }
-    drawBox(x0: number, y0: number, x1: number, y1: number) {
+    drawBox(x0: number, y0: number, x1: number, y1: number, margin: number) {
+        x0 -= margin;
+        y0 -= margin;
+        x1 += margin;
+        y1 += margin;
+
         let totalOffset = 0;
 
         this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
@@ -374,5 +381,23 @@ export class Renderer {
         this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
         totalOffset += Math.abs(y0 - y1);
         this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
+    }
+    drawGrid(x0: number, y0: number, x1: number, y1: number, xTiles: number, yTiles: number) {
+        x0 += 0.5;
+        y0 += 0.5;
+        x1 += 0.5;
+        y1 += 0.5;
+        const yIncrement = (y1 - y0) / yTiles
+        for (let i = 1; i < yTiles; i++) {
+            const yOffset = y0 + yIncrement * i;
+            this.#linePipeline.addData(x0, yOffset, 0, 0.5, 1, 0.5, 0);
+            this.#linePipeline.addData(x1, yOffset, 0, 0.5, 1, 0.5, x1-x0);
+        }
+        const xIncrement = (x1 - x0) / xTiles
+        for (let i = 1; i < xTiles; i++) {
+            const xOffset = x0 + xIncrement * i;
+            this.#linePipeline.addData(xOffset, y0, 0, 0.5, 1, 0.5, 0);
+            this.#linePipeline.addData(xOffset, y1, 0, 0.5, 1, 0.5, y1-y0);
+        }
     }
 }

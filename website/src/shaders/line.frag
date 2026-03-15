@@ -12,7 +12,7 @@ void main() {
   outColor = fColor;
   float offset = fOffset + uLinePattern[0] + 0.001;
   offset = mod(offset, uLinePattern[1]);
-  if (offset < uLinePattern[2]) {
+  if (offset < uLinePattern[2] && fColor.a == 1.0) {
     outColor.rgb = vec3(0);
   }
 }
