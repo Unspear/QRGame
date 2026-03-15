@@ -58,47 +58,48 @@ const fflateOptsDict: fflate.DeflateOptions = {
     dictionary: new TextEncoder().encode(LUA_KEYWORDS)
 };
 
-async function benchmarkGame(game: Game): Promise<readonly [string, number][]> {
-        //console.log(JSON.stringify(game));
-        const gameData = basicGameToData(game);
-        const results: [string, number][] = [];
-        results.push([ "raw", gameData.length]);
-        for (const c of compressors) {
-            const compressed = await c.compress(gameData);
-            results.push([c.toString(), compressed.length]);
-        }
-        results.push(["fflate gzip", fflate.gzipSync(gameData, fflateOpts).length]);
-        results.push(["fflate gzip w/dict", fflate.gzipSync(gameData, fflateOptsDict).length]);
-        results.push(["fflate zlib", fflate.zlibSync(gameData, fflateOpts).length]);
-        results.push(["fflate zlib w/dict", fflate.zlibSync(gameData, fflateOptsDict).length]);
-        results.push(["fflate deflate", fflate.deflateSync(gameData, fflateOpts).length]);
-        results.push(["fflate deflate w/dict", fflate.deflateSync(gameData, fflateOptsDict).length]);
-        results.push(["brotli", brotli.compress(gameData, {quality: 11}).length]);
-        results.push(["ppmd", PPMd.compress(gameData).length]);
-        results.push(["packGame", packGame(game).length]);
-        return results;
+async function benchmarkGamesAsync(target: HTMLTableElement, games: Uint8Array<ArrayBuffer>[], name: string, compressionFunction: (data: Uint8Array<ArrayBuffer>) => Promise<Uint8Array>) {
+    const row = target.insertRow();
+    row.insertCell().innerText = name;
+    for (const data of games) {
+        row.insertCell().innerText = (await compressionFunction(data)).length.toString();
+    }
 }
+function benchmarkGames(target: HTMLTableElement, games: Uint8Array<ArrayBuffer>[], name: string, compressionFunction: (data: Uint8Array<ArrayBuffer>) => Uint8Array) {
+    const row = target.insertRow();
+    row.insertCell().innerText = name;
+    for (const data of games) {
+        row.insertCell().innerText = compressionFunction(data).length.toString();
+    }
+}
+
 const benchmarkButton = document.getElementById('benchmark-button') as HTMLButtonElement;
 const benchmarkTable = document.getElementById('benchmark-table') as HTMLTableElement;
 benchmarkButton.onclick = async function (){
-    let promises: Promise<readonly [string, number][]>[] = [];
-    for (const game of library) {
-        promises.push(benchmarkGame(game));
-    }
-    let values = await Promise.all(promises);
     // Add column header
     let firstRow = benchmarkTable.insertRow();
-    for (const entry of values[0]) {
-        let cell = firstRow.insertCell();
-        cell.innerHTML = entry[0];
+    firstRow.insertCell().innerText = "";
+    for (const entry of library) {
+        firstRow.insertCell().innerText = entry.metadata.title;
     }
-    // Make data
-    for (const rowData of values) {
-        let row = benchmarkTable.insertRow();
-        for (const entry of rowData) {
-            let cell = row.insertCell();
-            cell.innerHTML = entry[1].toString();
-        }
+    const data = library.map((game: Game) => basicGameToData(game));
+    benchmarkGames(benchmarkTable, data, "raw", (data) => data);
+    for (const c of compressors) {
+        benchmarkGamesAsync(benchmarkTable, data, c.toString(), (data) => c.compress(data));
+    }
+    benchmarkGames(benchmarkTable, data, "fflate gzip", (gameData) => fflate.gzipSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate gzip w/dict", (gameData) => fflate.gzipSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "fflate zlib", (gameData) => fflate.zlibSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate zlib w/dict", (gameData) => fflate.zlibSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "fflate deflate", (gameData) => fflate.deflateSync(gameData, fflateOpts));
+    benchmarkGames(benchmarkTable, data, "fflate deflate w/dict", (gameData) => fflate.deflateSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "brotli", (gameData) => brotli.compress(gameData, {quality: 11}));
+    benchmarkGames(benchmarkTable, data, "ppmd", (gameData) => PPMd.compress(gameData));
+    // Pack Game Properly
+    const row = benchmarkTable.insertRow();
+    row.insertCell().innerText = "packGame";
+    for (const game of library) {
+        row.insertCell().innerText = packGame(game).length.toString();
     }
     // Remove button
     benchmarkButton.remove();
