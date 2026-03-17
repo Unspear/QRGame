@@ -5,25 +5,23 @@ import { Sprite } from './sprite'
 import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
-import SamJs from 'sam-js'
 import { Camera } from './camera'
 import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
-import { Sound } from 'retro-sound'
+import { AudioEngine } from './audio'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
-    textToSpeech: SamJs;
     luaFactory: LuaFactory;
     downPointers: Set<number>;
     renderer: Renderer;
-    audioContext: AudioContext;
-    masterVolume: GainNode;
+    audio: AudioEngine;
+    #paused: boolean;
     game!: Game;
     sprites!: Sprite[];
     tileMap!: TileMap;
@@ -31,22 +29,17 @@ export class Engine {
     matterEngine!: Matter.Engine;
     spriteDragConstraint!: SpriteDragConstraint;
     lua!: LuaEngine;
-    currentSpeak: SamJsSpeakPromise | undefined;
     ranScript: boolean;
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
     constructor(gameCanvas: HTMLCanvasElement) {
+        this.#paused = false;
         this.gameCanvas = gameCanvas;
-        this.textToSpeech = new SamJs();
+        this.audio = new AudioEngine();
         this.luaFactory = new LuaFactory(glueUrl);
         this.renderer = new Renderer(this.gameCanvas);
         this.downPointers = new Set();
-        this.audioContext = new AudioContext();
-        this.masterVolume = this.audioContext.createGain();
-        this.masterVolume.gain.setValueAtTime(0.25, 0);
-        this.masterVolume.connect(this.audioContext.destination);
-        this.audioContext.suspend();
         this.ranScript = false;
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
             this.downPointers.add(event.pointerId);
@@ -84,9 +77,7 @@ export class Engine {
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new Camera();
-        if (this.currentSpeak) {
-            this.currentSpeak.abort("Interrupted");
-        }
+        this.audio.reset();
         // Create physics engine
         (Matter.Resolver as any)._restingThresh = 1;
         this.matterEngine = Matter.Engine.create({ 
@@ -127,38 +118,23 @@ export class Engine {
             this.sprites.push(newSprite);
             return newSprite;
         });
-        this.lua.global.set('say', (string: string) => {
-            // Replace non-ascii and control characters with space
-            const ascii = string.replace(/[^\x20-\x7E]/g, " ");
-            if (this.currentSpeak) {
-                this.currentSpeak.abort("Interrupted");
-            }
-            this.currentSpeak = this.textToSpeech.speak(ascii);
+        this.lua.global.set('say', (text: string) => {
+            this.audio.say(text);
         });
-        this.lua.global.set('beep', () => {
-            const FM = new Sound(this.audioContext, 'triangle')
-            .withModulator('square', 6, 600, 'detune')
-            .withModulator('square', 12, 300, 'detune')
-            .withFilter('lowpass', 1000)
-            .toDestination(this.masterVolume);
-            FM.play('A5')
-            .rampToVolumeAtTime(0, 1)
-            .waitDispose();
+        this.lua.global.set('playNote', (length: number) => {
+            this.audio.playNote(length);
         })
         this.lua.global.set('camera', this.camera);
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value: boolean) {
+        this.#paused = value;
         this.renderer.paused = value;
-        if (value) { 
-            this.audioContext.suspend();
-        }else{
-            this.audioContext.resume();
-        }
+        this.audio.setPaused(value);
     }
-    isPaused(): boolean {
-        return this.renderer.paused;
+    get paused(): boolean {
+        return this.#paused;
     }
     #doFrame() {
         // Run Script
