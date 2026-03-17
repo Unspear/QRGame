@@ -10,13 +10,14 @@ import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
-import { AudioEngine } from './audio'
+import { AudioEngine, SoundNode } from './audio'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
+    gameErrors: HTMLDivElement;
     luaFactory: LuaFactory;
     downPointers: Set<number>;
     renderer: Renderer;
@@ -33,9 +34,10 @@ export class Engine {
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
-    constructor(gameCanvas: HTMLCanvasElement) {
+    constructor(gameCanvas: HTMLCanvasElement, gameErrors: HTMLDivElement) {
         this.#paused = false;
         this.gameCanvas = gameCanvas;
+        this.gameErrors = gameErrors;
         this.audio = new AudioEngine();
         this.luaFactory = new LuaFactory(glueUrl);
         this.renderer = new Renderer(this.gameCanvas);
@@ -71,13 +73,18 @@ export class Engine {
     async play(game: Game) {
         // Setup (should override any existing values)
         this.game = game;
+        // Clear game errors
+        this.gameErrors.textContent = '';
         this.ranScript = false;
         this.sprites = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new Camera();
-        this.audio.reset();
+        if (this.audio) {
+            this.audio.close();
+        }
+        this.audio = new AudioEngine();
         // Create physics engine
         (Matter.Resolver as any)._restingThresh = 1;
         this.matterEngine = Matter.Engine.create({ 
@@ -119,11 +126,26 @@ export class Engine {
             return newSprite;
         });
         this.lua.global.set('say', (text: string) => {
-            this.audio.say(text);
+            this.audio.makeSpeech(text).output();
         });
-        this.lua.global.set('playNote', (length: number) => {
-            this.audio.playNote(length);
-        })
+        this.lua.global.set('playSine', (note: string, length: number) => {
+            this.audio.makeWave("sine", note, length).output();
+        });
+        this.lua.global.set('playSquare', (note: string, length: number) => {
+            this.audio.makeWave("square", note, length).output();
+        });
+        this.lua.global.set('playSawtooth', (note: string, length: number) => {
+            this.audio.makeWave("sawtooth", note, length).output();
+        });
+        this.lua.global.set('playTriangle', (note: string, length: number) => {
+            this.audio.makeWave("triangle", note, length).output();
+        });
+        this.lua.global.set('playNoise', (length: number) => {
+            this.audio.makeNoise(length).output();
+        });
+        this.lua.global.set('makeSpeech', (text: string): SoundNode => {
+            return this.audio.makeSpeech(text);
+        });
         this.lua.global.set('camera', this.camera);
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
@@ -141,7 +163,13 @@ export class Engine {
         if (!this.ranScript) {
             this.ranScript = true;
             // Load Script
-            this.lua.doStringSync(this.game.script);
+            try {
+                this.lua.doStringSync(this.game.script);
+            } catch(error: any) {
+                let p = document.createElement("p");
+                p.innerText = `${error}`;
+                this.gameErrors.appendChild(p);
+            }
             // Get Lua References
             this.luaFrame = this.lua.global.get('frame');
             this.luaTap = this.lua.global.get('tap');

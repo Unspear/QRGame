@@ -7,6 +7,7 @@ export type GameProvider = (() => Game);
 
 export class Player {
     canvas: HTMLCanvasElement;
+    errors: HTMLDivElement;
     playButton: HTMLButtonElement;
     pauseButton: HTMLButtonElement;
     reloadButton: HTMLButtonElement;
@@ -24,6 +25,7 @@ export class Player {
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+        this.errors = document.getElementById('game-errors') as HTMLDivElement;
         this.playButton = document.getElementById('play-button') as HTMLButtonElement;
         this.pauseButton = document.getElementById('pause-button') as HTMLButtonElement;
         this.reloadButton = document.getElementById('reload-button') as HTMLButtonElement;
@@ -41,7 +43,7 @@ export class Player {
         this.gameTitle = document.getElementById('game-title') as HTMLElement;
         this.gameDescription = document.getElementById('game-description') as HTMLElement;
 
-        const engine = new Engine(this.canvas);
+        const engine = new Engine(this.canvas, this.errors);
         this.updatePlayer();
         
         // Buttons

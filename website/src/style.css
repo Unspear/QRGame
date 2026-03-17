@@ -135,3 +135,6 @@ h1, h2, h3, h4, h5, h6 {
     gap: 0.8rem; 
     width: 100%;
 }
+#game-errors {
+    border: solid black 
+}
