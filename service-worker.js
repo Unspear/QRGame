@@ -124,7 +124,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "4bb6be9b79c73f550434af725b0533c9"
   }, {
     "url": "edit.html",
-    "revision": "29cadaa3a13fa01cf7586138aeec440f"
+    "revision": "39e42b44f6ac54a85131a41c5b735951"
   }, {
     "url": "favicon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
