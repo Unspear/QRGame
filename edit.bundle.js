@@ -308,7 +308,10 @@ class Editor {
         }
     }
     setPatchFromEvent(event) {
-        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, this.getCoordFromEvent(event));
+        const point = this.getCoordFromEvent(event);
+        point.x = Math.floor(point.x / this.tileMap.dim.w);
+        point.y = Math.floor(point.y / this.tileMap.dim.h);
+        this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, point);
     }
     setBrushFromEvent(event) {
         let coords = this.getCoordFromEvent(event);
@@ -324,13 +327,12 @@ class Editor {
     }
     draw() {
         this.renderer.beginFrame();
+        this.renderer.viewOffset = this.getCurrentCamera().getViewOffset();
         if (this.tileMapTab.currentTab === TabDrawPatch) {
-            this.patchMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
-            this.patchMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.patchMap.draw(this.renderer, this.tileMap, true);
         }
         else {
-            this.tileMap.draw(this.renderer, this.getCurrentCamera().getViewOffset());
-            this.tileMap.drawOutline(this.renderer, this.getCurrentCamera().getViewOffset());
+            this.tileMap.draw(this.renderer, true);
         }
         this.renderer.endFrame();
     }
@@ -767,7 +769,7 @@ class Editor {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js-node_modules_retro-sound_dist_retro-sound_js-n-0a3be5","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","page_js-pack_ts","player_ts"], () => (__webpack_require__("./edit.ts")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053","vendors-node_modules_codemirror_legacy-modes_mode_lua_js-node_modules_codemirror_dist_index_js","page_js-pack_ts","player_ts"], () => (__webpack_require__("./edit.ts")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

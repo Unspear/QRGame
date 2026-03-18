@@ -1,5 +1,253 @@
 (self["webpackChunk"] = self["webpackChunk"] || []).push([["player_ts"],{
 
+/***/ "./audio.ts"
+/*!******************!*\
+  !*** ./audio.ts ***!
+  \******************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AudioAccessor: () => (/* binding */ AudioAccessor),
+/* harmony export */   AudioEngine: () => (/* binding */ AudioEngine),
+/* harmony export */   AudioNodeWrapper: () => (/* binding */ AudioNodeWrapper),
+/* harmony export */   BaseSoundNode: () => (/* binding */ BaseSoundNode),
+/* harmony export */   BufferSoundNode: () => (/* binding */ BufferSoundNode),
+/* harmony export */   FilterSoundNode: () => (/* binding */ FilterSoundNode),
+/* harmony export */   GainSoundNode: () => (/* binding */ GainSoundNode),
+/* harmony export */   OscillatorSoundNode: () => (/* binding */ OscillatorSoundNode),
+/* harmony export */   SoundMod: () => (/* binding */ SoundMod)
+/* harmony export */ });
+/* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sam-js */ "../node_modules/sam-js/dist/samjs.esm.min.js");
+
+function noteToFrequency(note) {
+    return 440 * Math.pow(2, (noteToMIDI(note) - 69) / 12);
+}
+function noteToMIDI(note) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octave = parseInt(note.slice(-1));
+    const noteName = note.slice(0, -1);
+    return (octave + 1) * 12 + noteNames.indexOf(noteName.toUpperCase());
+}
+function parseFrequency(input) {
+    return (typeof input === "string") ? noteToFrequency(input) : input;
+}
+class SoundMod {
+    type;
+    value;
+    duration;
+    constructor(type, value, duration) {
+        this.type = type;
+        this.value = value;
+        this.duration = duration;
+    }
+}
+function driveValue(ctx, target, inputs) {
+    for (let input of inputs) {
+        if (input instanceof AudioNodeWrapper) {
+            input.modulate(target);
+        }
+        else if (typeof input === "number") {
+            target.setValueAtTime(input, ctx.currentTime);
+        }
+        else {
+            switch (input.type) {
+                case "linear":
+                    target.linearRampToValueAtTime(input.value, ctx.currentTime + input.duration);
+                    break;
+                case "exponential":
+                    target.exponentialRampToValueAtTime(input.value, ctx.currentTime + input.duration);
+                    break;
+                case "step":
+                    target.setValueAtTime(input.value, ctx.currentTime + input.duration);
+                    break;
+            }
+        }
+    }
+}
+class AudioNodeWrapper {
+    #engine;
+    node;
+    constructor(engine, audioNode) {
+        this.#engine = engine;
+        this.node = audioNode;
+    }
+    addLowpass(frequency) {
+        let newNode = new FilterSoundNode(this.#engine, new BiquadFilterNode(this.node.context, {
+            type: "lowpass",
+            frequency: frequency,
+        }));
+        this.node.connect(newNode.node);
+        return newNode;
+    }
+    addHighpass(frequency) {
+        let newNode = new FilterSoundNode(this.#engine, new BiquadFilterNode(this.node.context, {
+            type: "highpass",
+            frequency: frequency,
+        }));
+        this.node.connect(newNode.node);
+        return newNode;
+    }
+    addGain(gain) {
+        let newNode = new GainSoundNode(this.#engine, new GainNode(this.node.context, {
+            gain: gain
+        }));
+        this.node.connect(newNode.node);
+        return newNode;
+    }
+    modulate(target) {
+        this.node.connect(target);
+    }
+    output() {
+        this.node.connect(this.#engine.output);
+    }
+}
+class BaseSoundNode extends AudioNodeWrapper {
+}
+class BufferSoundNode extends AudioNodeWrapper {
+    driveRate(...rate) {
+        driveValue(this.node.context, this.node.playbackRate, rate);
+        return this;
+    }
+    driveDetune(...cents) {
+        driveValue(this.node.context, this.node.detune, cents);
+        return this;
+    }
+}
+class OscillatorSoundNode extends AudioNodeWrapper {
+    driveFrequency(...frequency) {
+        driveValue(this.node.context, this.node.frequency, frequency);
+        return this;
+    }
+    driveDetune(...cents) {
+        driveValue(this.node.context, this.node.detune, cents);
+        return this;
+    }
+}
+class FilterSoundNode extends AudioNodeWrapper {
+    driveQuality(...quality) {
+        driveValue(this.node.context, this.node.Q, quality);
+        return this;
+    }
+    driveFrequency(...frequency) {
+        driveValue(this.node.context, this.node.frequency, frequency);
+        return this;
+    }
+    driveDetune(...cents) {
+        driveValue(this.node.context, this.node.detune, cents);
+        return this;
+    }
+    driveGian(...gain) {
+        driveValue(this.node.context, this.node.gain, gain);
+        return this;
+    }
+}
+class GainSoundNode extends AudioNodeWrapper {
+    driveGain(...gain) {
+        driveValue(this.node.context, this.node.gain, gain);
+        return this;
+    }
+}
+class AudioEngine {
+    tts;
+    ctx;
+    output;
+    noiseBuffer;
+    constructor() {
+        this.tts = new sam_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+        this.ctx = new AudioContext();
+        this.output = this.ctx.createGain();
+        this.output.connect(this.ctx.destination);
+        this.setVolume(0.25);
+        this.noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate);
+        let output = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < output.length; i++) {
+            output[i] = Math.random() * 2 - 1;
+        }
+    }
+    setPaused(value) {
+        if (value) {
+            this.ctx.suspend();
+        }
+        else {
+            this.ctx.resume();
+        }
+    }
+    close() {
+        this.ctx.close();
+    }
+    setVolume(value) {
+        this.output.gain.value = value;
+    }
+    getVolume() {
+        return this.output.gain.value;
+    }
+}
+class AudioAccessor {
+    #engine;
+    constructor(engine) {
+        this.#engine = engine;
+    }
+    wave(type, frequency, length) {
+        let oscNode = this.#engine.ctx.createOscillator();
+        oscNode.type = type;
+        oscNode.frequency.value = parseFrequency(frequency);
+        oscNode.start();
+        oscNode.stop(length);
+        return new OscillatorSoundNode(this.#engine, oscNode);
+    }
+    triangle(frequency, length) {
+        return this.wave("triangle", frequency, length);
+    }
+    sawtooth(frequency, length) {
+        return this.wave("sawtooth", frequency, length);
+    }
+    sine(frequency, length) {
+        return this.wave("sine", frequency, length);
+    }
+    square(frequency, length) {
+        return this.wave("square", frequency, length);
+    }
+    noise(length) {
+        let noiseNode = this.#engine.ctx.createBufferSource();
+        noiseNode.buffer = this.#engine.noiseBuffer;
+        noiseNode.loop = true;
+        noiseNode.start();
+        noiseNode.stop(length);
+        return new BufferSoundNode(this.#engine, noiseNode);
+    }
+    speech(text, length = 0) {
+        // Replace non-ascii and control characters with space
+        const speechData = this.#engine.tts.buf8(text.replace(/[^\x20-\x7E]/g, " "));
+        const speechBuffer = this.#engine.ctx.createBuffer(1, speechData.length, 22050);
+        const speechChannelData = speechBuffer.getChannelData(0);
+        for (let i = 0; i < speechData.length; i++) {
+            speechChannelData[i] = speechData[i] / 127.5 - 1;
+        }
+        const speechNode = this.#engine.ctx.createBufferSource();
+        speechNode.buffer = speechBuffer;
+        speechNode.start();
+        if (length > 0) {
+            speechNode.loop = true;
+            speechNode.stop(length);
+        }
+        return new BufferSoundNode(this.#engine, speechNode);
+    }
+    linear(value, duration) {
+        return new SoundMod("linear", parseFrequency(value), duration);
+    }
+    exp(value, duration) {
+        return new SoundMod("exponential", parseFrequency(value), duration);
+    }
+    step(value, duration) {
+        return new SoundMod("step", parseFrequency(value), duration);
+    }
+}
+
+
+/***/ },
+
 /***/ "./camera.ts"
 /*!*******************!*\
   !*** ./camera.ts ***!
@@ -61,13 +309,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./constants.ts");
 /* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile */ "./tile.ts");
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./util.ts");
-/* harmony import */ var sam_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! sam-js */ "../node_modules/sam-js/dist/samjs.esm.min.js");
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./camera */ "./camera.ts");
-/* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "../node_modules/wasmoon/dist/glue.wasm");
-/* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./press-play.png */ "./press-play.png");
-/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./render */ "./render.ts");
-/* harmony import */ var retro_sound__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! retro-sound */ "../node_modules/retro-sound/dist/retro-sound.js");
-
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./camera */ "./camera.ts");
+/* harmony import */ var wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! wasmoon/dist/glue.wasm */ "../node_modules/wasmoon/dist/glue.wasm");
+/* harmony import */ var _press_play_png__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./press-play.png */ "./press-play.png");
+/* harmony import */ var _render__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./render */ "./render.ts");
+/* harmony import */ var _audio__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./audio */ "./audio.ts");
 
 
 
@@ -81,15 +327,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let pressPlayImage = new Image();
-pressPlayImage.src = _press_play_png__WEBPACK_IMPORTED_MODULE_10__;
+pressPlayImage.src = _press_play_png__WEBPACK_IMPORTED_MODULE_9__;
 class Engine {
     gameCanvas;
-    textToSpeech;
+    gameErrors;
     luaFactory;
     downPointers;
     renderer;
-    audioContext;
-    masterVolume;
+    audio;
+    #paused;
     game;
     sprites;
     tileMap;
@@ -97,22 +343,18 @@ class Engine {
     matterEngine;
     spriteDragConstraint;
     lua;
-    currentSpeak;
     ranScript;
     luaFrame;
     luaDrag;
     luaTap;
-    constructor(gameCanvas) {
+    constructor(gameCanvas, gameErrors) {
+        this.#paused = false;
         this.gameCanvas = gameCanvas;
-        this.textToSpeech = new sam_js__WEBPACK_IMPORTED_MODULE_7__["default"]();
-        this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_9__);
-        this.renderer = new _render__WEBPACK_IMPORTED_MODULE_11__.Renderer(this.gameCanvas);
+        this.gameErrors = gameErrors;
+        this.audio = new _audio__WEBPACK_IMPORTED_MODULE_11__.AudioEngine();
+        this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_8__);
+        this.renderer = new _render__WEBPACK_IMPORTED_MODULE_10__.Renderer(this.gameCanvas);
         this.downPointers = new Set();
-        this.audioContext = new AudioContext();
-        this.masterVolume = this.audioContext.createGain();
-        this.masterVolume.gain.setValueAtTime(0.25, 0);
-        this.masterVolume.connect(this.audioContext.destination);
-        this.audioContext.suspend();
         this.ranScript = false;
         gameCanvas.addEventListener('pointerdown', (event) => {
             this.downPointers.add(event.pointerId);
@@ -140,15 +382,18 @@ class Engine {
     async play(game) {
         // Setup (should override any existing values)
         this.game = game;
+        // Clear game errors
+        this.gameErrors.textContent = '';
         this.ranScript = false;
         this.sprites = [];
         const gameTileMap = _tile__WEBPACK_IMPORTED_MODULE_5__.TileMap.Copy(game.tileMap);
         const gamePatchMap = _tile__WEBPACK_IMPORTED_MODULE_5__.PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
-        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_8__.Camera();
-        if (this.currentSpeak) {
-            this.currentSpeak.abort("Interrupted");
+        this.camera = new _camera__WEBPACK_IMPORTED_MODULE_7__.Camera();
+        if (this.audio) {
+            this.audio.close();
         }
+        this.audio = new _audio__WEBPACK_IMPORTED_MODULE_11__.AudioEngine();
         // Create physics engine
         matter_js__WEBPACK_IMPORTED_MODULE_1__.Resolver._restingThresh = 1;
         this.matterEngine = matter_js__WEBPACK_IMPORTED_MODULE_1__.Engine.create({
@@ -189,46 +434,33 @@ class Engine {
             this.sprites.push(newSprite);
             return newSprite;
         });
-        this.lua.global.set('say', (string) => {
-            // Replace non-ascii and control characters with space
-            const ascii = string.replace(/[^\x20-\x7E]/g, " ");
-            if (this.currentSpeak) {
-                this.currentSpeak.abort("Interrupted");
-            }
-            this.currentSpeak = this.textToSpeech.speak(ascii);
-        });
-        this.lua.global.set('beep', () => {
-            const FM = new retro_sound__WEBPACK_IMPORTED_MODULE_12__.Sound(this.audioContext, 'triangle')
-                .withModulator('square', 6, 600, 'detune')
-                .withModulator('square', 12, 300, 'detune')
-                .withFilter('lowpass', 1000)
-                .toDestination(this.masterVolume);
-            FM.play('A5')
-                .rampToVolumeAtTime(0, 1)
-                .waitDispose();
-        });
+        // Simple Audio functions
+        this.lua.global.set('audio', new _audio__WEBPACK_IMPORTED_MODULE_11__.AudioAccessor(this.audio));
         this.lua.global.set('camera', this.camera);
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
     }
     setPaused(value) {
+        this.#paused = value;
         this.renderer.paused = value;
-        if (value) {
-            this.audioContext.suspend();
-        }
-        else {
-            this.audioContext.resume();
-        }
+        this.audio.setPaused(value);
     }
-    isPaused() {
-        return this.renderer.paused;
+    get paused() {
+        return this.#paused;
     }
     #doFrame() {
         // Run Script
         if (!this.ranScript) {
             this.ranScript = true;
             // Load Script
-            this.lua.doStringSync(this.game.script);
+            try {
+                this.lua.doStringSync(this.game.script);
+            }
+            catch (error) {
+                let p = document.createElement("p");
+                p.innerText = `${error}`;
+                this.gameErrors.appendChild(p);
+            }
             // Get Lua References
             this.luaFrame = this.lua.global.get('frame');
             this.luaTap = this.lua.global.get('tap');
@@ -249,12 +481,12 @@ class Engine {
         // Rendering
         // Fill Background
         this.renderer.beginFrame();
-        let viewOffset = this.camera.getViewOffset();
+        this.renderer.viewOffset = this.camera.getViewOffset();
         // Draw Tilemap
-        this.tileMap.draw(this.renderer, viewOffset);
+        this.tileMap.draw(this.renderer);
         // Draw Sprites
         for (let sprite of this.sprites) {
-            sprite.draw(this.renderer, viewOffset);
+            sprite.draw(this.renderer);
         }
         this.renderer.endFrame();
     }
@@ -286,6 +518,7 @@ _pack__WEBPACK_IMPORTED_MODULE_2__ = __webpack_async_dependencies_result__[0];
 
 class Player {
     canvas;
+    errors;
     playButton;
     pauseButton;
     reloadButton;
@@ -303,6 +536,7 @@ class Player {
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas');
+        this.errors = document.getElementById('game-errors');
         this.playButton = document.getElementById('play-button');
         this.pauseButton = document.getElementById('pause-button');
         this.reloadButton = document.getElementById('reload-button');
@@ -320,7 +554,7 @@ class Player {
         }
         this.gameTitle = document.getElementById('game-title');
         this.gameDescription = document.getElementById('game-description');
-        const engine = new _engine__WEBPACK_IMPORTED_MODULE_1__.Engine(this.canvas);
+        const engine = new _engine__WEBPACK_IMPORTED_MODULE_1__.Engine(this.canvas, this.errors);
         this.updatePlayer();
         // Buttons
         this.playButton.onclick = () => {
@@ -557,8 +791,8 @@ class SpritePipeline {
         gl.enableVertexAttribArray(this.#iOffsetLoc);
         gl.enableVertexAttribArray(this.#iTexIndexLoc);
         gl.enableVertexAttribArray(this.#iHalfWidth);
-        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 0 * BPE);
-        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, false, this.#instanceStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
         gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
         gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
@@ -645,7 +879,7 @@ class LinePipeline {
         gl.enableVertexAttribArray(this.#vColorLoc);
         gl.enableVertexAttribArray(this.#vPositionLoc);
         gl.enableVertexAttribArray(this.#vOffsetLoc);
-        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, false, this.#vertexStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, true, this.#vertexStride * BPE, 0 * BPE);
         gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, this.#vertexStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#vOffsetLoc, 1, GL.FLOAT, false, this.#vertexStride * BPE, 6 * BPE);
     }
@@ -680,8 +914,11 @@ class Renderer {
     #linePipeline;
     paused;
     renderTime;
+    viewOffset;
     constructor(canvas) {
-        this.#gl = canvas.getContext("webgl2"); //{ antialias: false }
+        this.#gl = canvas.getContext("webgl2", { premultipliedAlpha: false }); //{ antialias: false }
+        this.#gl.enable(GL.BLEND);
+        this.#gl.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
         this.#gl.viewport(0, 0, this.#gl.canvas.width, this.#gl.canvas.height);
         this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
@@ -689,6 +926,7 @@ class Renderer {
         this.#linePipeline = new LinePipeline(this.#gl);
         this.paused = false;
         this.renderTime = 0;
+        this.viewOffset = { x: 0, y: 0 };
     }
     startRenderLoop(frameCallback) {
         this.#frameCallback = frameCallback;
@@ -721,7 +959,7 @@ class Renderer {
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
     }
     endFrame() {
-        const viewData = [0, 0, this.#gl.canvas.width, this.#gl.canvas.height];
+        const viewData = [this.viewOffset.x, this.viewOffset.y, this.#gl.canvas.width, this.#gl.canvas.height];
         this.#spritePipeline.draw(this.#gl, viewData);
         this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2 });
         this.#gl.flush();
@@ -759,7 +997,11 @@ class Renderer {
             this.#spritePipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
         }
     }
-    drawBox(x0, y0, x1, y1) {
+    drawBox(x0, y0, x1, y1, margin) {
+        x0 -= margin;
+        y0 -= margin;
+        x1 += margin;
+        y1 += margin;
         let totalOffset = 0;
         this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
         totalOffset += Math.abs(x0 - x1);
@@ -773,6 +1015,24 @@ class Renderer {
         this.#linePipeline.addData(x0, y1, 1, 1, 1, 1, totalOffset);
         totalOffset += Math.abs(y0 - y1);
         this.#linePipeline.addData(x0, y0, 1, 1, 1, 1, totalOffset);
+    }
+    drawGrid(x0, y0, x1, y1, xTiles, yTiles) {
+        x0 += 0.5;
+        y0 += 0.5;
+        x1 += 0.5;
+        y1 += 0.5;
+        const yIncrement = (y1 - y0) / yTiles;
+        for (let i = 1; i < yTiles; i++) {
+            const yOffset = y0 + yIncrement * i;
+            this.#linePipeline.addData(x0, yOffset, 0, 0.5, 1, 0.5, 0);
+            this.#linePipeline.addData(x1, yOffset, 0, 0.5, 1, 0.5, x1 - x0);
+        }
+        const xIncrement = (x1 - x0) / xTiles;
+        for (let i = 1; i < xTiles; i++) {
+            const xOffset = x0 + xIncrement * i;
+            this.#linePipeline.addData(xOffset, y0, 0, 0.5, 1, 0.5, 0);
+            this.#linePipeline.addData(xOffset, y1, 0, 0.5, 1, 0.5, y1 - y0);
+        }
     }
 }
 
@@ -1020,9 +1280,9 @@ class Sprite {
             this.#y = this.#physBody.position.y + _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH * this.#py - _constants__WEBPACK_IMPORTED_MODULE_0__.CHAR_WIDTH * 0.5;
         }
     }
-    draw(renderer, viewOffset) {
+    draw(renderer) {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
-        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x + viewOffset.x, this.#y + viewOffset.y, this.#px, this.#py, this.wrap, this.compact);
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact);
     }
 }
 
@@ -1157,7 +1417,7 @@ module.exports = "0,1\r\n1,1\r\n2,1\r\n3,1\r\n4,1\r\n5,1\r\n6,1\r\n7,1\r\n8,1\r\
 (module) {
 
 "use strict";
-module.exports = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec4 fColor;\r\nin float fOffset;\r\n\r\nuniform vec3 uLinePattern;\r\n\r\nout vec4 outColor;\r\n\r\nvoid main() {\r\n  outColor = fColor;\r\n  float offset = fOffset + uLinePattern[0] + 0.001;\r\n  offset = mod(offset, uLinePattern[1]);\r\n  if (offset < uLinePattern[2]) {\r\n    outColor.rgb = vec3(0);\r\n  }\r\n}";
+module.exports = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec4 fColor;\r\nin float fOffset;\r\n\r\nuniform vec3 uLinePattern;\r\n\r\nout vec4 outColor;\r\n\r\nvoid main() {\r\n  outColor = fColor;\r\n  float offset = fOffset + uLinePattern[0] + 0.001;\r\n  offset = mod(offset, uLinePattern[1]);\r\n  if (offset < uLinePattern[2] && fColor.a == 1.0) {\r\n    outColor.rgb = vec3(0);\r\n  }\r\n}";
 
 /***/ },
 
