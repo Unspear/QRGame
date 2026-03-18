@@ -45,7 +45,7 @@ class StreamCompressor {
 const compressors = [
     new StreamCompressor("deflate-raw"),
     new StreamCompressor("gzip"),
-    new StreamCompressor("deflate"),
+    //new StreamCompressor("deflate"),
 ];
 
 const fflateOpts: fflate.DeflateOptions = {
@@ -87,12 +87,12 @@ benchmarkButton.onclick = async function (){
     for (const c of compressors) {
         benchmarkGamesAsync(benchmarkTable, data, c.toString(), (data) => c.compress(data));
     }
-    benchmarkGames(benchmarkTable, data, "fflate gzip", (gameData) => fflate.gzipSync(gameData, fflateOpts));
-    benchmarkGames(benchmarkTable, data, "fflate gzip w/dict", (gameData) => fflate.gzipSync(gameData, fflateOptsDict));
+    //benchmarkGames(benchmarkTable, data, "fflate gzip", (gameData) => fflate.gzipSync(gameData, fflateOpts));
+    //benchmarkGames(benchmarkTable, data, "fflate gzip w/dict", (gameData) => fflate.gzipSync(gameData, fflateOptsDict));
     benchmarkGames(benchmarkTable, data, "fflate zlib", (gameData) => fflate.zlibSync(gameData, fflateOpts));
-    benchmarkGames(benchmarkTable, data, "fflate zlib w/dict", (gameData) => fflate.zlibSync(gameData, fflateOptsDict));
-    benchmarkGames(benchmarkTable, data, "fflate deflate", (gameData) => fflate.deflateSync(gameData, fflateOpts));
-    benchmarkGames(benchmarkTable, data, "fflate deflate w/dict", (gameData) => fflate.deflateSync(gameData, fflateOptsDict));
+    //benchmarkGames(benchmarkTable, data, "fflate zlib w/dict", (gameData) => fflate.zlibSync(gameData, fflateOptsDict));
+    //benchmarkGames(benchmarkTable, data, "fflate deflate", (gameData) => fflate.deflateSync(gameData, fflateOpts));
+    //benchmarkGames(benchmarkTable, data, "fflate deflate w/dict", (gameData) => fflate.deflateSync(gameData, fflateOptsDict));
     benchmarkGames(benchmarkTable, data, "brotli", (gameData) => brotli.compress(gameData, {quality: 11}));
     benchmarkGames(benchmarkTable, data, "ppmd", (gameData) => PPMd.compress(gameData));
     // Pack Game Properly
