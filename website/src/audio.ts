@@ -29,22 +29,24 @@ export class SoundMod {
     }
 }
 export type SoundModInput = number | SoundMod | AudioNodeWrapper<AudioNode>;
-function applyDriver(ctx: BaseAudioContext, target: AudioParam, input: SoundModInput) {
-    if (input instanceof AudioNodeWrapper) {
-        input.modulate(target);
-    } else if (typeof input === "number") {
-        target.setValueAtTime(input, ctx.currentTime);
-    } else {
-        switch(input.type) {
-        case "linear":
-            target.linearRampToValueAtTime(input.value, ctx.currentTime + input.duration);
-            break;
-        case "exponential":
-            target.exponentialRampToValueAtTime(input.value, ctx.currentTime + input.duration);
-            break;
-        case "step":
-            target.setValueAtTime(input.value, ctx.currentTime + input.duration);
-            break;
+function driveValue(ctx: BaseAudioContext, target: AudioParam, inputs: SoundModInput[]) {
+    for(let input of inputs) {
+         if (input instanceof AudioNodeWrapper) {
+            input.modulate(target);
+        } else if (typeof input === "number") {
+            target.setValueAtTime(input, ctx.currentTime);
+        } else {
+            switch(input.type) {
+            case "linear":
+                target.linearRampToValueAtTime(input.value, ctx.currentTime + input.duration);
+                break;
+            case "exponential":
+                target.exponentialRampToValueAtTime(input.value, ctx.currentTime + input.duration);
+                break;
+            case "step":
+                target.setValueAtTime(input.value, ctx.currentTime + input.duration);
+                break;
+            }
         }
     }
 }
@@ -91,49 +93,49 @@ export class BaseSoundNode extends AudioNodeWrapper<AudioNode> {
 }
 
 export class BufferSoundNode extends AudioNodeWrapper<AudioBufferSourceNode> {
-    setRate(rate: number): BufferSoundNode {
-        applyDriver(this.node.context, this.node.playbackRate, rate);
+    driveRate(...rate: SoundModInput[]): BufferSoundNode {
+        driveValue(this.node.context, this.node.playbackRate, rate);
         return this;
     }
-    setDetune(cents: number): BufferSoundNode {
-        applyDriver(this.node.context, this.node.detune, cents);
+    driveDetune(...cents: SoundModInput[]): BufferSoundNode {
+        driveValue(this.node.context, this.node.detune, cents);
         return this;
     }
 }
 
 export class OscillatorSoundNode extends AudioNodeWrapper<OscillatorNode> {
-    setFrequency(frequency: SoundModInput): OscillatorSoundNode {
-        applyDriver(this.node.context, this.node.frequency, frequency);
+    driveFrequency(...frequency: SoundModInput[]): OscillatorSoundNode {
+        driveValue(this.node.context, this.node.frequency, frequency);
         return this;
     }
-    setDetune(cents: SoundModInput): OscillatorSoundNode {
-        applyDriver(this.node.context, this.node.detune, cents);
+    driveDetune(...cents: SoundModInput[]): OscillatorSoundNode {
+        driveValue(this.node.context, this.node.detune, cents);
         return this;
     }
 }
 
 export class FilterSoundNode extends AudioNodeWrapper<BiquadFilterNode> {
-    setQuality(quality: SoundModInput): FilterSoundNode {
-        applyDriver(this.node.context, this.node.Q, quality);
+    driveQuality(...quality: SoundModInput[]): FilterSoundNode {
+        driveValue(this.node.context, this.node.Q, quality);
         return this;
     }
-    setFrequency(frequency: SoundModInput): FilterSoundNode {
-        applyDriver(this.node.context, this.node.frequency, frequency);
+    driveFrequency(...frequency: SoundModInput[]): FilterSoundNode {
+        driveValue(this.node.context, this.node.frequency, frequency);
         return this;
     }
-    setDetune(cents: SoundModInput): FilterSoundNode {
-        applyDriver(this.node.context, this.node.detune, cents);
+    driveDetune(...cents: SoundModInput[]): FilterSoundNode {
+        driveValue(this.node.context, this.node.detune, cents);
         return this;
     }
-    setGain(gain: SoundModInput): FilterSoundNode {
-        applyDriver(this.node.context, this.node.gain, gain);
+    driveGian(...gain: SoundModInput[]): FilterSoundNode {
+        driveValue(this.node.context, this.node.gain, gain);
         return this;
     }
 }
 
 export class GainSoundNode extends AudioNodeWrapper<GainNode> {
-    setGain(gain: SoundModInput): GainSoundNode {
-        applyDriver(this.node.context, this.node.gain, gain);
+    driveGain(...gain: SoundModInput[]): GainSoundNode {
+        driveValue(this.node.context, this.node.gain, gain);
         return this;
     }
 }
@@ -143,15 +145,15 @@ export class AudioEngine {
     tts: SamJs;
     ctx: AudioContext;
     output: GainNode;
-    #noiseBuffer: AudioBuffer;
+    noiseBuffer: AudioBuffer;
     constructor() {
         this.tts = new SamJs();
         this.ctx = new AudioContext();
         this.output = this.ctx.createGain();
         this.output.connect(this.ctx.destination);
         this.setVolume(0.25);
-        this.#noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate);
-        let output = this.#noiseBuffer.getChannelData(0);
+        this.noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate);
+        let output = this.noiseBuffer.getChannelData(0);
         for (let i = 0; i < output.length; i++) {
             output[i] = Math.random() * 2 - 1;
         }
@@ -172,34 +174,61 @@ export class AudioEngine {
     getVolume(): number {
         return this.output.gain.value;
     }
-    // Generators
-    makeWave(type: OscillatorType, frequency: FrequencyInput, length: number): OscillatorSoundNode {
-        let oscNode = this.ctx.createOscillator();
+}
+
+export class AudioAccessor {
+    #engine: AudioEngine;
+    constructor(engine: AudioEngine) {
+        this.#engine = engine;
+    }
+    wave(type: OscillatorType, frequency: FrequencyInput, length: number): OscillatorSoundNode {
+        let oscNode = this.#engine.ctx.createOscillator();
         oscNode.type = type;
         oscNode.frequency.value = parseFrequency(frequency);
         oscNode.start();
         oscNode.stop(length);
-        return new OscillatorSoundNode(this, oscNode);
+        return new OscillatorSoundNode(this.#engine, oscNode);
     }
-    makeNoise(length: number): BufferSoundNode {
-        let noiseNode = this.ctx.createBufferSource();
-        noiseNode.buffer = this.#noiseBuffer;
+    triangle(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+        return this.wave("triangle", frequency, length)
+    }
+    sawtooth(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+        return this.wave("sawtooth", frequency, length)
+    }
+    sine(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+        return this.wave("sine", frequency, length)
+    }
+    square(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+        return this.wave("square", frequency, length)
+    }
+    noise(length: number): BufferSoundNode {
+        let noiseNode = this.#engine.ctx.createBufferSource();
+        noiseNode.buffer = this.#engine.noiseBuffer;
         noiseNode.loop = true;
         noiseNode.start();
         noiseNode.stop(length);
-        return new BufferSoundNode(this, noiseNode);
+        return new BufferSoundNode(this.#engine, noiseNode);
     }
-    makeSpeech(text: string): BufferSoundNode {
+    speech(text: string): BufferSoundNode {
         // Replace non-ascii and control characters with space
-        const speechData = this.tts.buf8(text.replace(/[^\x20-\x7E]/g, " ")) as Uint8Array;
-        const speechBuffer = this.ctx.createBuffer(1, speechData.length, 22050);
+        const speechData = this.#engine.tts.buf8(text.replace(/[^\x20-\x7E]/g, " ")) as Uint8Array;
+        const speechBuffer = this.#engine.ctx.createBuffer(1, speechData.length, 22050);
         const speechChannelData = speechBuffer.getChannelData(0);
         for (let i = 0; i < speechData.length; i++) {
             speechChannelData[i] = speechData[i] / 127.5 - 1;
         }
-        const speechNode = this.ctx.createBufferSource();
+        const speechNode = this.#engine.ctx.createBufferSource();
         speechNode.buffer = speechBuffer;
         speechNode.start();
-        return new BufferSoundNode(this, speechNode);
+        return new BufferSoundNode(this.#engine, speechNode);
+    }
+    linear(value: FrequencyInput, duration: number): SoundMod {
+        return new SoundMod("linear", parseFrequency(value), duration);
+    }
+    exp(value: FrequencyInput, duration: number): SoundMod {
+        return new SoundMod("exponential", parseFrequency(value), duration);
+    }
+    step(value: FrequencyInput, duration: number): SoundMod {
+        return new SoundMod("step", parseFrequency(value), duration);
     }
 }

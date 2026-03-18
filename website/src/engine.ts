@@ -10,7 +10,7 @@ import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
-import { AudioEngine, BufferSoundNode, FrequencyInput, OscillatorSoundNode, SoundMod } from './audio'
+import { AudioAccessor, AudioEngine, BufferSoundNode, FrequencyInput, OscillatorSoundNode, SoundMod } from './audio'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
@@ -126,42 +126,7 @@ export class Engine {
             return newSprite;
         });
         // Simple Audio functions
-        this.lua.global.set('say', (text: string) => {
-            this.audio.makeSpeech(text).output();
-        });
-        this.lua.global.set('playSine', (note: string, length: number) => {
-            this.audio.makeWave("sine", note, length).output();
-        });
-        this.lua.global.set('playSquare', (note: string, length: number) => {
-            this.audio.makeWave("square", note, length).output();
-        });
-        this.lua.global.set('playSawtooth', (note: string, length: number) => {
-            this.audio.makeWave("sawtooth", note, length).output();
-        });
-        this.lua.global.set('playTriangle', (note: string, length: number) => {
-            this.audio.makeWave("triangle", note, length).output();
-        });
-        this.lua.global.set('playNoise', (length: number) => {
-            this.audio.makeNoise(length).output();
-        });
-        this.lua.global.set('makeSpeech', (text: string): BufferSoundNode => {
-            return this.audio.makeSpeech(text);
-        });
-        this.lua.global.set('makeWave', (type: OscillatorType, frequency: FrequencyInput, length: number): OscillatorSoundNode => {
-            return this.audio.makeWave(type, frequency, length);
-        });
-        this.lua.global.set('makeNoise', (length: number): BufferSoundNode => {
-            return this.audio.makeNoise(length);
-        });
-        this.lua.global.set('modLinear', (value: number, duration: number): SoundMod => {
-            return new SoundMod("linear", value, duration);
-        });
-        this.lua.global.set('modExp', (value: number, duration: number): SoundMod => {
-            return new SoundMod("exponential", value, duration);
-        });
-        this.lua.global.set('modStep', (value: number, duration: number): SoundMod => {
-            return new SoundMod("step", value, duration);
-        });
+        this.lua.global.set('audio', new AudioAccessor(this.audio));
         this.lua.global.set('camera', this.camera);
         // Start
         this.renderer.startRenderLoop(() => this.#doFrame());
