@@ -15,7 +15,7 @@ let script = `-- Noise 1
 -- Laser
 --audio.sawtooth("C6", 0.5).driveFrequency(audio.triangle(120, 0.5).addGain(100), audio.linear("C5", 0.25)).addLowpass(1800).addGain(1.0).driveGain(audio.linear(0, 0.5)).output()
 -- Witch
---audio.sawtooth('A4', 3.5).driveDetune(audio.sine(18, 3.5).driveFrequency(audio.sine(12, 3.5).addGain(50)).addGain(150)).driveFrequency(audio.linear("G3", 3)).addLowpass(1000).driveFrequency(audio.triangle(4, 3.5).addGain(1000)).addGain(1).driveGain(audio.linear(1, 0.125), audio.linear(0, 3.5)).output()
+audio.sawtooth('A4', 3.5).driveDetune(audio.sine(18, 3.5).driveFrequency(audio.sine(12, 3.5).addGain(50)).addGain(150)).driveFrequency(audio.linear("G3", 3)).addLowpass(1000).driveFrequency(audio.triangle(4, 3.5).addGain(1000)).addGain(1).driveGain(audio.linear(1, 0.125), audio.linear(0, 3.5)).output()
 -- Emergency
 --audio.sine("A4", 2).driveDetune(audio.sine(2, 2).addGain(600)).addLowpass(800).addGain(1).driveGain(audio.linear(0, 2)).output()
 -- Game Over

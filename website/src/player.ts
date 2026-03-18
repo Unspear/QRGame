@@ -22,6 +22,9 @@ export class Player {
     game: Game;
     gameProvider: GameProvider;
     constructor(gameProvider: GameProvider, isEditor: boolean) {
+        if ((navigator as any).audioSession) {
+            (navigator as any).audioSession.type = "playback";
+        }
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
