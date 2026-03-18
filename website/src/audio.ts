@@ -208,7 +208,7 @@ export class AudioAccessor {
         noiseNode.stop(length);
         return new BufferSoundNode(this.#engine, noiseNode);
     }
-    speech(text: string): BufferSoundNode {
+    speech(text: string, length: number = 0): BufferSoundNode {
         // Replace non-ascii and control characters with space
         const speechData = this.#engine.tts.buf8(text.replace(/[^\x20-\x7E]/g, " ")) as Uint8Array;
         const speechBuffer = this.#engine.ctx.createBuffer(1, speechData.length, 22050);
@@ -219,6 +219,10 @@ export class AudioAccessor {
         const speechNode = this.#engine.ctx.createBufferSource();
         speechNode.buffer = speechBuffer;
         speechNode.start();
+        if (length > 0) {
+            speechNode.loop = true;
+            speechNode.stop(length);
+        }
         return new BufferSoundNode(this.#engine, speechNode);
     }
     linear(value: FrequencyInput, duration: number): SoundMod {
