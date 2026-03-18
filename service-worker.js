@@ -139,7 +139,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "79aa064863ba7d727fd8bdb9ac2b5259"
   }, {
     "url": "index.bundle.js",
-    "revision": "85719e4ed42d7a12a30c9a2f20729b1a"
+    "revision": "d550b8a01acc732d05ea210799e99cf2"
   }, {
     "url": "index.html",
     "revision": "6b4a6a3cddd3eef779e84db8d909ee0d"
@@ -154,10 +154,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "14a20cc9943eaf13a85d841ee819a8b8"
   }, {
     "url": "player_ts.bundle.js",
-    "revision": "bc9b603e6bfca2da5bbcb14d69c9f053"
+    "revision": "16a294b0a51fb6b03567ff836ef517ce"
   }, {
     "url": "test.bundle.js",
-    "revision": "5a0a796926c08b65164a37e72370f26e"
+    "revision": "cc7eb57b3228deb79a48790b2ba1e38b"
   }, {
     "url": "test.html",
     "revision": "9753df46dfaa4dfa0feb2a3304622be3"

@@ -533,6 +533,9 @@ class Player {
     game;
     gameProvider;
     constructor(gameProvider, isEditor) {
+        if (navigator.audioSession) {
+            navigator.audioSession.type = "playback";
+        }
         this.gameProvider = gameProvider;
         this.game = gameProvider();
         this.canvas = document.getElementById('game-canvas');
