@@ -156,7 +156,7 @@ export class Engine {
         this.lua.global.set('modLinear', (value: number, duration: number): SoundMod => {
             return new SoundMod("linear", value, duration);
         });
-        this.lua.global.set('modExponential', (value: number, duration: number): SoundMod => {
+        this.lua.global.set('modExp', (value: number, duration: number): SoundMod => {
             return new SoundMod("exponential", value, duration);
         });
         this.lua.global.set('modStep', (value: number, duration: number): SoundMod => {
