@@ -1,4 +1,3 @@
-import { Sound } from "retro-sound";
 import SamJs from "sam-js";
 
 function noteToFrequency(note: string): number {
