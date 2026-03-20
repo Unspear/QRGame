@@ -87,10 +87,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "url": "376884e8dd79a0eec4c0.svg",
     "revision": null
   }, {
-    "url": "3f2fc8a9c17d6fba68e3.json",
+    "url": "3f53db599ee755d90efd.wasm",
     "revision": null
   }, {
-    "url": "3f53db599ee755d90efd.wasm",
+    "url": "4d10eef7edbee652c0b1.json",
     "revision": null
   }, {
     "url": "5a875fe39a17f0cc9c81.wasm",
@@ -124,7 +124,7 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "4bb6be9b79c73f550434af725b0533c9"
   }, {
     "url": "edit.html",
-    "revision": "39e42b44f6ac54a85131a41c5b735951"
+    "revision": "c2c19bb8510cc9e5cb74bbd91e2ea58d"
   }, {
     "url": "favicon.png",
     "revision": "2d735d5a8a1ad54b1fbddc346c40d1ce"
@@ -139,10 +139,10 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "79aa064863ba7d727fd8bdb9ac2b5259"
   }, {
     "url": "index.bundle.js",
-    "revision": "d550b8a01acc732d05ea210799e99cf2"
+    "revision": "57ef0f28577b87786c40f33e595d4a3b"
   }, {
     "url": "index.html",
-    "revision": "6b4a6a3cddd3eef779e84db8d909ee0d"
+    "revision": "e935b7a0a3b5f1128ceb01754bac20b4"
   }, {
     "url": "page_js-pack_ts.bundle.js",
     "revision": "d07ab78654ce2d5b769d053873f80849"
@@ -151,16 +151,16 @@ define(['./workbox-b3ca1ef5'], (function (workbox) { 'use strict';
     "revision": "748123afa5d7c6c7f4f550daf2058c58"
   }, {
     "url": "play.html",
-    "revision": "14a20cc9943eaf13a85d841ee819a8b8"
+    "revision": "e5fee375817ad34149eae0d6163a7cb1"
   }, {
     "url": "player_ts.bundle.js",
-    "revision": "16a294b0a51fb6b03567ff836ef517ce"
+    "revision": "c51db15858cf9be96ed489bb4563cf2f"
   }, {
     "url": "test.bundle.js",
-    "revision": "cc7eb57b3228deb79a48790b2ba1e38b"
+    "revision": "81f15898e6d3ac72fdce20c704d8bfeb"
   }, {
     "url": "test.html",
-    "revision": "9753df46dfaa4dfa0feb2a3304622be3"
+    "revision": "a1e8dd1adf171e99712f9347751eab38"
   }, {
     "url": "vendors-node_modules_brotli-wasm_index_web_js-node_modules_fflate_esm_browser_js.bundle.js",
     "revision": "8d90ea14d30c855f3fe0f7e662f713cc"

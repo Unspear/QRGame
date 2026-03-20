@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="3f2fc8a9c17d6fba68e3.json">
+    <link rel="manifest" href="4d10eef7edbee652c0b1.json">
     <title>QR Game</title>
   <link rel="icon" href="favicon.png"><script defer src="vendors-node_modules_matter-js_build_matter_js-node_modules_sam-js_dist_samjs_esm_min_js-node-e3c053.bundle.js"></script><script defer src="page_js-pack_ts.bundle.js"></script><script defer src="player_ts.bundle.js"></script><script defer src="play.bundle.js"></script><link href="04f35e6abd32edce5be7.css" rel="stylesheet"></head>
   <body>
@@ -40,6 +40,9 @@
                 Open Editor
             </button>
             <div style="flex-grow: 1;"></div>
+        </div>
+        <canvas id="qr-canvas"></canvas>
+        <div class="flex-bar">
             <button class="icon-button" id="url-button">
                 <img src="86dba0d8d03edcf7ca0a.svg" width="40" height="40"/>
                 URL
@@ -48,8 +51,8 @@
                 <img src="86dba0d8d03edcf7ca0a.svg" width="40" height="40"/>
                 QR
             </button>
+            <div style="flex-grow: 1;"></div>
         </div>
-        <canvas id="qr-canvas"></canvas>
     </div>
 </div>
 <div id="game-errors">

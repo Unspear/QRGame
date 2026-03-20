@@ -194,7 +194,7 @@ class AudioAccessor {
         oscNode.type = type;
         oscNode.frequency.value = parseFrequency(frequency);
         oscNode.start();
-        oscNode.stop(length);
+        oscNode.stop(this.#engine.ctx.currentTime + length);
         return new OscillatorSoundNode(this.#engine, oscNode);
     }
     triangle(frequency, length) {
@@ -214,7 +214,7 @@ class AudioAccessor {
         noiseNode.buffer = this.#engine.noiseBuffer;
         noiseNode.loop = true;
         noiseNode.start();
-        noiseNode.stop(length);
+        noiseNode.stop(this.#engine.ctx.currentTime + length);
         return new BufferSoundNode(this.#engine, noiseNode);
     }
     speech(text, length = 0) {
@@ -230,7 +230,7 @@ class AudioAccessor {
         speechNode.start();
         if (length > 0) {
             speechNode.loop = true;
-            speechNode.stop(length);
+            speechNode.stop(this.#engine.ctx.currentTime + length);
         }
         return new BufferSoundNode(this.#engine, speechNode);
     }
@@ -304,7 +304,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var wasmoon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(wasmoon__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./spriteDragConstraint */ "./spriteDragConstraint.ts");
+/* harmony import */ var _physicsInput__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./physicsInput */ "./physicsInput.ts");
 /* harmony import */ var _sprite__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sprite */ "./sprite.ts");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./constants.ts");
 /* harmony import */ var _tile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./tile */ "./tile.ts");
@@ -336,45 +336,31 @@ class Engine {
     renderer;
     audio;
     #paused;
+    pointerEventQueue;
     game;
     sprites;
     tileMap;
     camera;
     matterEngine;
-    spriteDragConstraint;
+    physicsInput;
     lua;
     ranScript;
     luaFrame;
     luaDrag;
     luaTap;
     constructor(gameCanvas, gameErrors) {
+        this.pointerEventQueue = [];
         this.#paused = false;
         this.gameCanvas = gameCanvas;
         this.gameErrors = gameErrors;
         this.audio = new _audio__WEBPACK_IMPORTED_MODULE_11__.AudioEngine();
         this.luaFactory = new wasmoon__WEBPACK_IMPORTED_MODULE_0__.LuaFactory(wasmoon_dist_glue_wasm__WEBPACK_IMPORTED_MODULE_8__);
         this.renderer = new _render__WEBPACK_IMPORTED_MODULE_10__.Renderer(this.gameCanvas);
-        this.downPointers = new Set();
+        this.downPointers = new Map();
         this.ranScript = false;
-        gameCanvas.addEventListener('pointerdown', (event) => {
-            this.downPointers.add(event.pointerId);
-            if (this.luaDrag) {
-                this.luaDrag(_util__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
-            }
-            if (this.luaTap) {
-                this.luaTap();
-            }
-        });
-        gameCanvas.addEventListener('pointermove', (event) => {
-            if (this.downPointers.has(event.pointerId)) {
-                if (this.luaDrag) {
-                    this.luaDrag(_util__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, event));
-                }
-            }
-        });
-        window.addEventListener('pointerup', (event) => {
-            this.downPointers.delete(event.pointerId);
-        });
+        gameCanvas.addEventListener('pointerdown', (event) => this.pointerEventQueue.push({ type: "down", event: event }));
+        gameCanvas.addEventListener('pointermove', (event) => this.pointerEventQueue.push({ type: "move", event: event }));
+        window.addEventListener('pointerup', (event) => this.pointerEventQueue.push({ type: "up", event: event }));
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
@@ -416,8 +402,7 @@ class Engine {
             }
         }
         // Create sprite drag constraint
-        this.spriteDragConstraint = new _spriteDragConstraint__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint(this.matterEngine, this.gameCanvas);
-        matter_js__WEBPACK_IMPORTED_MODULE_1__.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
+        this.physicsInput = new _physicsInput__WEBPACK_IMPORTED_MODULE_2__.SpriteDragConstraint(this.matterEngine, this.gameCanvas);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine();
         this.lua.global.set('FRAME_TIME', _constants__WEBPACK_IMPORTED_MODULE_4__.FRAME_TIME);
@@ -470,6 +455,36 @@ class Engine {
         if (this.luaFrame) {
             this.luaFrame();
         }
+        // Pointer events
+        while (this.pointerEventQueue.length > 0) {
+            let queued = this.pointerEventQueue.shift();
+            const pos = _util__WEBPACK_IMPORTED_MODULE_6__.getPointerPos(this.gameCanvas, queued.event);
+            switch (queued.type) {
+                case "down":
+                    this.downPointers.set(queued.event.pointerId, pos);
+                    if (this.luaDrag) {
+                        this.luaDrag(pos);
+                    }
+                    if (this.luaTap) {
+                        this.luaTap();
+                    }
+                    this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
+                    break;
+                case "move":
+                    if (this.downPointers.has(queued.event.pointerId)) {
+                        this.downPointers.set(queued.event.pointerId, pos);
+                        if (this.luaDrag) {
+                            this.luaDrag(pos);
+                        }
+                    }
+                    this.physicsInput.onPointerMove(queued.event.pointerId, pos);
+                    break;
+                case "up":
+                    this.downPointers.delete(queued.event.pointerId);
+                    this.physicsInput.onPointerUp(queued.event.pointerId, pos);
+                    break;
+            }
+        }
         // Physics
         for (let sprite of this.sprites) {
             sprite.prePhysicsUpdate(this.matterEngine);
@@ -489,6 +504,97 @@ class Engine {
             sprite.draw(this.renderer);
         }
         this.renderer.endFrame();
+    }
+}
+
+
+/***/ },
+
+/***/ "./physicsInput.ts"
+/*!*************************!*\
+  !*** ./physicsInput.ts ***!
+  \*************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SpriteDragConstraint: () => (/* binding */ SpriteDragConstraint)
+/* harmony export */ });
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
+/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
+
+class SpriteDragConstraint {
+    type;
+    element;
+    constraint;
+    collisionFilter;
+    pointerId;
+    constructor(engine, canvas) {
+        this.type = 'spriteDragConstraint';
+        this.element = canvas;
+        this.constraint = matter_js__WEBPACK_IMPORTED_MODULE_0__.Constraint.create({
+            label: 'Sprite Drag Constraint',
+            pointA: { x: 0, y: 0 },
+            pointB: { x: 0, y: 0 },
+            length: 0.01,
+            stiffness: 0.1,
+            render: {
+                strokeStyle: '#90EE90',
+                lineWidth: 3
+            },
+        });
+        this.collisionFilter = {
+            category: 0x0001,
+            mask: 0xFFFFFFFF,
+            group: 0
+        };
+        this.pointerId = -1;
+        matter_js__WEBPACK_IMPORTED_MODULE_0__.Composite.add(engine.world, this.constraint);
+    }
+    onPointerDown(matterEngine, pointerId, pos) {
+        let bodies = matter_js__WEBPACK_IMPORTED_MODULE_0__.Composite.allBodies(matterEngine.world);
+        for (let body of bodies) {
+            // Broad phase
+            if (body.plugin.sprite
+                && matter_js__WEBPACK_IMPORTED_MODULE_0__.Bounds.contains(body.bounds, pos)
+                && matter_js__WEBPACK_IMPORTED_MODULE_0__.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
+                // Narrow phase
+                for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
+                    var part = body.parts[j];
+                    if (matter_js__WEBPACK_IMPORTED_MODULE_0__.Vertices.contains(part.vertices, pos)) {
+                        let sprite = body.plugin.sprite;
+                        // Try Drag
+                        if (!this.constraint.bodyB && sprite.drag) {
+                            // Start drag
+                            this.constraint.pointA = pos;
+                            this.constraint.bodyB = body;
+                            this.constraint.pointB = { x: pos.x - body.position.x, y: pos.y - body.position.y };
+                            this.pointerId = pointerId;
+                            matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(body, false);
+                        }
+                        // Try Tap
+                        if (sprite.tap instanceof Function) {
+                            sprite.tap();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    onPointerMove(pointerId, pos) {
+        if (this.constraint.bodyB && this.pointerId === pointerId) { // If there is a body constrained
+            matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(this.constraint.bodyB, false);
+            this.constraint.pointA.x = pos.x;
+            this.constraint.pointA.y = pos.y;
+        }
+    }
+    ;
+    onPointerUp(pointerId, pos) {
+        if (pointerId === this.pointerId) {
+            this.constraint.bodyB = null;
+            this.pointerId = -1;
+        }
     }
 }
 
@@ -1063,6 +1169,7 @@ class Sprite {
     color;
     wrap;
     compact;
+    tap;
     #x;
     #y;
     #px;
@@ -1182,9 +1289,6 @@ class Sprite {
     }
     set drag(value) {
         this.#physIsDrag = value;
-        if (this.#physBody) {
-            this.#physBody.plugin.drag = value;
-        }
     }
     get drag() {
         return this.#physIsDrag;
@@ -1255,7 +1359,7 @@ class Sprite {
                 friction: 0.0,
                 isSensor: this.#physIsSensor,
                 isStatic: this.#physIsStatic,
-                plugin: { drag: this.#physIsDrag }
+                plugin: { sprite: this }
             };
             this.#physBody = matter_js__WEBPACK_IMPORTED_MODULE_1__.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
             this.#physWidth = this.#physWantsWidth;
@@ -1287,94 +1391,6 @@ class Sprite {
         const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
         renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), this.#x, this.#y, this.#px, this.#py, this.wrap, this.compact);
     }
-}
-
-
-/***/ },
-
-/***/ "./spriteDragConstraint.ts"
-/*!*********************************!*\
-  !*** ./spriteDragConstraint.ts ***!
-  \*********************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SpriteDragConstraint: () => (/* binding */ SpriteDragConstraint)
-/* harmony export */ });
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "../node_modules/matter-js/build/matter.js");
-/* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
-
-class SpriteDragConstraint {
-    type;
-    mouse;
-    element;
-    constraint;
-    collisionFilter;
-    constructor(engine, canvas) {
-        this.type = 'spriteDragConstraint';
-        this.mouse = matter_js__WEBPACK_IMPORTED_MODULE_0__.Mouse.create(canvas);
-        this.element = canvas;
-        this.constraint = matter_js__WEBPACK_IMPORTED_MODULE_0__.Constraint.create({
-            label: 'Sprite Drag Constraint',
-            pointA: this.mouse.position,
-            pointB: { x: 0, y: 0 },
-            length: 0.01,
-            stiffness: 0.1,
-            render: {
-                strokeStyle: '#90EE90',
-                lineWidth: 3
-            }
-        });
-        this.collisionFilter = {
-            category: 0x0001,
-            mask: 0xFFFFFFFF,
-            group: 0
-        };
-        let that = this;
-        matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.on(engine, 'beforeUpdate', function () {
-            var allBodies = matter_js__WEBPACK_IMPORTED_MODULE_0__.Composite.allBodies(engine.world);
-            that.#update(allBodies);
-            //that.#triggerEvents();
-        });
-    }
-    #update(bodies) {
-        if (this.mouse.button === 0) { // If button down
-            if (!this.constraint.bodyB) { // If there is no body constrained
-                for (let body of bodies) {
-                    // Broad phase
-                    if (body.plugin.drag
-                        && matter_js__WEBPACK_IMPORTED_MODULE_0__.Bounds.contains(body.bounds, this.mouse.position)
-                        && matter_js__WEBPACK_IMPORTED_MODULE_0__.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
-                        // Narrow phase
-                        for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
-                            var part = body.parts[j];
-                            if (matter_js__WEBPACK_IMPORTED_MODULE_0__.Vertices.contains(part.vertices, this.mouse.position)) {
-                                // Start drag
-                                this.constraint.pointA = this.mouse.position;
-                                this.constraint.bodyB = body;
-                                this.constraint.pointB = { x: this.mouse.position.x - body.position.x, y: this.mouse.position.y - body.position.y };
-                                //this.constraint.angleB = body.angle;
-                                matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(body, false);
-                                matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.trigger(this, 'startdrag', { mouse: this.mouse, body: body });
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            else { // If there is a body constrained
-                matter_js__WEBPACK_IMPORTED_MODULE_0__.Sleeping.set(this.constraint.bodyB, false);
-                this.constraint.pointA = this.mouse.position;
-            }
-        }
-        else if (this.constraint.bodyB) { // If button released and a body is being dragged
-            matter_js__WEBPACK_IMPORTED_MODULE_0__.Events.trigger(this, 'enddrag', { mouse: this.mouse, body: this.constraint.bodyB });
-            this.constraint.bodyB = null;
-        }
-    }
-    ;
 }
 
 
