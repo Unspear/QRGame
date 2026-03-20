@@ -1,5 +1,5 @@
 import SamJs from "sam-js";
-import MMLIterator from "@jstarpl/mml-iterator";
+import MMLIterator, { EndEvent, NoteEvent } from "@jstarpl/mml-iterator";
 
 function midiToFrequency(midi: number): number {
 	return 440 * Math.pow(2, (midi - 69) / 12);
@@ -28,8 +28,15 @@ function noteToFrequency(note: string): number | undefined {
 
 export type FrequencyInput = number | string;
 
-function parseFrequency(input: FrequencyInput): number | undefined {
-    return (typeof input === "string") ? noteToFrequency(input) : input;
+function parseFrequency(input: FrequencyInput): number {
+    if (typeof input === "string") {
+        const freq = noteToFrequency(input);
+        if (freq === undefined) {
+            throw new Error(`Could not parse frequency \"${input}\"`);
+        }
+        return freq;
+    }
+    return input;
 }
 export type SoundModType = "linear" | "exponential" | "step";
 export class SoundMod {
@@ -66,14 +73,14 @@ function driveValue(ctx: BaseAudioContext, target: AudioParam, inputs: SoundModI
 }
 
 export class AudioNodeWrapper<T extends AudioNode> {
-    #engine: AudioEngine;
+    protected engine: AudioEngine;
     protected node: T;
     constructor(engine: AudioEngine, audioNode: T) {
-        this.#engine = engine;
+        this.engine = engine;
         this.node = audioNode;
     }
     addLowpass(frequency: number): FilterSoundNode {
-        let newNode = new FilterSoundNode(this.#engine, new BiquadFilterNode(this.node.context, {
+        let newNode = new FilterSoundNode(this.engine, new BiquadFilterNode(this.node.context, {
             type: "lowpass",
             frequency: frequency,
         }));
@@ -81,7 +88,7 @@ export class AudioNodeWrapper<T extends AudioNode> {
         return newNode;
     }
     addHighpass(frequency: number): FilterSoundNode {
-        let newNode = new FilterSoundNode(this.#engine, new BiquadFilterNode(this.node.context, {
+        let newNode = new FilterSoundNode(this.engine, new BiquadFilterNode(this.node.context, {
             type: "highpass",
             frequency: frequency,
         }));
@@ -89,7 +96,7 @@ export class AudioNodeWrapper<T extends AudioNode> {
         return newNode;
     }
     addGain(gain: number): GainSoundNode {
-        let newNode = new GainSoundNode(this.#engine, new GainNode(this.node.context, {
+        let newNode = new GainSoundNode(this.engine, new GainNode(this.node.context, {
             gain: gain
         }));
         this.node.connect(newNode.node);
@@ -99,7 +106,7 @@ export class AudioNodeWrapper<T extends AudioNode> {
         this.node.connect(target);
     }
     output() {
-        this.node.connect(this.#engine.output);
+        this.node.connect(this.engine.output);
     }
 }
 
@@ -125,6 +132,46 @@ export class OscillatorSoundNode extends AudioNodeWrapper<OscillatorNode> {
     driveDetune(...cents: SoundModInput[]): OscillatorSoundNode {
         driveValue(this.node.context, this.node.detune, cents);
         return this;
+    }
+}
+const oscLimit = 8;
+export class MMLSoundNode extends AudioNodeWrapper<GainNode> {
+    #oscNodes: OscillatorNode[];
+    #iter: Iterator<NoteEvent | EndEvent>;
+    #type: OscillatorType;
+    #baseTime: number; 
+    constructor(engine: AudioEngine, type: OscillatorType, mmlString: string) {
+        super(engine, new GainNode(engine.ctx));
+        this.#oscNodes = [];
+        this.#type = type;
+        this.#baseTime = engine.ctx.currentTime;
+        this.#iter = new MMLIterator(mmlString.toLowerCase())[Symbol.iterator]();
+        for(let i = 0; i < oscLimit; i++) {
+            this.#processIter();
+        }
+    }
+    #processIter() {
+        const result = this.#iter.next();
+        if (result.done) {
+            return;
+        }
+        const event = result.value as NoteEvent | EndEvent;
+        if (event.type === "note") {
+            let oscNode = this.engine.ctx.createOscillator();
+            oscNode.type = this.#type;
+            oscNode.frequency.value = midiToFrequency(event.noteNumber);
+            oscNode.start(this.#baseTime + event.time);
+            oscNode.stop(this.#baseTime + event.time + event.duration);
+            oscNode.onended = () => {
+                oscNode.disconnect();
+                this.#oscNodes.splice(this.#oscNodes.indexOf(oscNode), 1);
+                if(this.#oscNodes.length < oscLimit) {
+                    this.#processIter();
+                }
+            }
+            oscNode.connect(this.node);
+            this.#oscNodes.push(oscNode);
+        }
     }
 }
 
@@ -195,26 +242,13 @@ export class AudioAccessor {
     constructor(engine: AudioEngine) {
         this.#engine = engine;
     }
+    mml(type: OscillatorType, mml: string): MMLSoundNode {
+        return new MMLSoundNode(this.#engine, type, mml);
+    }
     wave(type: OscillatorType, frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         let oscNode = this.#engine.ctx.createOscillator();
         oscNode.type = type;
-        const freq = parseFrequency(frequency);
-        if (freq !== undefined) {
-            oscNode.frequency.value = freq;
-        } else {
-            let iter = new MMLIterator((frequency as string).toLowerCase());
-            const zero = this.#engine.ctx.currentTime;
-            for (const noteEvent of iter) {
-                console.log(noteEvent);
-                if (noteEvent.type === "note") {
-                    oscNode.frequency.setValueAtTime(midiToFrequency(noteEvent.noteNumber), zero + noteEvent.time);
-                    oscNode.frequency.setValueAtTime(10, zero + noteEvent.time + noteEvent.duration);
-                } else {
-                    oscNode.frequency.setValueAtTime(10, zero + noteEvent.time);
-                    length = noteEvent.time;
-                }
-            }
-        }
+        oscNode.frequency.value = parseFrequency(frequency);
         oscNode.start();
         if (length > 0) {
             oscNode.stop(this.#engine.ctx.currentTime + length);
@@ -266,17 +300,9 @@ export class AudioAccessor {
         return new SoundMod("linear", freq, duration);
     }
     exp(value: FrequencyInput, duration: number): SoundMod {
-        const freq = parseFrequency(value);
-        if(freq === undefined) {
-            throw new Error(`Could not parse frequency ${freq}`);
-        }
-        return new SoundMod("exponential", freq, duration);
+        return new SoundMod("exponential", parseFrequency(value), duration);
     }
     step(value: FrequencyInput, duration: number): SoundMod {
-        const freq = parseFrequency(value);
-        if(freq === undefined) {
-            throw new Error(`Could not parse frequency ${freq}`);
-        }
-        return new SoundMod("step", freq, duration);
+        return new SoundMod("step", parseFrequency(value), duration);
     }
 }

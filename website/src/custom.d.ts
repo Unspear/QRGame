@@ -17,7 +17,7 @@ declare module "*.frag" {
   export default content;
 }
 declare module "@jstarpl/mml-iterator" {
-  type NoteEvent = {
+  export type NoteEvent = {
     type: "note",
     time: number,
     duration: number,
@@ -25,7 +25,7 @@ declare module "@jstarpl/mml-iterator" {
     quantize: number,
     velocity: number,
   }
-  type EndEvent = {
+  export type EndEvent = {
     type: "end",
     time: number,
   }
