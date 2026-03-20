@@ -8,6 +8,7 @@ export class Sprite {
     color: number;
     wrap: number;
     compact: boolean;
+    tap: Function | undefined;
     #x: number;
     #y: number;
     #px: number;
@@ -127,9 +128,6 @@ export class Sprite {
     }
     set drag(value) {
         this.#physIsDrag = value;
-        if (this.#physBody) {
-            this.#physBody.plugin.drag = value;
-        }
     }
     get drag() {
         return this.#physIsDrag;
@@ -200,7 +198,7 @@ export class Sprite {
                 friction: 0.0,
                 isSensor: this.#physIsSensor,
                 isStatic: this.#physIsStatic,
-                plugin: { drag: this.#physIsDrag }
+                plugin: { sprite: this }
             }
             this.#physBody = Matter.Bodies.rectangle(this.#getBodyX(), this.#getBodyY(), this.#physWantsWidth, this.#physWantsHeight, options);
             this.#physWidth = this.#physWantsWidth;

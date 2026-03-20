@@ -1,6 +1,6 @@
 import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
-import { SpriteDragConstraint } from './spriteDragConstraint'
+import { SpriteDragConstraint as PhysicsInput } from './physicsInput'
 import { Sprite } from './sprite'
 import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS } from './constants'
 import { PatchMap, TileMap } from './tile'
@@ -15,57 +15,44 @@ import { AudioAccessor, AudioEngine, BufferSoundNode, FrequencyInput, Oscillator
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
 
+type QueuedPointerEvent = {
+    type: "down" | "move" | "up",
+    event: PointerEvent
+}
+
 export class Engine {
     gameCanvas: HTMLCanvasElement;
     gameErrors: HTMLDivElement;
     luaFactory: LuaFactory;
-    downPointers: Set<number>;
+    downPointers: Map<number, Util.Point>;
     renderer: Renderer;
     audio: AudioEngine;
     #paused: boolean;
+    pointerEventQueue: QueuedPointerEvent[];
     game!: Game;
     sprites!: Sprite[];
     tileMap!: TileMap;
     camera!: Camera;
     matterEngine!: Matter.Engine;
-    spriteDragConstraint!: SpriteDragConstraint;
+    physicsInput!: PhysicsInput;
     lua!: LuaEngine;
     ranScript: boolean;
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
     constructor(gameCanvas: HTMLCanvasElement, gameErrors: HTMLDivElement) {
+        this.pointerEventQueue = [];
         this.#paused = false;
         this.gameCanvas = gameCanvas;
         this.gameErrors = gameErrors;
         this.audio = new AudioEngine();
         this.luaFactory = new LuaFactory(glueUrl);
         this.renderer = new Renderer(this.gameCanvas);
-        this.downPointers = new Set();
+        this.downPointers = new Map();
         this.ranScript = false;
-        gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => {
-            this.downPointers.add(event.pointerId);
-            if (this.luaDrag)
-            {
-                this.luaDrag(Util.getPointerPos(this.gameCanvas, event));
-            }
-            if (this.luaTap)
-            {
-                this.luaTap();
-            }
-        });
-        gameCanvas.addEventListener('pointermove', (event) => {
-            if (this.downPointers.has(event.pointerId))
-            {
-                if (this.luaDrag)
-                {
-                    this.luaDrag(Util.getPointerPos(this.gameCanvas, event));
-                }
-            }
-        });
-        window.addEventListener('pointerup', (event) => {
-            this.downPointers.delete(event.pointerId);
-        });
+        gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => this.pointerEventQueue.push({type: "down", event: event}));
+        gameCanvas.addEventListener('pointermove', (event: PointerEvent) => this.pointerEventQueue.push({type: "move", event: event}));
+        window.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
@@ -107,8 +94,7 @@ export class Engine {
             }
         }
         // Create sprite drag constraint
-        this.spriteDragConstraint = new SpriteDragConstraint(this.matterEngine, this.gameCanvas);
-        Matter.Composite.add(this.matterEngine.world, this.spriteDragConstraint.constraint);
+        this.physicsInput = new PhysicsInput(this.matterEngine, this.gameCanvas);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
@@ -160,6 +146,41 @@ export class Engine {
         if (this.luaFrame)
         {
             this.luaFrame();
+        }
+        // Pointer events
+        while(this.pointerEventQueue.length > 0) {
+            let queued = this.pointerEventQueue.shift()!;
+            const pos = Util.getPointerPos(this.gameCanvas, queued.event);
+            switch(queued.type) {
+                case "down":
+                    this.downPointers.set(queued.event.pointerId, pos);
+                    if (this.luaDrag)
+                    {
+                        this.luaDrag(pos);
+                    }
+                    if (this.luaTap)
+                    {
+                        this.luaTap();
+                    }
+                    this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
+                    break;
+                case "move":
+                    
+                    if (this.downPointers.has(queued.event.pointerId))
+                    {
+                        this.downPointers.set(queued.event.pointerId, pos);
+                        if (this.luaDrag)
+                        {
+                            this.luaDrag(pos);
+                        }
+                    }
+                    this.physicsInput.onPointerMove(queued.event.pointerId, pos);
+                    break;
+                case "up":
+                    this.downPointers.delete(queued.event.pointerId);
+                    this.physicsInput.onPointerUp(queued.event.pointerId, pos);
+                    break;
+            }
         }
         // Physics
         for (let sprite of this.sprites) {

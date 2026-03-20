@@ -185,7 +185,7 @@ export class AudioAccessor {
         oscNode.type = type;
         oscNode.frequency.value = parseFrequency(frequency);
         oscNode.start();
-        oscNode.stop(length);
+        oscNode.stop(this.#engine.ctx.currentTime + length);
         return new OscillatorSoundNode(this.#engine, oscNode);
     }
     triangle(frequency: FrequencyInput, length: number): OscillatorSoundNode {
@@ -205,7 +205,7 @@ export class AudioAccessor {
         noiseNode.buffer = this.#engine.noiseBuffer;
         noiseNode.loop = true;
         noiseNode.start();
-        noiseNode.stop(length);
+        noiseNode.stop(this.#engine.ctx.currentTime + length);
         return new BufferSoundNode(this.#engine, noiseNode);
     }
     speech(text: string, length: number = 0): BufferSoundNode {
@@ -221,7 +221,7 @@ export class AudioAccessor {
         speechNode.start();
         if (length > 0) {
             speechNode.loop = true;
-            speechNode.stop(length);
+            speechNode.stop(this.#engine.ctx.currentTime + length);
         }
         return new BufferSoundNode(this.#engine, speechNode);
     }
