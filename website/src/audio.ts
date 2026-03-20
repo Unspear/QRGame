@@ -1,19 +1,34 @@
 import SamJs from "sam-js";
+import MMLIterator from "@jstarpl/mml-iterator";
 
-function noteToFrequency(note: string): number {
-	return 440 * Math.pow(2, (noteToMIDI(note) - 69) / 12);
+function midiToFrequency(midi: number): number {
+	return 440 * Math.pow(2, (midi - 69) / 12);
+}
+const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+function noteToMidi(note: string): number | undefined {
+	const octave = parseInt(note.slice(-1));
+    if (isNaN(octave)) {
+        return undefined;
+    }
+	const noteName = note.slice(0, -1);
+    const index = noteNames.indexOf(noteName.toUpperCase());
+    if (index === -1) {
+        return undefined;
+    }
+	return (octave + 1) * 12 + index;
 }
 
-function noteToMIDI(note: string): number {
-	const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-	const octave = parseInt(note.slice(-1));
-	const noteName = note.slice(0, -1);
-	return (octave + 1) * 12 + noteNames.indexOf(noteName.toUpperCase());
+function noteToFrequency(note: string): number | undefined {
+    const midi = noteToMidi(note);
+    if (midi === undefined) {
+        return undefined;
+    }
+	return midiToFrequency(midi);
 }
 
 export type FrequencyInput = number | string;
 
-function parseFrequency(input: FrequencyInput): number {
+function parseFrequency(input: FrequencyInput): number | undefined {
     return (typeof input === "string") ? noteToFrequency(input) : input;
 }
 export type SoundModType = "linear" | "exponential" | "step";
@@ -180,24 +195,42 @@ export class AudioAccessor {
     constructor(engine: AudioEngine) {
         this.#engine = engine;
     }
-    wave(type: OscillatorType, frequency: FrequencyInput, length: number): OscillatorSoundNode {
+    wave(type: OscillatorType, frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         let oscNode = this.#engine.ctx.createOscillator();
         oscNode.type = type;
-        oscNode.frequency.value = parseFrequency(frequency);
+        const freq = parseFrequency(frequency);
+        if (freq !== undefined) {
+            oscNode.frequency.value = freq;
+        } else {
+            let iter = new MMLIterator((frequency as string).toLowerCase());
+            const zero = this.#engine.ctx.currentTime;
+            for (const noteEvent of iter) {
+                console.log(noteEvent);
+                if (noteEvent.type === "note") {
+                    oscNode.frequency.setValueAtTime(midiToFrequency(noteEvent.noteNumber), zero + noteEvent.time);
+                    oscNode.frequency.setValueAtTime(10, zero + noteEvent.time + noteEvent.duration);
+                } else {
+                    oscNode.frequency.setValueAtTime(10, zero + noteEvent.time);
+                    length = noteEvent.time;
+                }
+            }
+        }
         oscNode.start();
-        oscNode.stop(this.#engine.ctx.currentTime + length);
+        if (length > 0) {
+            oscNode.stop(this.#engine.ctx.currentTime + length);
+        }
         return new OscillatorSoundNode(this.#engine, oscNode);
     }
-    triangle(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+    triangle(frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         return this.wave("triangle", frequency, length)
     }
-    sawtooth(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+    sawtooth(frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         return this.wave("sawtooth", frequency, length)
     }
-    sine(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+    sine(frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         return this.wave("sine", frequency, length)
     }
-    square(frequency: FrequencyInput, length: number): OscillatorSoundNode {
+    square(frequency: FrequencyInput, length: number = 0): OscillatorSoundNode {
         return this.wave("square", frequency, length)
     }
     noise(length: number): BufferSoundNode {
@@ -226,12 +259,24 @@ export class AudioAccessor {
         return new BufferSoundNode(this.#engine, speechNode);
     }
     linear(value: FrequencyInput, duration: number): SoundMod {
-        return new SoundMod("linear", parseFrequency(value), duration);
+        const freq = parseFrequency(value);
+        if(freq === undefined) {
+            throw new Error(`Could not parse frequency ${freq}`);
+        }
+        return new SoundMod("linear", freq, duration);
     }
     exp(value: FrequencyInput, duration: number): SoundMod {
-        return new SoundMod("exponential", parseFrequency(value), duration);
+        const freq = parseFrequency(value);
+        if(freq === undefined) {
+            throw new Error(`Could not parse frequency ${freq}`);
+        }
+        return new SoundMod("exponential", freq, duration);
     }
     step(value: FrequencyInput, duration: number): SoundMod {
-        return new SoundMod("step", parseFrequency(value), duration);
+        const freq = parseFrequency(value);
+        if(freq === undefined) {
+            throw new Error(`Could not parse frequency ${freq}`);
+        }
+        return new SoundMod("step", freq, duration);
     }
 }

@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@codemirror/legacy-modes": "^6.5.2",
+    "@jstarpl/mml-iterator": "^1.2.1",
     "brotli-wasm": "^3.0.1",
     "codemirror": "^6.0.2",
     "fflate": "^0.8.2",

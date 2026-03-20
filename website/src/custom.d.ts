@@ -16,3 +16,22 @@ declare module "*.frag" {
   const content: string;
   export default content;
 }
+declare module "@jstarpl/mml-iterator" {
+  type NoteEvent = {
+    type: "note",
+    time: number,
+    duration: number,
+    noteNumber: number,
+    quantize: number,
+    velocity: number,
+  }
+  type EndEvent = {
+    type: "end",
+    time: number,
+  }
+  class MMLIterator {
+    constructor(string: string);
+    [Symbol.iterator](): Iterator<NoteEvent | EndEvent>;
+  }
+  export default MMLIterator;
+}
