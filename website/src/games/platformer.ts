@@ -3,7 +3,7 @@ import { Game } from "../game";
 let script = `local player = createSprite('🕴', 0, 96, 128)
 player.width = 8
 player.physics = true
-function frame()
+player.frame = function()
   player.velY = player.velY + FRAME_TIME
   camera.x = player.x - 96
 end`

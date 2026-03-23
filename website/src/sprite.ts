@@ -9,6 +9,7 @@ export class Sprite {
     wrap: number;
     compact: boolean;
     tap: Function | undefined;
+    frame: Function | undefined;
     #x: number;
     #y: number;
     #px: number;

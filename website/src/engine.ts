@@ -147,6 +147,11 @@ export class Engine {
         {
             this.luaFrame();
         }
+        for (let sprite of this.sprites) {
+            if (sprite.frame instanceof Function) {
+                sprite.frame();
+            }
+        }
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
             let queued = this.pointerEventQueue.shift()!;
