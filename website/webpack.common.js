@@ -6,8 +6,6 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   context: path.join(__dirname, 'src'),
-  mode: 'development',
-  devtool: 'source-map',
   target: 'web',
   entry: {
     index: './index.ts',

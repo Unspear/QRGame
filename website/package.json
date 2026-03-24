@@ -8,9 +8,9 @@
   "scripts": {
     "//": "Single ampersand is used because the mkdir will fail if it already exists, this may not work right on UNIX",
     "buildcpp": "mkdir cmake-build & cd cmake-build & emcmake cmake .. -DCMAKE_BUILD_TYPE=Release & cmake --build . & cd ..",
-    "build": "webpack --mode=development",
-    "start": "npm run build && http-server dist",
-    "predeploy": "npm run build",
+    "start": "webpack --config webpack.dev.js && http-server dist",
+    "startprod": "webpack --config webpack.prod.js && http-server dist",
+    "predeploy": "webpack --config webpack.prod.js",
     "deploy": "gh-pages -d dist --cname qr.unspear.com --nojekyll"
   },
   "author": "",
@@ -29,6 +29,7 @@
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
+    "webpack-merge": "^6.0.1",
     "workbox-webpack-plugin": "^7.4.0"
   },
   "dependencies": {
