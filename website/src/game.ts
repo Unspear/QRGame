@@ -9,7 +9,7 @@ export class Game {
     tileMap: TileMap;
     patchMap: PatchMap;
     solidTiles: number[];
-    constructor(metadata = { title: "Game", description: "An empty game" }, script: string = "", tileMap: TileMap | null = null, patchMap: PatchMap | null = null) {
+    constructor(metadata = { title: "Empty Game", description: "An empty game" }, script: string = "", tileMap: TileMap | null = null, patchMap: PatchMap | null = null) {
         this.metadata = metadata;
         this.script = script;
         this.tileMap = tileMap ? TileMap.Copy(tileMap) : new TileMap({w: 12, h: 16});
