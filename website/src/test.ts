@@ -7,6 +7,7 @@ import * as PPMd from "./compressor"
 import { Game } from './game';
 import { packGame } from './pack';
 import makeAirHockey from './games/airHockey'
+const lzma = require("lzma/src/lzma_worker.js").LZMA_WORKER;
 
 const LUA_KEYWORDS = `andbreakdoelseelseifendfalseforfunctionifinlocalnilnotorrepeatreturnthentrueuntilwhile`;
 
@@ -93,6 +94,7 @@ benchmarkButton.onclick = async function (){
     //benchmarkGames(benchmarkTable, data, "fflate zlib w/dict", (gameData) => fflate.zlibSync(gameData, fflateOptsDict));
     //benchmarkGames(benchmarkTable, data, "fflate deflate", (gameData) => fflate.deflateSync(gameData, fflateOpts));
     //benchmarkGames(benchmarkTable, data, "fflate deflate w/dict", (gameData) => fflate.deflateSync(gameData, fflateOptsDict));
+    benchmarkGames(benchmarkTable, data, "lzma", (gameData) => lzma.compress(gameData, 9))
     benchmarkGames(benchmarkTable, data, "brotli", (gameData) => brotli.compress(gameData, {quality: 11}));
     benchmarkGames(benchmarkTable, data, "ppmd", (gameData) => PPMd.compress(gameData));
     // Pack Game Properly
