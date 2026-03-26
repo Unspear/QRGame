@@ -1,53 +1,51 @@
 import { Game } from "../game";
 
 let script = `-- Paddles
-local top = createSprite('----', 8, 96, 32)
-top.width = 32
-top.physics = true
-top.static = true
-local bottom = copySprite(top)
-bottom.y = 256 - 32
+local top = createEntity('----', 8, 96, 32)
+top.physics.enabled = true
+top.physics.dim.x = 32
+local bottom = copyEntity(top)
+bottom.pos.y = 256 - 32
 -- Ball
-local ball = createSprite('⬤', 4, 96, 128)
-ball.width = 16
-ball.physics = true
-ball.bounce = true
+local ball = createEntity('⬤', 4, 96, 128)
+ball.physics.enabled = true
+ball.physics.simulate = true
+ball.physics.bounce = true
+ball.physics.dim.x = 16
 -- Control Paddles
 function drag(pos)
   local x = math.min(math.max(pos.x, 32), 192-32)
   if pos.y < 64 then
-    top.x = x
+    top.pos.x = x
   elseif pos.y > (256-64) then
-    bottom.x = x 
+    bottom.pos.x = x
   end
 end
 -- Score
 top.score = 0
 bottom.score = 0
-local topScore = createSprite('', 12, 20, 4)
-topScore.px = 0
-topScore.py = 0
-local bottomScore = createSprite('', 12, 192-20, 256-4)
-bottomScore.px = 1
-bottomScore.py = 1
+local topScore = createEntity('', 12, 20, 4)
+topScore.sprite.pivot = {x = -1, y = -1}
+local bottomScore = createEntity('', 12, 192-20, 256-4)
+bottomScore.sprite.pivot = {x = 1, y = 1}
 -- Update score and reset ball
 function newRound()
-    topScore.char = tostring(top.score)
-    bottomScore.char = tostring(bottom.score)
-    ball.x = 96
+    topScore.sprite.char = tostring(top.score)
+    bottomScore.sprite.char = tostring(bottom.score)
+    ball.pos.x = 96
     local dirY = math.random(0, 1)*2-1
-    ball.y = 128-dirY*64
-    ball.velY = dirY*3
-    ball.velX = (math.random(0, 1)*2-1)*1.5
+    ball.pos.y = 128-dirY*64
+    ball.physics.vel.y = dirY*3
+    ball.physics.vel.x = (math.random(0, 1)*2-1)*1.5
 end
 newRound()
 -- Frame
 function frame()
-    if ball.y < 0 then
+    if ball.pos.y < 0 then
         top.score = top.score + 1
         newRound()
     end
-    if ball.y > 256 then
+    if ball.pos.y > 256 then
         bottom.score = bottom.score + 1
         newRound()
     end

@@ -1,8 +1,8 @@
 import * as Matter from 'matter-js'
-import { Sprite } from './sprite';
+import { Entity } from './entity';
 import { Point } from './util'
 
-export class SpriteDragConstraint {
+export class PhysicsInput {
     type: string;
     element: HTMLCanvasElement;
     constraint: Matter.Constraint;
@@ -38,16 +38,16 @@ export class SpriteDragConstraint {
         let bodies = Matter.Composite.allBodies(matterEngine.world);
         for (let body of bodies) {
             // Broad phase
-            if (body.plugin.sprite 
+            if (body.plugin.entity 
                     && Matter.Bounds.contains(body.bounds, pos) 
                     && Matter.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
                 // Narrow phase
                 for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
                     var part = body.parts[j];
                     if (Matter.Vertices.contains(part.vertices, pos)) {
-                        let sprite = (body.plugin.sprite as Sprite);
+                        let entity = (body.plugin.entity as Entity);
                         // Try Drag
-                        if (!this.constraint.bodyB && sprite.drag) {
+                        if (!this.constraint.bodyB && entity.physics.drag) {
                             // Start drag
                             this.constraint.pointA = pos;
                             this.constraint.bodyB = body;
@@ -56,8 +56,8 @@ export class SpriteDragConstraint {
                             Matter.Sleeping.set(body, false);
                         }
                         // Try Tap
-                        if (sprite.tap instanceof Function) {
-                            sprite.tap();
+                        if (entity.input.enabled && entity.input.tap instanceof Function) {
+                            entity.input.tap();
                         }
                     }
                 }

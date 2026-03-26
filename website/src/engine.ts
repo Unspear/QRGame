@@ -1,7 +1,7 @@
 import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
-import { SpriteDragConstraint as PhysicsInput } from './physicsInput'
-import { Sprite } from './sprite'
+import { PhysicsInput } from './physicsInput'
+import { Entity } from './entity'
 import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
@@ -30,7 +30,7 @@ export class Engine {
     #paused: boolean;
     pointerEventQueue: QueuedPointerEvent[];
     game!: Game;
-    sprites!: Sprite[];
+    entities!: Entity[];
     tileMap!: TileMap;
     camera!: Camera;
     matterEngine!: Matter.Engine;
@@ -63,7 +63,7 @@ export class Engine {
         // Clear game errors
         this.gameErrors.textContent = '';
         this.ranScript = false;
-        this.sprites = [];
+        this.entities = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
@@ -93,23 +93,25 @@ export class Engine {
                 }
             }
         }
-        // Create sprite drag constraint
+        // Create entity drag constraint
         this.physicsInput = new PhysicsInput(this.matterEngine, this.gameCanvas);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
-        this.lua.global.set('createSprite', (char: string, color: number, x: number, y: number) => {
-            let newSprite = new Sprite(char, color, x, y);
-            this.sprites.push(newSprite);
-            return newSprite;
+        this.lua.global.set('createEntity', (char: string, color: number, x: number, y: number) => {
+            let newEntity = new Entity({ x: x, y: y});
+            newEntity.sprite.char = char;
+            newEntity.sprite.color = color;
+            this.entities.push(newEntity);
+            return newEntity;
         });
-        this.lua.global.set('destroySprite', (sprite: Sprite) => {
-            this.sprites = this.sprites.filter(s => s !== sprite);
+        this.lua.global.set('destroyEntity', (entity: Entity) => {
+            this.entities = this.entities.filter(s => s !== entity);
         });
-        this.lua.global.set('copySprite', (sprite: Sprite) => {
-            let newSprite = Sprite.Copy(sprite);
-            this.sprites.push(newSprite);
-            return newSprite;
+        this.lua.global.set('copyEntity', (entity: Entity) => {
+            let newEntity = Entity.Copy(entity);
+            this.entities.push(newEntity);
+            return newEntity;
         });
         // Simple Audio functions
         this.lua.global.set('audio', new AudioAccessor(this.audio));
@@ -147,9 +149,9 @@ export class Engine {
         {
             this.luaFrame();
         }
-        for (let sprite of this.sprites) {
-            if (sprite.frame instanceof Function) {
-                sprite.frame();
+        for (let entity of this.entities) {
+            if (entity.frame instanceof Function) {
+                entity.frame();
             }
         }
         // Pointer events
@@ -188,12 +190,12 @@ export class Engine {
             }
         }
         // Physics
-        for (let sprite of this.sprites) {
-            sprite.prePhysicsUpdate(this.matterEngine)
+        for (let entity of this.entities) {
+            entity.physics.prePhysicsUpdate(this.matterEngine)
         }
         Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
-        for (let sprite of this.sprites) {
-            sprite.postPhysicsUpdate(this.matterEngine)
+        for (let entity of this.entities) {
+            entity.physics.postPhysicsUpdate(this.matterEngine)
         }
         // Rendering
         // Fill Background
@@ -201,9 +203,9 @@ export class Engine {
         this.renderer.viewOffset = this.camera.getViewOffset();
         // Draw Tilemap
         this.tileMap.draw(this.renderer);
-        // Draw Sprites
-        for (let sprite of this.sprites) {
-            sprite.draw(this.renderer)
+        // Draw entities
+        for (let entity of this.entities) {
+            entity.sprite.draw(this.renderer)
         }
         this.renderer.endFrame();
     }

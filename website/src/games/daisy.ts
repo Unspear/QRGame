@@ -7,18 +7,18 @@ local chars = "🚲🌹🌷⚘🚲🌹🌷⚘"
 local color = {1, 2, 7, 4, 1, 2, 7, 4}
 local i = 1
 for _, c in utf8.codes(chars) do
-  sprites[i] = createSprite(utf8.char(c), color[i], 0, 0)
+  sprites[i] = createEntity(utf8.char(c), color[i], 0, 0)
   i = i + 1
 end
 
-createSprite("👫", 4, 96, 128)
+createEntity("👫", 4, 96, 128)
 
 local seconds = 0
 function frame()
   for i = 1, 8 do
     local r = 6.28 / 8 * i
-    sprites[i].x = math.sin(seconds+r) * 60 + 96
-    sprites[i].y = math.cos(seconds+r) * 60 + 128
+    sprites[i].pos.x = math.sin(seconds+r) * 60 + 96
+    sprites[i].pos.y = math.cos(seconds+r) * 60 + 128
   end
   seconds = seconds + FRAME_TIME
 end
