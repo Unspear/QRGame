@@ -23,7 +23,7 @@ function frame()
   seconds = seconds + FRAME_TIME
 end
 
-say([[
+audio.speech([[
 Daisy, Daisy,
 Give me your answer, do!
 I'm half crazy,
@@ -32,7 +32,7 @@ It won't be a stylish marriage,
 I can't afford a carriage,
 But you'll look sweet upon the seat
 Of a bicycle built for two!
-]])`
+]]).output()`
 export default function (): Game {
     return new Game({ title: "Daisy Bell", description: "A demo showing text-to-speech and sprite manipulation" }, script);
 }
