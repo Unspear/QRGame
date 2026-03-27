@@ -63,17 +63,6 @@ export class PhysicsInput {
             }
         }
     }
-    onPointerFrame(matterEngine: Matter.Engine, downPointers: Map<number, Point>) {
-        let entities = new Set<Entity>();
-        for (let pointer of downPointers) {
-            this.#getOverlappingEntities(matterEngine, pointer[1], INPUT_PHYSICS_GROUP).forEach(item => entities.add(item.entity))
-        }
-        for (const entity of entities) {
-            if (entity.input.enabled && entity.input.hold instanceof Function) {
-                entity.input.hold();
-            }
-        }
-    }
     onPointerMove(pointerId: number, pos: Point) {
         if (this.constraint.bodyB && this.pointerId === pointerId) {// If there is a body constrained
             Matter.Sleeping.set(this.constraint.bodyB, false);
@@ -85,6 +74,37 @@ export class PhysicsInput {
         if (pointerId === this.pointerId) {
             this.constraint.bodyB = null;
             this.pointerId = -1
+        }
+    }
+
+    onKeyDown(entities: Entity[], code: string) {
+        for (let entity of entities) {
+            if (entity.input.enabled 
+                && typeof entity.input.key === "string" 
+                && entity.input.key.toLowerCase() === code.toLowerCase()
+                && entity.input.press instanceof Function) {
+                entity.input.press();
+            }
+        }
+    }
+    onKeyUp(entities: Entity[], code: string) {
+    }
+    onUpdate(matterEngine: Matter.Engine, downPointers: Map<number, Point>, entities: Entity[], downKeys: Set<string>) {
+        let held = new Set<Entity>();
+        for (let pointer of downPointers) {
+            this.#getOverlappingEntities(matterEngine, pointer[1], INPUT_PHYSICS_GROUP).forEach(item => held.add(item.entity))
+        }
+        for (let code of downKeys) {
+            entities.forEach(entity => {
+                if (typeof entity.input.key === "string" && entity.input.key.toLowerCase() === code.toLowerCase()) {
+                    held.add(entity)
+                }
+            });
+        }
+        for (const entity of held) {
+            if (entity.input.enabled && entity.input.hold instanceof Function) {
+                entity.input.hold();
+            }
         }
     }
 }

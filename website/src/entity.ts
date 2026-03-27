@@ -187,12 +187,14 @@ export class PhysicsComponent extends BoxComponent {
 export class InputComponent extends BoxComponent {
     press: Function | undefined;
     hold: Function | undefined;
+    key: string;
     #physState: null | {
         body: Matter.Body,
         dim: Point,
     };
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
+        this.key = "";
         this.#physState = null;
     }
     copyFrom(input: InputComponent) {

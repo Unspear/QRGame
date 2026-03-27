@@ -19,16 +19,22 @@ type QueuedPointerEvent = {
     type: "down" | "move" | "up",
     event: PointerEvent
 }
+type QueuedKeyboardEvent = {
+    type: "down" | "up",
+    event: KeyboardEvent
+}
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
     gameErrors: HTMLDivElement;
     luaFactory: LuaFactory;
     downPointers: Map<number, Util.Point>;
+    downKeys: Set<string>;
     renderer: Renderer;
     audio: AudioEngine;
     #paused: boolean;
     pointerEventQueue: QueuedPointerEvent[];
+    keyboardEventQueue: QueuedKeyboardEvent[];
     game!: Game;
     entities!: Entity[];
     tileMap!: TileMap;
@@ -42,6 +48,7 @@ export class Engine {
     luaTap!: () => void;
     constructor(gameCanvas: HTMLCanvasElement, gameErrors: HTMLDivElement) {
         this.pointerEventQueue = [];
+        this.keyboardEventQueue = [];
         this.#paused = false;
         this.gameCanvas = gameCanvas;
         this.gameErrors = gameErrors;
@@ -49,10 +56,28 @@ export class Engine {
         this.luaFactory = new LuaFactory(glueUrl);
         this.renderer = new Renderer(this.gameCanvas);
         this.downPointers = new Map();
+        this.downKeys = new Set();
         this.ranScript = false;
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => this.pointerEventQueue.push({type: "down", event: event}));
         gameCanvas.addEventListener('pointermove', (event: PointerEvent) => this.pointerEventQueue.push({type: "move", event: event}));
-        window.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
+        document.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
+        const capturedCodes = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (gameCanvas.checkVisibility()) {
+                this.keyboardEventQueue.push({type: "down", event: event});
+                if (capturedCodes.indexOf(event.code) > -1) {
+                    event.preventDefault();
+                }
+            }
+        }, { passive: false });
+        document.addEventListener('keyup', (event: KeyboardEvent) => {
+            if (gameCanvas.checkVisibility()) {
+                this.keyboardEventQueue.push({type: "up", event: event});
+                if (capturedCodes.indexOf(event.code) > -1) {
+                    event.preventDefault();
+                }
+            }
+        }, { passive: false });
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
@@ -159,7 +184,7 @@ export class Engine {
                 entity.frame();
             }
         }
-        this.physicsInput.onPointerFrame(this.matterEngine, this.downPointers);
+        this.physicsInput.onUpdate(this.matterEngine, this.downPointers, this.entities, this.downKeys);
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
             let queued = this.pointerEventQueue.shift()!;
@@ -192,6 +217,21 @@ export class Engine {
                 case "up":
                     this.downPointers.delete(queued.event.pointerId);
                     this.physicsInput.onPointerUp(queued.event.pointerId, pos);
+                    break;
+            }
+        }
+        while(this.keyboardEventQueue.length > 0) {
+            let queued = this.keyboardEventQueue.shift()!;
+            switch(queued.type) {
+                case "down":
+                    if (!this.downKeys.has(queued.event.code)) {
+                        this.downKeys.add(queued.event.code);
+                        this.physicsInput.onKeyDown(this.entities, queued.event.code);
+                    }
+                    break;
+                case "up":
+                    this.downKeys.delete(queued.event.code);
+                    this.physicsInput.onKeyUp(this.entities, queued.event.code);
                     break;
             }
         }

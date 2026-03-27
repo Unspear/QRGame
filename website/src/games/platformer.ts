@@ -11,18 +11,21 @@ end
 local left = createEntity(" <- ", 8, 32, 256-32)
 left.input.enabled = true
 left.input.dim = {x = 64, y = 48}
-left.input.hold = function() 
+left.input.key = "arrowleft"
+left.input.hold = function()
   player.physics.vel.x = -1
 end
 local right = createEntity(" -> ", 8, 96, 256-32)
 right.input.enabled = true
 right.input.dim = {x = 64, y = 48}
+right.input.key = "arrowright"
 right.input.hold = function() 
   player.physics.vel.x = 1
 end
 local jump = createEntity("JUMP", 8, 160, 256-32)
 jump.input.enabled = true
 jump.input.dim = {x = 64, y = 48}
+jump.input.key = "arrowup"
 jump.input.press = function() 
   player.physics.vel.y = -1
 end`
