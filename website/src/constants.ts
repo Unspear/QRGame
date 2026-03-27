@@ -23,3 +23,6 @@ export const PALETTE_FRACTIONS = [
     [0.20, 0.47, 0.87],
     [0.56, 0.13, 0.74]
 ]
+
+export const NORMAL_PHYSICS_GROUP = 1;
+export const INPUT_PHYSICS_GROUP = 2;

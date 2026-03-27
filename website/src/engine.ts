@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
-import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS } from './constants'
+import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, NORMAL_PHYSICS_GROUP } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { Camera } from './camera'
@@ -78,11 +78,16 @@ export class Engine {
             gravity: { scale: 0 }
         });
         // Create bodies
-        const options = {
+        const options: Matter.IChamferableBodyDefinition = {
             restitution: 1.0,
             frictionAir: 0.0,
             friction: 0.0,
-            isStatic: true
+            isStatic: true,
+            collisionFilter: {
+                mask: 0,
+                category: 0,
+                group: NORMAL_PHYSICS_GROUP
+            }
         };
         for (let y = 0; y < this.tileMap.dim.h; y++) {
             for (let x = 0; x < this.tileMap.dim.w; x++) {
@@ -154,6 +159,7 @@ export class Engine {
                 entity.frame();
             }
         }
+        this.physicsInput.onPointerFrame(this.matterEngine, this.downPointers);
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
             let queued = this.pointerEventQueue.shift()!;
@@ -192,10 +198,12 @@ export class Engine {
         // Physics
         for (let entity of this.entities) {
             entity.physics.prePhysicsUpdate(this.matterEngine)
+            entity.input.prePhysicsUpdate(this.matterEngine)
         }
         Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
         for (let entity of this.entities) {
             entity.physics.postPhysicsUpdate(this.matterEngine)
+            entity.input.postPhysicsUpdate(this.matterEngine)
         }
         // Rendering
         // Fill Background

@@ -1,16 +1,12 @@
 import * as Matter from 'matter-js'
 import { Entity } from './entity';
 import { Point } from './util'
+import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
 
 export class PhysicsInput {
     type: string;
     element: HTMLCanvasElement;
     constraint: Matter.Constraint;
-    collisionFilter: {
-        category: number,
-        mask: number,
-        group: number
-    }
     pointerId: number;
     constructor(engine: Matter.Engine, canvas: HTMLCanvasElement) {
         this.type = 'spriteDragConstraint';
@@ -26,41 +22,55 @@ export class PhysicsInput {
                 lineWidth: 3
             },
         });
-        this.collisionFilter = {
-            category: 0x0001,
-            mask: 0xFFFFFFFF,
-            group: 0
-        }
         this.pointerId = -1;
         Matter.Composite.add(engine.world, this.constraint);
     }
-    onPointerDown(matterEngine: Matter.Engine, pointerId: number, pos: Point) {
+    #getOverlappingEntities(matterEngine: Matter.Engine, pos: Point, group: number): {entity: Entity, body: Matter.Body}[] {
+        let overlapped = [];
         let bodies = Matter.Composite.allBodies(matterEngine.world);
         for (let body of bodies) {
             // Broad phase
             if (body.plugin.entity 
                     && Matter.Bounds.contains(body.bounds, pos) 
-                    && Matter.Detector.canCollide(body.collisionFilter, this.collisionFilter)) {
+                    && Matter.Detector.canCollide(body.collisionFilter, {category: 0, mask: 0, group: group})) {
                 // Narrow phase
                 for (var j = body.parts.length > 1 ? 1 : 0; j < body.parts.length; j++) {
-                    var part = body.parts[j];
-                    if (Matter.Vertices.contains(part.vertices, pos)) {
-                        let entity = (body.plugin.entity as Entity);
-                        // Try Drag
-                        if (!this.constraint.bodyB && entity.physics.drag) {
-                            // Start drag
-                            this.constraint.pointA = pos;
-                            this.constraint.bodyB = body;
-                            this.constraint.pointB = { x: pos.x - body.position.x, y: pos.y - body.position.y };
-                            this.pointerId = pointerId;
-                            Matter.Sleeping.set(body, false);
-                        }
-                        // Try Tap
-                        if (entity.input.enabled && entity.input.tap instanceof Function) {
-                            entity.input.tap();
-                        }
+                    if (Matter.Vertices.contains(body.parts[j].vertices, pos)) {
+                        overlapped.push({entity: body.plugin.entity, body: body});
+                        break;
                     }
                 }
+            }
+        }
+        return overlapped;
+    }
+    onPointerDown(matterEngine: Matter.Engine, pointerId: number, pos: Point) {
+        for(const overlap of this.#getOverlappingEntities(matterEngine, pos, NORMAL_PHYSICS_GROUP)) {
+            // Try Drag
+            if (!this.constraint.bodyB && overlap.entity.physics.drag) {
+                // Start drag
+                this.constraint.pointA = pos;
+                this.constraint.bodyB = overlap.body;
+                this.constraint.pointB = { x: pos.x - overlap.body.position.x, y: pos.y - overlap.body.position.y };
+                this.pointerId = pointerId;
+                Matter.Sleeping.set(overlap.body, false);
+            }
+        }
+        for(const overlap of this.#getOverlappingEntities(matterEngine, pos, INPUT_PHYSICS_GROUP)) {
+            // Try Tap
+            if (overlap.entity.input.enabled && overlap.entity.input.press instanceof Function) {
+                overlap.entity.input.press();
+            }
+        }
+    }
+    onPointerFrame(matterEngine: Matter.Engine, downPointers: Map<number, Point>) {
+        let entities = new Set<Entity>();
+        for (let pointer of downPointers) {
+            this.#getOverlappingEntities(matterEngine, pointer[1], INPUT_PHYSICS_GROUP).forEach(item => entities.add(item.entity))
+        }
+        for (const entity of entities) {
+            if (entity.input.enabled && entity.input.hold instanceof Function) {
+                entity.input.hold();
             }
         }
     }
