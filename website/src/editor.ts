@@ -7,7 +7,6 @@ import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { MyTabElement } from './tab';
 import { Renderer } from './render';
-import { CHAR_WIDTH, FRAME_TIME, SCREEN_DIM } from './constants';
 
 enum EditorState {
     Brush,
