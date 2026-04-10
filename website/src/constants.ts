@@ -1,7 +1,11 @@
+import { Dimensions } from "./util";
+
 export const FRAME_TIME = 1.0 / 60.0
 export const FRAME_TIME_MS = FRAME_TIME * 1000.0;
 
 export const CHAR_WIDTH = 16;
+export const SCREEN_TILES: Dimensions = {w: 12, h: 16};
+export const SCREEN_DIM: Dimensions = {w: 192, h: 256};
 
 export const PALETTE = [
     '#ffffff',

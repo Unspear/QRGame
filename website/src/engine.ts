@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
-import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, NORMAL_PHYSICS_GROUP } from './constants'
+import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, NORMAL_PHYSICS_GROUP, SCREEN_DIM } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { Camera } from './camera'
@@ -93,6 +93,7 @@ export class Engine {
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
         this.camera = new Camera();
+        this.camera.setLevelDim(this.tileMap.getDrawDim());
         if (this.audio) {
             this.audio.close();
         }

@@ -7,7 +7,7 @@ import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { MyTabElement } from './tab';
 import { Renderer } from './render';
-import { FRAME_TIME } from './constants';
+import { CHAR_WIDTH, FRAME_TIME, SCREEN_DIM } from './constants';
 
 enum EditorState {
     Brush,
@@ -142,69 +142,69 @@ export class Editor {
         this.canvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
         this.canvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-        let that = this;
         this.tileMapTab.updateListeners.push(function(currentTab: string): void {
         });
-        this.applySettingsButton.onclick = function(){
+        this.applySettingsButton.onclick = () => {
             // Make new tilemap with new size and copy data
             const patchDim = {
-                w: that.getAndValidateInputNumber(that.patchWidthInput, 1, 32, 1),
-                h: that.getAndValidateInputNumber(that.patchHeightInput, 1, 32, 1),
+                w: this.getAndValidateInputNumber(this.patchWidthInput, 1, 32, 1),
+                h: this.getAndValidateInputNumber(this.patchHeightInput, 1, 32, 1),
             };
-            const newPatchCount = that.getAndValidateInputNumber(that.patchCountInput, 1, 128, 1);
+            const newPatchCount = this.getAndValidateInputNumber(this.patchCountInput, 1, 128, 1);
             const newTileMap = new TileMap(patchDim, newPatchCount);
             for (let i = 0; i < newPatchCount; i++) {
                 for (let y = 0; y < patchDim.h; y++) {
                     for (let x = 0; x < patchDim.w; x++) {
                         const coords = {x: x, y: y};
-                        const getTileResult = that.tileMap.getTile(coords, i);
+                        const getTileResult = this.tileMap.getTile(coords, i);
                         if (getTileResult !== null) {
                             newTileMap.setTile(getTileResult, coords, i);
                         }
                     }
                 }     
             }
-            that.tileMap = newTileMap;
-
+            this.tileMap = newTileMap;
+            this.tileCamera.setLevelDim(this.tileMap.getDrawDim());
             const newDim = {
-                w: that.getAndValidateInputNumber(that.widthInput, 1, 128, 1),
-                h: that.getAndValidateInputNumber(that.heightInput, 1, 128, 1),
+                w: this.getAndValidateInputNumber(this.widthInput, 1, 128, 1),
+                h: this.getAndValidateInputNumber(this.heightInput, 1, 128, 1),
             };
             const newPatchMap = new PatchMap(newDim);
             for (let y = 0; y < newDim.h; y++) {
                 for (let x = 0; x < newDim.w; x++) {
                     const coords = {x: x, y: y};
-                    const getPatchResult = that.patchMap.getPatch(coords);
+                    const getPatchResult = this.patchMap.getPatch(coords);
                     if (getPatchResult !== null) {
                         newPatchMap.setPatch(getPatchResult, coords);
                     }
                 }
             }
-            that.patchMap = newPatchMap;
+            this.patchMap = newPatchMap;
+            this.patchCamera.setLevelDim(this.patchMap.getDrawDim(this.tileMap));
         };
-        this.leftButton.onclick = function(){that.getCurrentCamera().x -= 64;};
-        this.upButton.onclick = function(){that.getCurrentCamera().y -= 64;};
-        this.rightButton.onclick = function(){that.getCurrentCamera().x += 64;};
-        this.downButton.onclick = function(){that.getCurrentCamera().y += 64;};
-        this.exportButton.onclick = function(){
-            let serialised = JSON.stringify({tileMap: that.tileMap, patchMap: that.patchMap});
+        this.leftButton.onclick = () => {this.getCurrentCamera().x -= 64;};
+        this.upButton.onclick = () => {this.getCurrentCamera().y -= 64;};
+        this.rightButton.onclick = () => {this.getCurrentCamera().x += 64;};
+        this.downButton.onclick = () => {this.getCurrentCamera().y += 64;};
+        this.exportButton.onclick = () => {
+            let serialised = JSON.stringify({tileMap: this.tileMap, patchMap: this.patchMap});
             navigator.clipboard.writeText(serialised);
         };
-        this.importButton.onclick = async function(){
+        this.importButton.onclick = async () => {
             try {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
-                that.tileMap = TileMap.Copy(serialised.tileMap as TileMap);
-                that.patchMap = PatchMap.Copy(serialised.patchMap as PatchMap);
+                this.tileMap = TileMap.Copy(serialised.tileMap as TileMap);
+                this.patchMap = PatchMap.Copy(serialised.patchMap as PatchMap);
             } catch(err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
         }
         this.invertedLabel.classList.toggle("hidden", !this.invertedInput.checked);
-        this.invertedInput.onchange = function() {
-            that.invertedLabel.classList.toggle("hidden", !that.invertedInput.checked);
+        this.invertedInput.onchange = () => {
+            this.invertedLabel.classList.toggle("hidden", !this.invertedInput.checked);
         };
-        this.pipetteButton.onclick = function() {
-            that.state = EditorState.Pipette;
+        this.pipetteButton.onclick = () => {
+            this.state = EditorState.Pipette;
         };
         // Load input game into editor
         this.infoTitle.value = inputGame.metadata.title;
@@ -222,6 +222,8 @@ export class Editor {
         this.patchCountInput.valueAsNumber = this.tileMap.count;
         this.widthInput.valueAsNumber = this.patchMap.dim.w;
         this.heightInput.valueAsNumber = this.patchMap.dim.h;
+        this.patchCamera.setLevelDim(this.patchMap.getDrawDim(this.tileMap));
+        this.tileCamera.setLevelDim(this.tileMap.getDrawDim());
         this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
         this.renderer.startRenderLoop(() => this.draw());
     }

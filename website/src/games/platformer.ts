@@ -6,6 +6,7 @@ player.physics.simulate = true
 player.frame = function()
   player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 3
   camera.x = player.pos.x - 96
+  camera.y = player.pos.y - 128
   player.physics.vel.x = 0
 end
 local left = createEntity(" <- ", 8, 32, 256-32)

@@ -90,6 +90,12 @@ export class TileMap {
         let patch = this.tileData[index]!;
         renderer.drawCharacters(patch.codePoint, patch.color, point.x, point.y, 0, 0, this.dim.w, false);
     }
+    getDrawDim(): Dimensions {
+        return {
+            w: this.count * this.dim.w * CHAR_WIDTH,
+            h: this.dim.h * CHAR_WIDTH
+        }
+    }
 }
 
 type SinglePatchData = {
@@ -184,5 +190,11 @@ export class PatchMap {
             }
         }
         return tileMap
+    }
+    getDrawDim(patchSource: TileMap): Dimensions {
+        return {
+            w: this.dim.w * patchSource.dim.w * CHAR_WIDTH,
+            h: this.dim.h * patchSource.dim.h * CHAR_WIDTH
+        }
     }
 }
