@@ -1,9 +1,10 @@
 import { Game } from "../game";
+import { stringToCodePoints } from "../util";
 
 let script = `local player = createEntity('🕴', 0, 96, 128)
 player.physics.enabled = true
 player.physics.simulate = true
-player.physics.dim = {x=8, y=14}
+player.physics.dim = {x=6, y=14}
 player.frame = function()
   if player.physics.vel.y > -0.5 then
     player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 3
@@ -39,6 +40,6 @@ let tiles: string = '{"tileMap":{"dim":{"w":2,"h":8},"count":12,"tileData":[{"co
 export default function (): Game {
     let parsed = JSON.parse(tiles);
     let game = new Game({ title: "Platformer", description: "A platformer" }, script, parsed.tileMap, parsed.patchMap);
-    game.solidTiles = ['#'.codePointAt(0)!];
+    game.solidTiles = stringToCodePoints('#=');
     return game;
 }
