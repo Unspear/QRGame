@@ -43,6 +43,7 @@ export class Engine {
     physicsInput!: PhysicsInput;
     lua!: LuaEngine;
     ranScript: boolean;
+    endScreenString: string | undefined;
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
@@ -88,6 +89,7 @@ export class Engine {
         // Clear game errors
         this.gameErrors.textContent = '';
         this.ranScript = false;
+        this.endScreenString = undefined;
         this.entities = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
@@ -144,6 +146,9 @@ export class Engine {
             this.entities.push(newEntity);
             return newEntity;
         });
+        this.lua.global.set('endGame', (string: string) => {
+            this.endScreenString = string;
+        });
         // Simple Audio functions
         this.lua.global.set('audio', new AudioAccessor(this.audio));
         this.lua.global.set('camera', this.camera);
@@ -174,6 +179,18 @@ export class Engine {
             this.luaFrame = this.lua.global.get('frame');
             this.luaTap = this.lua.global.get('tap');
             this.luaDrag = this.lua.global.get('drag');
+        }
+        // Show end screen
+        if (this.endScreenString !== undefined) {
+            // Rendering
+            // Fill Background
+            this.renderer.beginFrame();
+            this.renderer.viewOffset = {x: 0, y: 0};
+            // Draw Tilemap
+            const codePoints = Util.stringToCodePoints(this.endScreenString);
+            this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2, 0.5, 0.5, 0, true);
+            this.renderer.endFrame();
+            return;
         }
         // Frame
         if (this.luaFrame)

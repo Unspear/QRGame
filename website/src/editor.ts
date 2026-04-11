@@ -241,7 +241,7 @@ export class Editor {
     }
     setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
-        let codePoints = [...this.charInput.value].map(c => c.codePointAt(0) ?? 0);
+        let codePoints = Util.stringToCodePoints(this.charInput.value);
         let color = parseInt(this.colorInput.value);
         const inverted = this.invertedInput.checked;
         if (inverted) {

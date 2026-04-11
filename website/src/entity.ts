@@ -1,5 +1,5 @@
 import * as Matter from 'matter-js'
-import { Point } from './util';
+import { Point, stringToCodePoints } from './util';
 import { Renderer } from './render';
 import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
 
@@ -65,7 +65,7 @@ export class SpriteComponent extends EntityComponent {
         this.compact = sprite.compact;
     }
     draw(renderer: Renderer) {
-        const codePoints = [...this.char].map(c => c.codePointAt(0) ?? 0);
+        const codePoints = stringToCodePoints(this.char);
         const globalPos = this.gpos;
         renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact)
     }
