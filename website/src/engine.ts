@@ -165,6 +165,16 @@ export class Engine {
         this.lua.global.set('endGame', (string: string) => {
             this.endScreenString = string;
         });
+        this.lua.global.set('getMarkers', (markerId: string) => {
+            const id = markerId.codePointAt(0);
+            let result: Util.Point[] = []
+            for (const m of this.game.markers) {
+                if (m.codePoint === id) {
+                    result.push({x: (m.x + 0.5) * CHAR_WIDTH, y: (m.y + 0.5) * CHAR_WIDTH});
+                }
+            }
+            return result;
+        })
         // Simple Audio functions
         this.lua.global.set('audio', new AudioAccessor(this.audio));
         this.lua.global.set('camera', this.camera);
