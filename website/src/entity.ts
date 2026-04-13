@@ -76,6 +76,7 @@ export class PhysicsComponent extends BoxComponent {
     simulate: boolean;
     bounce: boolean;
     drag: boolean;
+    onFloor: boolean;
     #physState: null | {
         body: Matter.Body,
         dim: Point,
@@ -89,6 +90,7 @@ export class PhysicsComponent extends BoxComponent {
         this.simulate = false;
         this.bounce = false;
         this.drag = false;
+        this.onFloor = false;
         this.#physState = null;
     }
     copyFrom(physics: PhysicsComponent) {
@@ -169,6 +171,7 @@ export class PhysicsComponent extends BoxComponent {
                 Matter.Body.setPosition(this.#physState.body, this.gpos);
             } 
         }
+        this.onFloor = false;
     }
     postPhysicsUpdate(matterEngine: Matter.Engine) {
         if (this.#physState) {
