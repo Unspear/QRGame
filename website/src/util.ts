@@ -3,6 +3,8 @@ export type Point = {
     y: number;
 }
 
+export type Marker = Point & {codePoint: number};
+
 export type Dimensions = {
     w: number;
     h: number;

@@ -1,4 +1,5 @@
 import { PatchMap, TileMap } from "./tile";
+import { Marker } from "./util";
 
 export class Game {
     metadata: {
@@ -8,12 +9,14 @@ export class Game {
     script: string;
     tileMap: TileMap;
     patchMap: PatchMap;
+    markers: Marker[];
     solidTiles: number[];
     constructor(metadata = { title: "Empty Game", description: "An empty game" }, script: string = "", tileMap: TileMap | null = null, patchMap: PatchMap | null = null) {
         this.metadata = metadata;
         this.script = script;
         this.tileMap = tileMap ? TileMap.Copy(tileMap) : new TileMap({w: 12, h: 16});
         this.patchMap = patchMap ? PatchMap.Copy(patchMap) : new PatchMap({w: 1, h: 1});
+        this.markers = [];
         this.solidTiles = [];
     }
 }

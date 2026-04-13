@@ -64,7 +64,7 @@ export class Editor {
     tileCamera: Camera;
     tileMap: TileMap;
     patchMap: PatchMap;
-    markers: Map<string, Util.Point & { codePoint: number }>;
+    markers: Map<string, Util.Marker>;
     state: EditorState;
     constructor(inputGame: Game) {
         this.state = EditorState.Brush;
@@ -238,6 +238,9 @@ export class Editor {
         this.tileCamera.setLevelDim(this.tileMap.getDrawDim());
         this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
         this.markers = new Map();
+        for (const value of inputGame.markers) {
+            this.markers.set(pointToString(value), value);
+        }
         this.renderer.startRenderLoop(() => this.draw());
     }
     getAndValidateInputNumber(input: HTMLInputElement, min: number, max: number, step: number): number {
@@ -329,6 +332,7 @@ export class Editor {
             this.tileMap,
             this.patchMap
         );
+        game.markers = Array.from(this.markers.values());
         game.solidTiles = Util.stringToCodePoints(this.solidCharInput.value);
         return game;
     }
