@@ -218,7 +218,16 @@ export class Engine {
             this.renderer.endFrame();
             return;
         }
-
+        // Physics
+        for (let entity of this.entities) {
+            entity.physics.prePhysicsUpdate(this.matterEngine)
+            entity.input.prePhysicsUpdate(this.matterEngine)
+        }
+        Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
+        for (let entity of this.entities) {
+            entity.physics.postPhysicsUpdate(this.matterEngine)
+            entity.input.postPhysicsUpdate(this.matterEngine)
+        }
         // Frame
         if (this.luaFrame)
         {
@@ -279,16 +288,6 @@ export class Engine {
                     this.physicsInput.onKeyUp(this.entities, queued.event.code);
                     break;
             }
-        }
-        // Physics
-        for (let entity of this.entities) {
-            entity.physics.prePhysicsUpdate(this.matterEngine)
-            entity.input.prePhysicsUpdate(this.matterEngine)
-        }
-        Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
-        for (let entity of this.entities) {
-            entity.physics.postPhysicsUpdate(this.matterEngine)
-            entity.input.postPhysicsUpdate(this.matterEngine)
         }
         // Rendering
         // Fill Background
