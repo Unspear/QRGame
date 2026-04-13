@@ -190,7 +190,7 @@ class SpritePipeline {
         gl.bindVertexArray(this.#vao);
         // Instance Data
         gl.bindBuffer(GL.ARRAY_BUFFER, this.#instanceBuffer);
-        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#instanceData, 0, this.#numInstances * this.#instanceStride * Float32Array.BYTES_PER_ELEMENT);
+        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#instanceData, 0, this.#numInstances * this.#instanceStride);
         // Draw
         gl.drawArraysInstanced(GL.TRIANGLES, 0, this.#numVertices, this.#numInstances);
         this.#numInstances = 0;
@@ -261,7 +261,7 @@ class LinePipeline {
         gl.bindVertexArray(this.#vao);
         // Instance Data
         gl.bindBuffer(GL.ARRAY_BUFFER, this.#vertexBuffer);
-        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#vertexData, 0, this.#numVertices * this.#vertexStride * Float32Array.BYTES_PER_ELEMENT);
+        gl.bufferSubData(GL.ARRAY_BUFFER, 0, this.#vertexData, 0, this.#numVertices * this.#vertexStride);
         // Draw
         gl.drawArrays(GL.LINES, 0, this.#numVertices);
         this.#numVertices = 0;
