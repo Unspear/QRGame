@@ -7,6 +7,7 @@ import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { MyTabElement } from './tab';
 import { Renderer } from './render';
+import { CHAR_WIDTH } from './constants';
 
 enum EditorState {
     Brush,
@@ -15,6 +16,9 @@ enum EditorState {
 
 const TabDrawTile = "draw-tile";
 const TabDrawPatch = "draw-patch";
+const TabDrawMarker = "draw-marker";
+
+const pointToString = (point: Util.Point) => `${point.x},${point.y}`;
 
 export class Editor {
     // Code
@@ -41,6 +45,8 @@ export class Editor {
     pipetteButton: HTMLButtonElement;
     // Draw Patchmap
     patchIdInput: HTMLInputElement;
+    // Draw Markers
+    markerIdInput: HTMLInputElement;
     // Physics
     solidCharInput: HTMLInputElement;
     // Camera
@@ -58,6 +64,7 @@ export class Editor {
     tileCamera: Camera;
     tileMap: TileMap;
     patchMap: PatchMap;
+    markers: Map<string, Util.Point & { codePoint: number }>;
     state: EditorState;
     constructor(inputGame: Game) {
         this.state = EditorState.Brush;
@@ -89,6 +96,8 @@ export class Editor {
         this.pipetteButton = document.getElementById('editor-pipette-button') as HTMLButtonElement;
         //Patch Drawing
         this.patchIdInput = document.getElementById('patch-id') as HTMLInputElement;
+        //Marker Drawing
+        this.markerIdInput = document.getElementById('marker-id') as HTMLInputElement;
         //Physics
         this.solidCharInput = document.getElementById('editor-solid-input') as HTMLInputElement;
         //Camera
@@ -114,6 +123,8 @@ export class Editor {
                 }
             } else if (this.tileMapTab.currentTab === TabDrawPatch){
                 this.setPatchFromEvent(event);
+            } else if (this.tileMapTab.currentTab === TabDrawMarker) {
+                this.setMarkerFromEvent(event);
             }
         });
         window.addEventListener('pointerup', (event) => {
@@ -134,6 +145,8 @@ export class Editor {
                     }
                 } else if (this.tileMapTab.currentTab === TabDrawPatch) {
                     this.setPatchFromEvent(event);
+                } else if (this.tileMapTab.currentTab === TabDrawMarker) {
+                    this.setMarkerFromEvent(event);
                 }
             }
         });
@@ -224,6 +237,7 @@ export class Editor {
         this.patchCamera.setLevelDim(this.patchMap.getDrawDim(this.tileMap));
         this.tileCamera.setLevelDim(this.tileMap.getDrawDim());
         this.solidCharInput.value = String.fromCodePoint(...inputGame.solidTiles);
+        this.markers = new Map();
         this.renderer.startRenderLoop(() => this.draw());
     }
     getAndValidateInputNumber(input: HTMLInputElement, min: number, max: number, step: number): number {
@@ -264,25 +278,44 @@ export class Editor {
         point.y = Math.floor(point.y / this.tileMap.dim.h);
         this.patchMap.setPatch({ patchId: this.patchIdInput.valueAsNumber, transform: 0 }, point);
     }
+    setMarkerFromEvent(event: PointerEvent) {
+        const point = this.getCoordFromEvent(event);
+        if (this.markerIdInput.value.length > 0) {
+            
+            this.markers.set(pointToString(point), { ...point, codePoint: this.markerIdInput.value.codePointAt(0) ?? 0 });
+        }
+        else {
+            this.markers.delete(pointToString(point));
+        }
+    }
     setBrushFromEvent(event: PointerEvent) {
-        let coords = this.getCoordFromEvent(event);
-        let tileData = this.tileMap.getTile(coords);
+        let pair = this.tileMap.getSplitCoords(this.getCoordFromEvent(event));
+        let tileData = this.tileMap.getTile(pair.coords, pair.patchIndex);
         if (tileData !== null) {
             this.charInput.value = String.fromCodePoint(tileData.codePoint);
             this.colorInput.value = (tileData.color % 8).toString();
             this.invertedInput.checked = tileData.color > 8;
         }
     }
+    #isPatchMapView(): boolean {
+        return this.tileMapTab.currentTab === TabDrawPatch || this.tileMapTab.currentTab === TabDrawMarker;
+    }
     getCurrentCamera() {
-        return (this.tileMapTab.currentTab === TabDrawPatch) ? this.patchCamera : this.tileCamera;
+        return this.#isPatchMapView() ? this.patchCamera : this.tileCamera;
     }
     draw() {
         this.renderer.beginFrame();
         this.renderer.viewOffset = this.getCurrentCamera().getViewOffset();
-        if (this.tileMapTab.currentTab === TabDrawPatch) {
+        if (this.#isPatchMapView()) {
             this.patchMap.draw(this.renderer, this.tileMap, true);
         } else {
             this.tileMap.draw(this.renderer, true);
+        }
+        if (this.tileMapTab.currentTab === TabDrawMarker) {
+            for (const m of this.markers.values()) {
+                this.renderer.drawBox(m.x * CHAR_WIDTH, m.y * CHAR_WIDTH, (m.x + 1) * CHAR_WIDTH, (m.y + 1) * CHAR_WIDTH, -2.5);
+                this.renderer.drawCharacters([m.codePoint], [0], m.x * CHAR_WIDTH, m.y * CHAR_WIDTH, 0, 0, 0, false);
+            }
         }
         this.renderer.endFrame();
     }
