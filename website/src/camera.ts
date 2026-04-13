@@ -35,8 +35,6 @@ export class Camera {
         return Object.assign({}, this.#pos);
     }
     getViewOffset(): Point {
-        let offsetX = -this.#pos.x;
-        let offsetY = -this.#pos.y;
-        return {x: offsetX, y: offsetY};
+        return {x: Math.round(-this.#pos.x), y: Math.round(-this.#pos.y)};
     }
 }
