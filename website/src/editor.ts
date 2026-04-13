@@ -199,7 +199,7 @@ export class Editor {
         this.rightButton.onclick = () => {this.getCurrentCamera().x += 64;};
         this.downButton.onclick = () => {this.getCurrentCamera().y += 64;};
         this.exportButton.onclick = () => {
-            let serialised = JSON.stringify({tileMap: this.tileMap, patchMap: this.patchMap});
+            let serialised = JSON.stringify({tileMap: this.tileMap, patchMap: this.patchMap, markers: Array.from(this.markers.values())});
             navigator.clipboard.writeText(serialised);
         };
         this.importButton.onclick = async () => {
@@ -207,6 +207,10 @@ export class Editor {
                 let serialised = JSON.parse(await navigator.clipboard.readText());
                 this.tileMap = TileMap.Copy(serialised.tileMap as TileMap);
                 this.patchMap = PatchMap.Copy(serialised.patchMap as PatchMap);
+                this.markers = new Map();
+                for (const value of serialised.markers) {
+                    this.markers.set(pointToString(value), value);
+                }
             } catch(err) {
                 alert("Failed to load tilemap from clipboard, are you sure it is in the clipboard and correctly formatted?")
             }
