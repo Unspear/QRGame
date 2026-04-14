@@ -966,7 +966,7 @@ void encode(const char* inputPath, const char* outputPath) {
 	FILE* inputFile = fopen(inputPath, "rb");
 	FILE* outputFile = fopen(outputPath, "w+b");
 	StartSubAllocator(10);
-	EncodeFile(outputFile, inputFile, 4, MRM_RESTART);
+	EncodeFile(outputFile, inputFile, 6, MRM_RESTART);
 	StopSubAllocator();
 	fclose(inputFile);
 	fclose(outputFile);
@@ -976,7 +976,7 @@ void decode(const char* inputPath, const char* outputPath) {
 	FILE* inputFile = fopen(inputPath, "rb");
 	FILE* outputFile = fopen(outputPath, "w+b");
 	StartSubAllocator(10);
-	DecodeFile(outputFile, inputFile, 4, MRM_RESTART);
+	DecodeFile(outputFile, inputFile, 6, MRM_RESTART);
 	StopSubAllocator();
 	fclose(inputFile);
 	fclose(outputFile);

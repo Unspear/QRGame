@@ -3,14 +3,18 @@ import * as PPMd from "./compressor"
 import { PatchMap, TileMap } from './tile';
 import { Marker, stringToCodePoints } from './util';
 
+export type DataTransform = (array: Uint8Array) => Uint8Array;
+
 export class Packer {
     #buffer: ArrayBuffer;
     #view: DataView;
     #offset: number;
-    constructor() {
+    compressor: DataTransform;
+    constructor(compressor: DataTransform) {
         this.#buffer = new ArrayBuffer(10240);
         this.#view = new DataView(this.#buffer);
         this.#offset = 0;
+        this.compressor = compressor;
     }
     getUint8Array(): Uint8Array {
         return new Uint8Array(this.#buffer, 0, this.#offset);
@@ -41,7 +45,7 @@ export class Packer {
         this.packUint8Array(encoded);
     }
     packUint8Array(value: Uint8Array): void {
-        value = PPMd.compress(value);
+        value = this.compressor(value);
         this.packUintVar(value.byteLength);
         for (const val of value) {
             this.packUint8(val);
@@ -52,9 +56,11 @@ export class Packer {
 export class Unpacker {
     #view: DataView;
     #offset: number;
-    constructor(data: Uint8Array) {
+    decompressor: DataTransform;
+    constructor(data: Uint8Array, decompressor: DataTransform) {
         this.#view = new DataView(data.buffer, data.byteOffset, data.byteLength);
         this.#offset = 0;
+        this.decompressor = decompressor;
     }
     unpackUint8(): number {
         const value = this.#view.getUint8(this.#offset);
@@ -87,7 +93,7 @@ export class Unpacker {
         for (let i = 0; i < byteLength; i++) {
             value[i] = this.unpackUint8();
         }
-        return PPMd.decompress(value);
+        return this.decompressor(value);
     }
 }
 
@@ -101,6 +107,7 @@ export function urlToData(): Uint8Array | null {
     if (compressed.length === 0) return null;
     return compressed;
 }
+
 export function dataToUrl(data: Uint8Array, page: string) {
     const base64 = btoa(Array.from(data, (byte) => String.fromCodePoint(byte)).join(""));
     const params = new URLSearchParams();
@@ -108,8 +115,8 @@ export function dataToUrl(data: Uint8Array, page: string) {
     return URL.parse(page, window.location.origin+window.location.pathname)+"?"+params;
 }
 
-export function packGame(game: Game): Uint8Array {
-    const packer = new Packer();
+export function packGame(game: Game, compressor: DataTransform = PPMd.compress): Uint8Array {
+    const packer = new Packer(compressor);
     // Info
     packer.packString(game.metadata.title);
     packer.packString(game.metadata.description);
@@ -144,8 +151,8 @@ export function packGame(game: Game): Uint8Array {
     return packer.getUint8Array();
 }
 
-export function unpackGame(data: Uint8Array): Game {
-    const unpacker = new Unpacker(data);
+export function unpackGame(data: Uint8Array, decompressor: DataTransform = PPMd.decompress): Game {
+    const unpacker = new Unpacker(data, decompressor);
     // Info
     const infoTitle = unpacker.unpackString();
     const infoDescription = unpacker.unpackString();
