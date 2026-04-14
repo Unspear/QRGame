@@ -67,7 +67,7 @@ export class SpriteComponent extends EntityComponent {
     draw(renderer: Renderer) {
         const codePoints = stringToCodePoints(this.char);
         const globalPos = this.gpos;
-        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact)
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact, this.parent.screen);
     }
 }
 
@@ -270,18 +270,23 @@ export class Entity {
     sprite: SpriteComponent;
     physics: PhysicsComponent;
     input: InputComponent;
-    constructor(pos: Point) {
+    #screen: boolean;
+    constructor(pos: Point, screen: boolean) {
         this.pos = {...pos};
+        this.#screen = screen;
         this.sprite = new SpriteComponent(this, true);
         this.physics = new PhysicsComponent(this, false);
         this.input = new InputComponent(this, false);
     }
     static Copy(entity: Entity) {
-        let s = new Entity(entity.pos);
+        let s = new Entity(entity.pos, entity.#screen);
         s.frame = entity.frame;
         s.sprite.copyFrom(entity.sprite);
         s.physics.copyFrom(entity.physics);
         s.input.copyFrom(entity.input);
         return s;
+    }
+    get screen(): boolean {
+        return this.#screen;
     }
 }

@@ -148,7 +148,14 @@ export class Engine {
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('FRAME_TIME', FRAME_TIME);
         this.lua.global.set('createEntity', (char: string, color: number, x: number, y: number) => {
-            let newEntity = new Entity({ x: x, y: y});
+            let newEntity = new Entity({ x: x, y: y}, false);
+            newEntity.sprite.char = char;
+            newEntity.sprite.color = color;
+            this.entities.push(newEntity);
+            return newEntity;
+        });
+        this.lua.global.set('createScreenEntity', (char: string, color: number, x: number, y: number) => {
+            let newEntity = new Entity({ x: x, y: y}, true);
             newEntity.sprite.char = char;
             newEntity.sprite.color = color;
             this.entities.push(newEntity);
@@ -214,7 +221,7 @@ export class Engine {
             this.renderer.viewOffset = {x: 0, y: 0};
             // Draw Tilemap
             const codePoints = Util.stringToCodePoints(this.endScreenString);
-            this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2, 0.5, 0.5, 0, true);
+            this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2, 0.5, 0.5, 0, true, false);
             this.renderer.endFrame();
             return;
         }

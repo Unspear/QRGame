@@ -88,7 +88,7 @@ export class TileMap {
     }
     drawSingle(renderer: Renderer, index: number, point: Point) {
         let patch = this.tileData[index]!;
-        renderer.drawCharacters(patch.codePoint, patch.color, point.x, point.y, 0, 0, this.dim.w, false);
+        renderer.drawCharacters(patch.codePoint, patch.color, point.x, point.y, 0, 0, this.dim.w, false, false);
     }
     getDrawDim(): Dimensions {
         return {

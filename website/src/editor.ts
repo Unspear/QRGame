@@ -321,7 +321,7 @@ export class Editor {
         if (this.tileMapTab.currentTab === TabDrawMarker) {
             for (const m of this.markers.values()) {
                 this.renderer.drawBox(m.x * CHAR_WIDTH, m.y * CHAR_WIDTH, (m.x + 1) * CHAR_WIDTH, (m.y + 1) * CHAR_WIDTH, -2.5);
-                this.renderer.drawCharacters([m.codePoint], [0], m.x * CHAR_WIDTH, m.y * CHAR_WIDTH, 0, 0, 0, false);
+                this.renderer.drawCharacters([m.codePoint], [0], m.x * CHAR_WIDTH, m.y * CHAR_WIDTH, 0, 0, 0, false, false);
             }
         }
         this.renderer.endFrame();

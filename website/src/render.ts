@@ -273,6 +273,7 @@ export class Renderer {
     #previousTimestamp: DOMHighResTimeStamp | undefined;
     #frameCallback: (() => void) | undefined;
     #spritePipeline: SpritePipeline;
+    #screenSpritePipeline: SpritePipeline;
     #linePipeline: LinePipeline;
     paused: boolean;
     renderTime: number;
@@ -285,6 +286,7 @@ export class Renderer {
         this.#gl.clearColor(0, 0, 0, 1);
         this.#gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
         this.#spritePipeline = new SpritePipeline(this.#gl);
+        this.#screenSpritePipeline = new SpritePipeline(this.#gl);
         this.#linePipeline = new LinePipeline(this.#gl);
         this.paused = false;
         this.renderTime = 0;
@@ -321,10 +323,11 @@ export class Renderer {
     endFrame() {
         const viewData: ViewData = [this.viewOffset.x, this.viewOffset.y, this.#gl.canvas.width, this.#gl.canvas.height];
         this.#spritePipeline.draw(this.#gl, viewData);
+        this.#screenSpritePipeline.draw(this.#gl, [0, 0, this.#gl.canvas.width, this.#gl.canvas.height]);
         this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2});
         this.#gl.flush();
     }
-    drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean) {
+    drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean, screen: boolean) {
         console.assert(codePoints.length == colors.length)
         // Find layout
         let offsets = []
@@ -355,7 +358,8 @@ export class Renderer {
         let roundedY = Math.round(posY - height * pivotY);
         for (let i = 0; i < codePoints.length; i++) {
             let offset = offsets[i];
-            this.#spritePipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
+            const pipeline = screen ? this.#screenSpritePipeline : this.#spritePipeline;
+            pipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
         }
     }
     drawBox(x0: number, y0: number, x1: number, y1: number, margin: number) {
