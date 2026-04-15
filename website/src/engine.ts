@@ -62,6 +62,7 @@ export class Engine {
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => this.pointerEventQueue.push({type: "down", event: event}));
         gameCanvas.addEventListener('pointermove', (event: PointerEvent) => this.pointerEventQueue.push({type: "move", event: event}));
         document.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
+        document.addEventListener('pointercancel', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
         const capturedCodes = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             if (gameCanvas.checkVisibility()) {
