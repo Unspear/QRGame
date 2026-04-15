@@ -83,6 +83,10 @@ export class Engine {
         gameCanvas.addEventListener('drag', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragstart', (event) => event.preventDefault(), { passive: false });
         gameCanvas.addEventListener('dragend', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('touchstart', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('touchend', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+        gameCanvas.addEventListener('touchcancel', (event) => event.preventDefault(), { passive: false });
     }
     async play(game: Game) {
         // Setup (should override any existing values)

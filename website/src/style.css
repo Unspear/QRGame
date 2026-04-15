@@ -5,6 +5,7 @@ body {
     min-width: 320px;
     margin-inline: auto;
     width: min(calc(192px * 3), 100%);
+    touch-action: none;
 }
 article {
     margin: 0px 10px
