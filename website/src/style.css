@@ -5,7 +5,7 @@ body {
     min-width: 320px;
     margin-inline: auto;
     width: min(calc(192px * 3), 100%);
-    touch-action: none;
+    touch-action: pan-y;
 }
 article {
     margin: 0px 10px
@@ -33,6 +33,7 @@ canvas {
     display: block;
     width: 100%;
     image-rendering: pixelated;
+    touch-action: none;
 }
 #qr-canvas {
     outline: 2px solid grey;
