@@ -3,6 +3,8 @@ import { Point, stringToCodePoints } from './util';
 import { Renderer } from './render';
 import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
 
+type EntityFunction = (self: Entity) => void
+
 export class EntityComponent {
     parent: Entity;
     lpos: Point;
@@ -188,9 +190,10 @@ export class PhysicsComponent extends BoxComponent {
 }
 
 export class InputComponent extends BoxComponent {
-    press: Function | undefined;
-    hold: Function | undefined;
+    press: EntityFunction | undefined;
+    release: EntityFunction | undefined;
     key: string;
+    down: boolean;
     #physState: null | {
         body: Matter.Body,
         dim: Point,
@@ -198,12 +201,15 @@ export class InputComponent extends BoxComponent {
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
         this.key = "";
+        this.down = false;
         this.#physState = null;
     }
     copyFrom(input: InputComponent) {
         super.copyFrom(input);
         this.press = input.press;
-        this.hold = input.hold;
+        this.release = input.release;
+        this.key = input.key;
+        // this.down is not copied because I consider it transient
     }
     #shouldRemoveBody(): boolean {
         // Body doesn't exist
@@ -266,7 +272,7 @@ export class InputComponent extends BoxComponent {
 
 export class Entity {
     pos: Point;
-    frame: Function | undefined;
+    frame: EntityFunction | undefined;
     sprite: SpriteComponent;
     physics: PhysicsComponent;
     input: InputComponent;

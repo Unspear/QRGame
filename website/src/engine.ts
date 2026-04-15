@@ -235,17 +235,6 @@ export class Engine {
             entity.physics.postPhysicsUpdate(this.matterEngine)
             entity.input.postPhysicsUpdate(this.matterEngine)
         }
-        // Frame
-        if (this.luaFrame)
-        {
-            this.luaFrame();
-        }
-        for (let entity of this.entities) {
-            if (entity.frame instanceof Function) {
-                entity.frame();
-            }
-        }
-        this.physicsInput.onUpdate(this.matterEngine, this.downPointers, this.entities, this.downKeys);
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
             let queued = this.pointerEventQueue.shift()!;
@@ -285,15 +274,22 @@ export class Engine {
             let queued = this.keyboardEventQueue.shift()!;
             switch(queued.type) {
                 case "down":
-                    if (!this.downKeys.has(queued.event.code)) {
-                        this.downKeys.add(queued.event.code);
-                        this.physicsInput.onKeyDown(this.entities, queued.event.code);
-                    }
+                    this.downKeys.add(queued.event.code);
                     break;
                 case "up":
                     this.downKeys.delete(queued.event.code);
-                    this.physicsInput.onKeyUp(this.entities, queued.event.code);
                     break;
+            }
+        }
+        this.physicsInput.onUpdate(this.matterEngine, this.downPointers, this.entities, this.downKeys);
+        // Frame
+        if (this.luaFrame)
+        {
+            this.luaFrame();
+        }
+        for (let entity of this.entities) {
+            if (entity.frame instanceof Function) {
+                entity.frame(entity);
             }
         }
         // Rendering

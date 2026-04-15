@@ -1,7 +1,15 @@
 import { Game } from "../game";
 import { stringToCodePoints } from "../util";
 
-let script = `local player = createEntity('🕴', 0, 128, 176)
+let script = `local left = createScreenEntity(" <- ", 8, 32, 234)
+left.input.enabled = true
+left.input.dim = {x = 64, y = 48}
+left.input.key = "arrowleft"
+local right = createScreenEntity(" -> ", 8, 96, 234)
+right.input.enabled = true
+right.input.dim = {x = 64, y = 48}
+right.input.key = "arrowright"
+local player = createEntity('🕴', 0, 128, 176)
 player.physics.enabled = true
 player.physics.simulate = true
 player.physics.dim = {x=6, y=14}
@@ -13,27 +21,21 @@ player.frame = function()
   end
   camera.x = player.pos.x - 96
   camera.y = player.pos.y - 128
-  player.physics.vel.x = 0
+  local vel = 0
+  if right.input.down then
+    vel = vel + 1
+  end
+  if left.input.down then
+    vel = vel - 1
+  end
+  player.physics.vel.x = vel
   if player.pos.y > 352 then
     endGame("💀Game Over💀")
   elseif player.pos.x > 2208 then
     endGame("🎇You Win🎇")
   end
 end
-local left = createScreenEntity(" <- ", 8, 32, 234)
-left.input.enabled = true
-left.input.dim = {x = 64, y = 48}
-left.input.key = "arrowleft"
-left.input.hold = function()
-  player.physics.vel.x = -1
-end
-local right = createScreenEntity(" -> ", 8, 96, 234)
-right.input.enabled = true
-right.input.dim = {x = 64, y = 48}
-right.input.key = "arrowright"
-right.input.hold = function() 
-  player.physics.vel.x = 1
-end
+
 local jump = createScreenEntity("JUMP", 8, 160, 234)
 jump.input.enabled = true
 jump.input.dim = {x = 64, y = 48}

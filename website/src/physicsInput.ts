@@ -56,12 +56,6 @@ export class PhysicsInput {
                 Matter.Sleeping.set(overlap.body, false);
             }
         }
-        for(const overlap of this.#getOverlappingEntities(matterEngine, pos, INPUT_PHYSICS_GROUP)) {
-            // Try Tap
-            if (overlap.entity.input.enabled && overlap.entity.input.press instanceof Function) {
-                overlap.entity.input.press();
-            }
-        }
     }
     onPointerMove(pointerId: number, pos: Point) {
         if (this.constraint.bodyB && this.pointerId === pointerId) {// If there is a body constrained
@@ -76,19 +70,6 @@ export class PhysicsInput {
             this.pointerId = -1
         }
     }
-
-    onKeyDown(entities: Entity[], code: string) {
-        for (let entity of entities) {
-            if (entity.input.enabled 
-                && typeof entity.input.key === "string" 
-                && entity.input.key.toLowerCase() === code.toLowerCase()
-                && entity.input.press instanceof Function) {
-                entity.input.press();
-            }
-        }
-    }
-    onKeyUp(entities: Entity[], code: string) {
-    }
     onUpdate(matterEngine: Matter.Engine, downPointers: Map<number, Point>, entities: Entity[], downKeys: Set<string>) {
         let held = new Set<Entity>();
         for (let pointer of downPointers) {
@@ -101,9 +82,21 @@ export class PhysicsInput {
                 }
             });
         }
-        for (const entity of held) {
-            if (entity.input.enabled && entity.input.hold instanceof Function) {
-                entity.input.hold();
+        for (const entity of entities) {
+            if (!entity.input.enabled) {
+                entity.input.down = false;
+                continue;
+            }
+            let oldDown = entity.input.down;
+            let newDown = held.has(entity);
+            entity.input.down = newDown;
+            if (newDown) {
+                if (!oldDown && entity.input.press instanceof Function) {
+                    entity.input.press(entity);
+                }
+            }
+            else if (oldDown && entity.input.release instanceof Function) {
+                entity.input.release(entity);
             }
         }
     }
