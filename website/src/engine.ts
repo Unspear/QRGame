@@ -110,6 +110,40 @@ export class Engine {
         this.matterEngine = Matter.Engine.create({ 
             gravity: { scale: 0 }
         });
+        Matter.Events.on(this.matterEngine, "collisionStart", (event) => {
+            for (const pair of event.pairs) {
+                if (pair.bodyA.plugin.entity === undefined || pair.bodyB.plugin.entity === undefined) {
+                    return
+                }
+                const entityA = pair.bodyA.plugin.entity as Entity;
+                const entityB = pair.bodyB.plugin.entity as Entity;
+                entityA.physics.overlapping.push(entityB);
+                entityB.physics.overlapping.push(entityA);
+                if (entityA.physics.overlapBegin instanceof Function) {
+                    entityA.physics.overlapBegin(entityA, entityB);
+                }
+                if (entityB.physics.overlapBegin instanceof Function) {
+                    entityB.physics.overlapBegin(entityB, entityA);
+                }
+            }
+        });
+        Matter.Events.on(this.matterEngine, "collisionEnd", (event) => {
+            for (const pair of event.pairs) {
+                if (pair.bodyA.plugin.entity === undefined || pair.bodyB.plugin.entity === undefined) {
+                    return
+                }
+                const entityA = pair.bodyA.plugin.entity as Entity;
+                const entityB = pair.bodyB.plugin.entity as Entity;
+                Util.removeByValue(entityA.physics.overlapping, entityB);
+                Util.removeByValue(entityB.physics.overlapping, entityA);
+                if (entityA.physics.overlapEnd instanceof Function) {
+                    entityA.physics.overlapEnd(entityA, entityB);
+                }
+                if (entityB.physics.overlapEnd instanceof Function) {
+                    entityB.physics.overlapEnd(entityB, entityA);
+                }
+            }
+        });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
             const updateCollisionPair = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
                 if (a.plugin.entity === undefined) {
@@ -120,10 +154,6 @@ export class Engine {
                 if (floorAngle < 50.0) {
                     entityA.physics.onFloor = true;
                 }
-                if (b.plugin.entity === undefined) {
-                    return;
-                }
-                entityA.physics.overlapping.push(b.plugin.entity as Entity);
             };
             for (const pair of event.pairs) {
                 updateCollisionPair(pair.bodyA, pair.bodyB, pair.collision.normal);

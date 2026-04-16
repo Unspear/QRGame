@@ -203,7 +203,6 @@ export class PhysicsComponent extends BoxComponent {
             } 
         }
         this.onFloor = false;
-        this.overlapping = [];
     }
     postPhysicsUpdate(matterEngine: Matter.Engine) {
         if (this.#physState) {
