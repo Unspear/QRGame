@@ -111,19 +111,23 @@ export class Engine {
             gravity: { scale: 0 }
         });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
-            const updateFloorForPair = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
+            const updateCollisionPair = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
                 if (a.plugin.entity === undefined) {
                     return;
                 }
-                const entity = (a.plugin.entity as Entity);
+                const entityA = (a.plugin.entity as Entity);
                 const floorAngle = Math.acos(Matter.Vector.dot({x: 0, y: -1}, normal)) * (180 / Math.PI);
                 if (floorAngle < 50.0) {
-                    entity.physics.onFloor = true;
+                    entityA.physics.onFloor = true;
                 }
+                if (b.plugin.entity === undefined) {
+                    return;
+                }
+                entityA.physics.overlapping.push(b.plugin.entity as Entity);
             };
             for (const pair of event.pairs) {
-                updateFloorForPair(pair.bodyA, pair.bodyB, pair.collision.normal);
-                updateFloorForPair(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
+                updateCollisionPair(pair.bodyA, pair.bodyB, pair.collision.normal);
+                updateCollisionPair(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
             }
         });
         // Create bodies

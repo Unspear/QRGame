@@ -5,6 +5,7 @@ import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
 import { Camera } from './camera';
 
 type EntityFunction = (self: Entity) => void
+type EntityOverlapFunction = (self: Entity, other: Entity) => void
 
 export class EntityComponent {
     parent: Entity;
@@ -96,10 +97,14 @@ export class SpriteComponent extends EntityComponent {
 export class PhysicsComponent extends BoxComponent {
     vel: Point;
     static: boolean;
+    sensor: boolean;
     bounce: number;
     friction: number;
     drag: boolean;
     onFloor: boolean;
+    overlapping: Entity[];
+    overlapBegin: EntityOverlapFunction | undefined;
+    overlapEnd: EntityOverlapFunction | undefined;
     #physState: null | {
         body: Matter.Body,
         dim: Point,
@@ -109,16 +114,19 @@ export class PhysicsComponent extends BoxComponent {
         super(parent, enabled)
         this.vel = {x: 0, y: 0};
         this.static = false;
+        this.sensor = false;
         this.bounce = 0.0;
         this.friction = 0.0;
         this.drag = false;
         this.onFloor = false;
+        this.overlapping = [];
         this.#physState = null;
     }
     copyFrom(physics: PhysicsComponent) {
         super.copyFrom(physics);
         this.vel = physics.vel;
         this.static = physics.static;
+        this.sensor = physics.sensor;
         this.bounce = physics.bounce;
         this.friction = physics.friction;
         this.drag = physics.drag;
@@ -155,6 +163,7 @@ export class PhysicsComponent extends BoxComponent {
                 if (this.#physState.body.isStatic !== this.static) {
                     Matter.Body.setStatic(this.#physState.body, this.static);
                 }
+                this.#physState.body.isSensor = this.sensor;
                 this.#physState.body.restitution = this.bounce;
                 this.#physState.body.friction = this.friction;
             }
@@ -167,7 +176,7 @@ export class PhysicsComponent extends BoxComponent {
                 restitution: this.bounce,
                 frictionAir: 0.0,
                 friction: this.friction,
-                isSensor: false,
+                isSensor: this.sensor,
                 isStatic: this.static,
                 plugin: { entity: this.parent },
                 collisionFilter: {
@@ -194,6 +203,7 @@ export class PhysicsComponent extends BoxComponent {
             } 
         }
         this.onFloor = false;
+        this.overlapping = [];
     }
     postPhysicsUpdate(matterEngine: Matter.Engine) {
         if (this.#physState) {
