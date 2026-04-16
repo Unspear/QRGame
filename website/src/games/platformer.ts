@@ -9,7 +9,7 @@ local right = createScreenEntity(" -> ", 8, 96, 234)
 right.input.enabled = true
 right.input.dim = {x = 64, y = 48}
 right.input.key = "arrowright"
-local player = createEntity('🕴', 0, 128, 176)
+local player = createEntity('🐿', 0, 128, 176)
 player.physics.enabled = true
 player.physics.simulate = true
 player.physics.dim = {x=6, y=14}
@@ -29,6 +29,9 @@ player.frame = function()
     vel = vel - 1
   end
   player.physics.vel.x = vel
+  if vel ~= 0 then
+    player.sprite.fliph = vel > 0
+  end
   if player.pos.y > 352 then
     endGame("💀Game Over💀")
   elseif player.pos.x > 2208 then
