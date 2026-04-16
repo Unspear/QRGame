@@ -130,7 +130,7 @@ export class Engine {
         const options: Matter.IChamferableBodyDefinition = {
             restitution: 1.0,
             frictionAir: 0.0,
-            friction: 0.0,
+            friction: 1.0,
             isStatic: true,
             collisionFilter: {
                 mask: 0,

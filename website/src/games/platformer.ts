@@ -11,7 +11,6 @@ right.input.dim = {x = 64, y = 48}
 right.input.key = "arrowright"
 local player = createEntity('🐿', 0, 128, 176)
 player.physics.enabled = true
-player.physics.simulate = true
 player.physics.dim = {x=10, y=12}
 player.frame = function()
   if player.physics.vel.y > -0.5 then
@@ -61,7 +60,7 @@ health.sprite.pivot = {x=-1,y=-1}
 for i, v in ipairs(getMarkers('g')) do
   local goose = createEntity('🪿', 0, v.x, v.y)
   goose.physics.enabled = true
-  goose.physics.simulate = true
+  goose.physics.friction = 1.0
   goose.physics.dim.x = 10
   goose.frame = function(self)
     self.physics.vel.y = self.physics.vel.y + FRAME_TIME * 3

@@ -95,22 +95,22 @@ export class SpriteComponent extends EntityComponent {
 
 export class PhysicsComponent extends BoxComponent {
     vel: Point;
-    simulate: boolean;
-    bounce: boolean;
+    static: boolean;
+    bounce: number;
+    friction: number;
     drag: boolean;
     onFloor: boolean;
     #physState: null | {
         body: Matter.Body,
         dim: Point,
-        bounce: boolean,
-        simulate: boolean,
         parentPos: Point,
     };
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
         this.vel = {x: 0, y: 0};
-        this.simulate = false;
-        this.bounce = false;
+        this.static = false;
+        this.bounce = 0.0;
+        this.friction = 0.0;
         this.drag = false;
         this.onFloor = false;
         this.#physState = null;
@@ -118,8 +118,9 @@ export class PhysicsComponent extends BoxComponent {
     copyFrom(physics: PhysicsComponent) {
         super.copyFrom(physics);
         this.vel = physics.vel;
-        this.simulate = physics.simulate;
+        this.static = physics.static;
         this.bounce = physics.bounce;
+        this.friction = physics.friction;
         this.drag = physics.drag;
     }
     #shouldRemoveBody(): boolean {
@@ -139,34 +140,35 @@ export class PhysicsComponent extends BoxComponent {
         if (this.#physState.dim.y !== this.dim.y) {
             return true;
         }
-        // Body simulate doesn't match
-        if (this.#physState.simulate !== this.simulate) {
-            return true;
-        }
-        // Body bounce doesn't match
-        if (this.#physState.bounce !== this.bounce) {
-            return true;
-        }
         // All is fine
         return false;
     }
     prePhysicsUpdate(matterEngine: Matter.Engine) {
         // Remove body if wanted or width/height is wrong
-        if (this.#physState !== null && this.#shouldRemoveBody()) {
-            // Destroy body
-            Matter.Composite.remove(matterEngine.world, this.#physState.body);
-            this.#physState = null;
+        if (this.#physState !== null) {
+            if (this.#shouldRemoveBody()) {
+                // Destroy body
+                Matter.Composite.remove(matterEngine.world, this.#physState.body);
+                this.#physState = null;
+            }
+            else {
+                if (this.#physState.body.isStatic !== this.static) {
+                    Matter.Body.setStatic(this.#physState.body, this.static);
+                }
+                this.#physState.body.restitution = this.bounce;
+                this.#physState.body.friction = this.friction;
+            }
         }
         // Check if the body needs to be created
         if (this.enabled && this.#physState === null) {
             // Create Body
             const options: Matter.IChamferableBodyDefinition = {
                 inertia: Infinity,// Prevent rotation
-                restitution: this.bounce ? 1.0 : 0.0,
+                restitution: this.bounce,
                 frictionAir: 0.0,
-                friction: 0.0,
+                friction: this.friction,
                 isSensor: false,
-                isStatic: !this.simulate,
+                isStatic: this.static,
                 plugin: { entity: this.parent },
                 collisionFilter: {
                     category: 1,
@@ -178,8 +180,6 @@ export class PhysicsComponent extends BoxComponent {
             this.#physState = {
                 body: Matter.Bodies.rectangle(bodyPos.x, bodyPos.y, this.dim.x, this.dim.y, options),
                 dim: { ...this.dim },
-                bounce: this.bounce,
-                simulate: this.simulate,
                 parentPos: {...this.parent.pos},
             }
             Matter.Composite.add(matterEngine.world, this.#physState.body);
