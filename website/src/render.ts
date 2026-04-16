@@ -76,7 +76,7 @@ class SpritePipeline {
     #iBackColorLoc: number;
     #iFrontColorLoc: number;
     #iTexIndexLoc: number;
-    #iHalfWidth: number;
+    #iFlags: number;
     #uView: WebGLUniformLocation;
     #vao: WebGLVertexArrayObject;
     #numInstances: number;
@@ -94,7 +94,7 @@ class SpritePipeline {
         this.#iBackColorLoc = gl.getAttribLocation(this.#program, 'iBackColor');
         this.#iFrontColorLoc = gl.getAttribLocation(this.#program, 'iFrontColor');
         this.#iTexIndexLoc = gl.getAttribLocation(this.#program, 'iTexIndex');
-        this.#iHalfWidth = gl.getAttribLocation(this.#program, 'iHalfWidth');
+        this.#iFlags = gl.getAttribLocation(this.#program, 'iFlags');
         this.#uView = gl.getUniformLocation(this.#program, 'uView')!;
         // Make VAO
         this.#vao = gl.createVertexArray();
@@ -142,17 +142,17 @@ class SpritePipeline {
         gl.enableVertexAttribArray(this.#iFrontColorLoc);
         gl.enableVertexAttribArray(this.#iOffsetLoc);
         gl.enableVertexAttribArray(this.#iTexIndexLoc);
-        gl.enableVertexAttribArray(this.#iHalfWidth);
+        gl.enableVertexAttribArray(this.#iFlags);
         gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 0 * BPE);
         gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
         gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
-        gl.vertexAttribPointer(this.#iHalfWidth, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
+        gl.vertexAttribPointer(this.#iFlags, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
         gl.vertexAttribDivisor(this.#iBackColorLoc, 1);
         gl.vertexAttribDivisor(this.#iFrontColorLoc, 1);
         gl.vertexAttribDivisor(this.#iOffsetLoc, 1);
         gl.vertexAttribDivisor(this.#iTexIndexLoc, 1);
-        gl.vertexAttribDivisor(this.#iHalfWidth, 1);
+        gl.vertexAttribDivisor(this.#iFlags, 1);
         // Draw
         let that = this;
         this.#texture = createTexture(gl, spriteSheet);
@@ -160,7 +160,7 @@ class SpritePipeline {
             that.#texture = createTexture(gl, spriteSheet);
         });
     }
-    addData(x: number, y: number, color: number, codepoint: number, compact: boolean = false) {
+    addData(x: number, y: number, color: number, codepoint: number, compact: boolean = false, fliph: boolean = false, flipv: boolean = false) {
         let start = this.#numInstances * this.#instanceStride;
         let values = PALETTE_FRACTIONS[color % 8];
         if (color >= 8) {
@@ -175,7 +175,17 @@ class SpritePipeline {
         }
         const data = spriteSheetData[codepoint];
         const isFullWidth = !compact || data.isFullWidth;
-        this.#instanceData.set([x, y, data.index, isFullWidth ? 0.0 : 1.0], start);
+        let flags = 0;
+        if (!isFullWidth) {
+            flags += 1.0;
+        }
+        if (fliph) {
+            flags += 2.0;
+        }
+        if (flipv) {
+            flags += 4.0;
+        }
+        this.#instanceData.set([x, y, data.index, flags], start);
         this.#numInstances++;
     }
     draw(gl: WebGL2RenderingContext, view: ViewData) {
@@ -327,7 +337,7 @@ export class Renderer {
         this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2});
         this.#gl.flush();
     }
-    drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean, screen: boolean) {
+    drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean, screen: boolean, fliph: boolean = false, flipv: boolean = false) {
         console.assert(codePoints.length == colors.length)
         // Find layout
         let offsets = []
@@ -359,7 +369,7 @@ export class Renderer {
         for (let i = 0; i < codePoints.length; i++) {
             let offset = offsets[i];
             const pipeline = screen ? this.#screenSpritePipeline : this.#spritePipeline;
-            pipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact);
+            pipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact, fliph, flipv);
         }
     }
     drawBox(x0: number, y0: number, x1: number, y1: number, margin: number) {

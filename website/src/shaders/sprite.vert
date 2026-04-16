@@ -5,7 +5,7 @@ in vec4 iBackColor;
 in vec4 iFrontColor;
 in vec2 iOffset;
 in float iTexIndex;
-in float iHalfWidth;
+in float iFlags;
 
 uniform highp vec4 uView;
 
@@ -18,10 +18,19 @@ const int atlasWidth = 64;
 void main() {
   vec2 pos = vPosition;
   vec2 tex = vTexCoord;
-  if (iHalfWidth > 0.0) {
+  bool isHalfWidth = mod(iFlags, 2.0) > 0.;
+  bool fliph = mod(floor(iFlags / 2.0), 2.0) > 0.;
+  bool flipv = mod(floor(iFlags / 4.0), 2.0) > 0.;
+  if (isHalfWidth) {// isHalfWidth
     pos.x = pos.x * 0.5;
     tex.x = tex.x * 0.5 + 0.25;
-  } 
+  }
+  if (fliph) {
+    tex.x = 1.0 - tex.x;
+  }
+  if (flipv) {
+    tex.y = 1.0 - tex.y;
+  }
   pos = (pos + iOffset + uView.xy) / uView.zw * 2.0 - 1.0;
   pos.y *= -1.0;
   gl_Position = vec4(pos, 0.0, 1.0);

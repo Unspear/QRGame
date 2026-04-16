@@ -46,12 +46,16 @@ export class SpriteComponent extends EntityComponent {
     color: number;
     wrap: number;
     compact: boolean;
+    fliph: boolean;
+    flipv: boolean;
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
         this.char = "";
         this.color = 0;
         this.wrap = 0;
         this.compact = true;
+        this.fliph = false;
+        this.flipv = false;
     }
     get gpos() {
         return {
@@ -65,11 +69,13 @@ export class SpriteComponent extends EntityComponent {
         this.color = sprite.color;
         this.wrap = sprite.wrap;
         this.compact = sprite.compact;
+        this.fliph = sprite.fliph;
+        this.flipv = sprite.flipv;
     }
     draw(renderer: Renderer) {
         const codePoints = stringToCodePoints(this.char);
         const globalPos = this.gpos;
-        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact, this.parent.screen);
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact, this.parent.screen, this.fliph, this.flipv);
     }
 }
 
