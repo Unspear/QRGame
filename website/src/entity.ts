@@ -2,6 +2,7 @@ import * as Matter from 'matter-js'
 import { Point, stringToCodePoints } from './util';
 import { Renderer } from './render';
 import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
+import { Camera } from './camera';
 
 type EntityFunction = (self: Entity) => void
 
@@ -38,6 +39,19 @@ export class BoxComponent extends EntityComponent {
             x: this.parent.pos.x + this.lpos.x - this.dim.x * 0.5 * this.pivot.x,
             y: this.parent.pos.y + this.lpos.y - this.dim.y * 0.5 * this.pivot.y,
         }
+    }
+    isPointInside(camera: Camera, screenPoint: Point): boolean {
+        let point = {x: screenPoint.x, y: screenPoint.y };
+        if (!this.parent.screen) {
+            point.x += camera.x;
+            point.y += camera.y;
+        }
+        const centre = this.gpos;
+        const left = centre.x - this.dim.x * 0.5;
+        const right = centre.x + this.dim.x * 0.5;
+        const top = centre.y - this.dim.y * 0.5;
+        const bottom = centre.y + this.dim.y * 0.5;
+        return left < point.x && point.x < right && top < point.y && point.y < bottom; 
     }
 }
 
@@ -200,15 +214,10 @@ export class InputComponent extends BoxComponent {
     release: EntityFunction | undefined;
     key: string;
     down: boolean;
-    #physState: null | {
-        body: Matter.Body,
-        dim: Point,
-    };
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
         this.key = "";
         this.down = false;
-        this.#physState = null;
     }
     copyFrom(input: InputComponent) {
         super.copyFrom(input);
@@ -216,63 +225,6 @@ export class InputComponent extends BoxComponent {
         this.release = input.release;
         this.key = input.key;
         // this.down is not copied because I consider it transient
-    }
-    #shouldRemoveBody(): boolean {
-        // Body doesn't exist
-        if (this.#physState === null) {
-            return false;
-        }
-        // Body should not exist
-        if (!this.enabled) {
-            return true;
-        }
-        // Body width doesn't match
-        if (this.#physState.dim.x !== this.dim.x) {
-            return true;
-        }
-        // Body height doesn't match
-        if (this.#physState.dim.y !== this.dim.y) {
-            return true;
-        }
-        // All is fine
-        return false;
-    }
-    prePhysicsUpdate(matterEngine: Matter.Engine) {
-        // Remove body if wanted or width/height is wrong
-        if (this.#physState !== null && this.#shouldRemoveBody()) {
-            // Destroy body
-            Matter.Composite.remove(matterEngine.world, this.#physState.body);
-            this.#physState = null;
-        }
-        // Check if the body needs to be created
-        if (this.enabled && this.#physState === null) {
-            // Create Body
-            const options: Matter.IChamferableBodyDefinition = {
-                inertia: Infinity,// Prevent rotation
-                restitution: 0.0,
-                frictionAir: 0.0,
-                friction: 0.0,
-                isSensor: false,
-                isStatic: true,
-                plugin: { entity: this.parent },
-                collisionFilter: {
-                    category: 1,
-                    mask: 0,
-                    group: INPUT_PHYSICS_GROUP,
-                },
-            }
-            let bodyPos = this.gpos;
-            this.#physState = {
-                body: Matter.Bodies.rectangle(bodyPos.x, bodyPos.y, this.dim.x, this.dim.y, options),
-                dim: { ...this.dim },
-            }
-            Matter.Composite.add(matterEngine.world, this.#physState.body);
-        }
-        if (this.#physState) {
-            Matter.Body.setPosition(this.#physState.body, this.gpos);
-        }
-    }
-    postPhysicsUpdate(matterEngine: Matter.Engine) {
     }
 }
 

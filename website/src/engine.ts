@@ -233,12 +233,10 @@ export class Engine {
         // Physics
         for (let entity of this.entities) {
             entity.physics.prePhysicsUpdate(this.matterEngine)
-            entity.input.prePhysicsUpdate(this.matterEngine)
         }
         Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
         for (let entity of this.entities) {
             entity.physics.postPhysicsUpdate(this.matterEngine)
-            entity.input.postPhysicsUpdate(this.matterEngine)
         }
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
@@ -279,14 +277,39 @@ export class Engine {
             let queued = this.keyboardEventQueue.shift()!;
             switch(queued.type) {
                 case "down":
-                    this.downKeys.add(queued.event.code);
+                    this.downKeys.add(queued.event.code.toLowerCase());
                     break;
                 case "up":
-                    this.downKeys.delete(queued.event.code);
+                    this.downKeys.delete(queued.event.code.toLowerCase());
                     break;
             }
         }
-        this.physicsInput.onUpdate(this.matterEngine, this.downPointers, this.entities, this.downKeys);
+        // Update input components
+        for (let entity of this.entities) {
+            if (!entity.input.enabled) {
+                entity.input.down = false;
+                continue;
+            }
+            let newDown = false;
+            for (let pointer of this.downPointers) {
+                if (entity.input.isPointInside(this.camera, pointer[1])) {
+                    newDown = true;
+                }
+            }
+            if (typeof entity.input.key === "string" && this.downKeys.has(entity.input.key.toLowerCase())) {
+                newDown = true;
+            }
+            let oldDown = entity.input.down;
+            entity.input.down = newDown;
+            if (newDown) {
+                if (!oldDown && entity.input.press instanceof Function) {
+                    entity.input.press(entity);
+                }
+            }
+            else if (oldDown && entity.input.release instanceof Function) {
+                entity.input.release(entity);
+            }
+        }
         // Frame
         if (this.luaFrame)
         {

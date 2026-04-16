@@ -70,34 +70,4 @@ export class PhysicsInput {
             this.pointerId = -1
         }
     }
-    onUpdate(matterEngine: Matter.Engine, downPointers: Map<number, Point>, entities: Entity[], downKeys: Set<string>) {
-        let held = new Set<Entity>();
-        for (let pointer of downPointers) {
-            this.#getOverlappingEntities(matterEngine, pointer[1], INPUT_PHYSICS_GROUP).forEach(item => held.add(item.entity))
-        }
-        for (let code of downKeys) {
-            entities.forEach(entity => {
-                if (typeof entity.input.key === "string" && entity.input.key.toLowerCase() === code.toLowerCase()) {
-                    held.add(entity)
-                }
-            });
-        }
-        for (const entity of entities) {
-            if (!entity.input.enabled) {
-                entity.input.down = false;
-                continue;
-            }
-            let oldDown = entity.input.down;
-            let newDown = held.has(entity);
-            entity.input.down = newDown;
-            if (newDown) {
-                if (!oldDown && entity.input.press instanceof Function) {
-                    entity.input.press(entity);
-                }
-            }
-            else if (oldDown && entity.input.release instanceof Function) {
-                entity.input.release(entity);
-            }
-        }
-    }
 }
