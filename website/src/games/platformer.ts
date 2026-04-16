@@ -12,7 +12,7 @@ right.input.key = "arrowright"
 local player = createEntity('🐿', 0, 128, 176)
 player.physics.enabled = true
 player.physics.simulate = true
-player.physics.dim = {x=6, y=14}
+player.physics.dim = {x=10, y=12}
 player.frame = function()
   if player.physics.vel.y > -0.5 then
     player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 3
