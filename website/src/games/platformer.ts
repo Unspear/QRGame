@@ -46,6 +46,7 @@ jump.input.key = "arrowup"
 jump.input.press = function()
   if player.physics.onFloor then
     player.physics.vel.y = -3.2
+    audio.square("C4", 0.25).driveDetune(audio.step(0, 0.1), audio.linear(600, 0.25)).output()
   end
 end
 local timer = createScreenEntity("", 4, 192-6, 6)
@@ -62,7 +63,7 @@ for i, v in ipairs(getMarkers('g')) do
   goose.physics.enabled = true
   goose.physics.simulate = true
   goose.physics.dim.x = 10
-  goose.frame = function(self) 
+  goose.frame = function(self)
     self.physics.vel.y = self.physics.vel.y + FRAME_TIME * 3
   end
 end`
