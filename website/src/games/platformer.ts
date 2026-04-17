@@ -35,7 +35,7 @@ player.frame = function()
   if left.input.down then
     vel = vel - 1
   end
-  player.physics.vel.x = vel
+  player.physics.vel.x = vel * 2
   if vel ~= 0 then
     player.sprite.fliph = vel > 0
   end
@@ -52,7 +52,7 @@ jump.input.dim = {x = 64, y = 48}
 jump.input.key = "arrowup"
 jump.input.press = function()
   if player.physics.onFloor then
-    player.physics.vel.y = -3.2
+    player.physics.vel.y = -4.5
     audio.square("C4", 0.25).driveDetune(audio.step(0, 0.1), audio.linear(600, 0.25)).output()
   end
 end
