@@ -178,13 +178,27 @@ export class Engine {
                 group: 0
             }
         };
-        for (let y = 0; y < this.tileMap.dim.h; y++) {
-            for (let x = 0; x < this.tileMap.dim.w; x++) {
+        for (let x = 0; x < this.tileMap.dim.w; x++) {
+            const createBody = (yBegin: number, yEnd: number) => {
+                const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (yBegin + yEnd) * 0.5 * CHAR_WIDTH, CHAR_WIDTH, (yEnd - yBegin) * CHAR_WIDTH, options);
+                Matter.Composite.add(this.matterEngine.world, physBody);
+            };
+            let startY: number | null = null;
+            for (let y = 0; y < this.tileMap.dim.h; y++) {
                 const tile = this.tileMap.getTile({x: x, y: y})!;
                 if (game.solidTiles.includes(tile.codePoint)) {
-                    const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
-                    Matter.Composite.add(this.matterEngine.world, physBody);
+                    if (startY === null) {
+                        startY = y;
+                    }
+                }else{
+                    if (startY !== null) {
+                        createBody(startY, y);
+                        startY = null;
+                    }
                 }
+            }
+            if (startY !== null) {
+                createBody(startY, this.tileMap.dim.h)
             }
         }
         // Create entity drag constraint
