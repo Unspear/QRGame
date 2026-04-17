@@ -1,3 +1,4 @@
+import { LuaExecutor } from "./engine";
 
 export class Timer {
     duration: number;
@@ -11,18 +12,14 @@ export class Timer {
     get finished() {
         return this.#time > this.duration;
     }
-    update(deltaTime: number) {
+    update(deltaTime: number, luaExecutor: LuaExecutor) {
         if (this.#time > this.duration) {
             return;
         }
         this.#time += deltaTime;
-        if (this.frame instanceof Function) {
-            this.frame();
-        }
+        luaExecutor(this.frame);
         if (this.#time > this.duration) {
-            if (this.finish instanceof Function) {
-                this.finish();
-            }
+            luaExecutor(this.finish);
         }
     }
 }

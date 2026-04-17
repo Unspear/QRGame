@@ -25,6 +25,8 @@ type QueuedKeyboardEvent = {
     event: KeyboardEvent
 }
 
+export type LuaExecutor = (f: Function | undefined, ...args: any[]) => void;
+
 export class Engine {
     gameCanvas: HTMLCanvasElement;
     gameErrors: HTMLDivElement;
@@ -44,6 +46,7 @@ export class Engine {
     matterEngine!: Matter.Engine;
     physicsInput!: PhysicsInput;
     lua!: LuaEngine;
+    luaExecutor: LuaExecutor;
     ranScript: boolean;
     endScreenData: string[] | undefined;
     luaFrame!: () => void;
@@ -61,6 +64,24 @@ export class Engine {
         this.downPointers = new Map();
         this.downKeys = new Set();
         this.ranScript = false;
+        this.luaExecutor = (f: Function | undefined, ...args: any[]) => {
+            if (f instanceof Function) {
+                try {
+                    f(...args);
+                } catch(error: any) {
+                    const messageCount = this.gameErrors.childElementCount;
+                    if (messageCount < 5) {
+                        let p = document.createElement("p");
+                        p.innerText = `${error}`;
+                        this.gameErrors.appendChild(p);
+                    }else if (messageCount == 5) {
+                        let p = document.createElement("p");
+                        p.innerText = "+++Additional Errors Hidden+++";
+                        this.gameErrors.appendChild(p);
+                    }
+                }
+            }
+        };
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => this.pointerEventQueue.push({type: "down", event: event}));
         gameCanvas.addEventListener('pointermove', (event: PointerEvent) => this.pointerEventQueue.push({type: "move", event: event}));
         document.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
@@ -122,12 +143,8 @@ export class Engine {
                 const entityB = pair.bodyB.plugin.entity as Entity;
                 entityA.physics.overlapping.push(entityB);
                 entityB.physics.overlapping.push(entityA);
-                if (entityA.physics.overlapBegin instanceof Function) {
-                    entityA.physics.overlapBegin(entityA, entityB);
-                }
-                if (entityB.physics.overlapBegin instanceof Function) {
-                    entityB.physics.overlapBegin(entityB, entityA);
-                }
+                this.luaExecutor(entityA.physics.overlapBegin, entityA, entityB);
+                this.luaExecutor(entityB.physics.overlapBegin, entityB, entityA);
             }
         });
         Matter.Events.on(this.matterEngine, "collisionEnd", (event) => {
@@ -139,12 +156,8 @@ export class Engine {
                 const entityB = pair.bodyB.plugin.entity as Entity;
                 Util.removeByValue(entityA.physics.overlapping, entityB);
                 Util.removeByValue(entityB.physics.overlapping, entityA);
-                if (entityA.physics.overlapEnd instanceof Function) {
-                    entityA.physics.overlapEnd(entityA, entityB);
-                }
-                if (entityB.physics.overlapEnd instanceof Function) {
-                    entityB.physics.overlapEnd(entityB, entityA);
-                }
+                this.luaExecutor(entityA.physics.overlapEnd, entityA, entityB);
+                this.luaExecutor(entityB.physics.overlapEnd, entityB, entityA);
             }
         });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
@@ -268,13 +281,7 @@ export class Engine {
         if (!this.ranScript) {
             this.ranScript = true;
             // Load Script
-            try {
-                this.lua.doStringSync(this.game.script);
-            } catch(error: any) {
-                let p = document.createElement("p");
-                p.innerText = `${error}`;
-                this.gameErrors.appendChild(p);
-            }
+            this.luaExecutor(() => this.lua.doStringSync(this.game.script));
             // Get Lua References
             this.luaFrame = this.lua.global.get('frame');
             this.luaTap = this.lua.global.get('tap');
@@ -309,25 +316,15 @@ export class Engine {
             switch(queued.type) {
                 case "down":
                     this.downPointers.set(queued.event.pointerId, pos);
-                    if (this.luaDrag)
-                    {
-                        this.luaDrag(pos);
-                    }
-                    if (this.luaTap)
-                    {
-                        this.luaTap();
-                    }
+                    this.luaExecutor(this.luaDrag, pos);
+                    this.luaExecutor(this.luaTap);
                     this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
                     break;
                 case "move":
-                    
                     if (this.downPointers.has(queued.event.pointerId))
                     {
                         this.downPointers.set(queued.event.pointerId, pos);
-                        if (this.luaDrag)
-                        {
-                            this.luaDrag(pos);
-                        }
+                        this.luaExecutor(this.luaDrag, pos);
                     }
                     this.physicsInput.onPointerMove(queued.event.pointerId, pos);
                     break;
@@ -366,26 +363,21 @@ export class Engine {
             let oldDown = entity.input.down;
             entity.input.down = newDown;
             if (newDown) {
-                if (!oldDown && entity.input.press instanceof Function) {
-                    entity.input.press(entity);
+                if (!oldDown) {
+                    this.luaExecutor(entity.input.press, entity);
                 }
             }
-            else if (oldDown && entity.input.release instanceof Function) {
-                entity.input.release(entity);
+            else if (oldDown) {
+                this.luaExecutor(entity.input.release, entity);
             }
         }
         // Frame
-        if (this.luaFrame)
-        {
-            this.luaFrame();
-        }
+        this.luaExecutor(this.luaFrame);
         for (let entity of this.entities) {
-            if (entity.frame instanceof Function) {
-                entity.frame(entity);
-            }
+            this.luaExecutor(entity.frame, entity);
         }
         for (let timer of this.timers) {
-            timer.update(FRAME_TIME);
+            timer.update(FRAME_TIME, this.luaExecutor);
         }
         this.timers = this.timers.filter(t => !t.finished);
         // Rendering
