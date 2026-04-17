@@ -45,7 +45,7 @@ export class Engine {
     physicsInput!: PhysicsInput;
     lua!: LuaEngine;
     ranScript: boolean;
-    endScreenString: string | undefined;
+    endScreenData: string[] | undefined;
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
@@ -96,7 +96,7 @@ export class Engine {
         // Clear game errors
         this.gameErrors.textContent = '';
         this.ranScript = false;
-        this.endScreenString = undefined;
+        this.endScreenData = undefined;
         this.entities = [];
         this.timers = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
@@ -219,8 +219,8 @@ export class Engine {
         this.lua.global.set('destroyTimer', (timer: Timer) => {
             this.timers = this.timers.filter(s => s !== timer);
         });
-        this.lua.global.set('endGame', (string: string) => {
-            this.endScreenString = string;
+        this.lua.global.set('endGame', (...args: string[]) => {
+            this.endScreenData = args;
         });
         this.lua.global.set('getMarkers', (markerId: string) => {
             const id = markerId.codePointAt(0);
@@ -264,14 +264,16 @@ export class Engine {
             this.luaDrag = this.lua.global.get('drag');
         }
         // Show end screen
-        if (this.endScreenString !== undefined) {
+        if (this.endScreenData !== undefined) {
             // Rendering
             // Fill Background
             this.renderer.beginFrame();
             this.renderer.viewOffset = {x: 0, y: 0};
             // Draw Tilemap
-            const codePoints = Util.stringToCodePoints(this.endScreenString);
-            this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2, 0.5, 0.5, 0, true, false);
+            for(let i = 0; i < this.endScreenData.length; i++) {
+                const codePoints = Util.stringToCodePoints(this.endScreenData[i]);
+                this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2 + (i - (this.endScreenData.length - 1) / 2.0) * CHAR_WIDTH, 0.5, 0.5, 0, true, false);
+            }
             this.renderer.endFrame();
             return;
         }

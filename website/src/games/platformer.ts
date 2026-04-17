@@ -1,7 +1,15 @@
 import { Game } from "../game";
 import { stringToCodePoints } from "../util";
 
-let script = `local left = createScreenEntity(" <- ", 8, 32, 234)
+let script = `local healthVal = 3;
+local timer = createScreenEntity("", 4, 192-6, 6)
+timer.sprite.pivot = {x=1,y=-1}
+local seconds = 0
+timer.frame = function()
+  seconds = seconds + FRAME_TIME
+  timer.sprite.char = tostring(math.floor(seconds*10.0))
+end
+local left = createScreenEntity(" <- ", 8, 32, 234)
 left.input.enabled = true
 left.input.dim = {x = 64, y = 48}
 left.input.key = "arrowleft"
@@ -34,7 +42,7 @@ player.frame = function()
   if player.pos.y > 352 then
     endGame("💀Game Over💀")
   elseif player.pos.x > 1472 and player.physics.onFloor then
-    endGame("🎇You Win🎇")
+    endGame("🎇You Win🎇", "Time: "..math.floor(seconds*10.0), "Health: "..string.rep("🖤", healthVal))
   end
 end
 
@@ -48,16 +56,8 @@ jump.input.press = function()
     audio.square("C4", 0.25).driveDetune(audio.step(0, 0.1), audio.linear(600, 0.25)).output()
   end
 end
-local timer = createScreenEntity("", 4, 192-6, 6)
-timer.sprite.pivot = {x=1,y=-1}
-local seconds = 0
-timer.frame = function()
-  seconds = seconds + FRAME_TIME
-  timer.sprite.char = tostring(math.floor(seconds*10.0))
-end
 local health = createScreenEntity("🖤🖤🖤", 2, 6, 6)
 health.sprite.pivot = {x=-1,y=-1}
-local healthVal = 3;
 local healthTimer = nil
 function damage() 
   if healthTimer == nil or healthTimer.finished then
