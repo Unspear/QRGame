@@ -11,6 +11,7 @@ import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
 import { AudioAccessor, AudioEngine, BufferSoundNode, FrequencyInput, OscillatorSoundNode, SoundMod } from './audio'
+import { Timer } from './timer'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
@@ -37,6 +38,7 @@ export class Engine {
     keyboardEventQueue: QueuedKeyboardEvent[];
     game!: Game;
     entities!: Entity[];
+    timers!: Timer[];
     tileMap!: TileMap;
     camera!: Camera;
     matterEngine!: Matter.Engine;
@@ -96,6 +98,7 @@ export class Engine {
         this.ranScript = false;
         this.endScreenString = undefined;
         this.entities = [];
+        this.timers = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
@@ -207,6 +210,14 @@ export class Engine {
             let newEntity = Entity.Copy(entity);
             this.entities.push(newEntity);
             return newEntity;
+        });
+        this.lua.global.set('createTimer', (duration: number) => {
+            let newTimer = new Timer(duration);
+            this.timers.push(newTimer)
+            return newTimer;
+        });
+        this.lua.global.set('destroyTimer', (timer: Timer) => {
+            this.timers = this.timers.filter(s => s !== timer);
         });
         this.lua.global.set('endGame', (string: string) => {
             this.endScreenString = string;
@@ -354,6 +365,10 @@ export class Engine {
                 entity.frame(entity);
             }
         }
+        for (let timer of this.timers) {
+            timer.update(FRAME_TIME);
+        }
+        this.timers = this.timers.filter(t => !t.finished);
         // Rendering
         // Fill Background
         this.renderer.beginFrame();
