@@ -22,9 +22,9 @@ player.physics.enabled = true
 player.physics.dim = {x=10, y=12}
 player.frame = function()
   if player.physics.vel.y > -0.5 then
-    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 3
-  else
     player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 6
+  else
+    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 12
   end
   camera.x = player.pos.x - 96
   camera.y = player.pos.y - 128
