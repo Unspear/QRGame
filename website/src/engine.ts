@@ -148,7 +148,7 @@ export class Engine {
             }
         });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
-            const updateCollisionPair = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
+            const updateOnFloor = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
                 if (a.plugin.entity === undefined) {
                     return;
                 }
@@ -159,8 +159,11 @@ export class Engine {
                 }
             };
             for (const pair of event.pairs) {
-                updateCollisionPair(pair.bodyA, pair.bodyB, pair.collision.normal);
-                updateCollisionPair(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
+                if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
+                    continue;
+                }
+                updateOnFloor(pair.bodyA, pair.bodyB, pair.collision.normal);
+                updateOnFloor(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
             }
         });
         // Create bodies
