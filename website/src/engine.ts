@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
-import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, NORMAL_PHYSICS_GROUP, SCREEN_DIM } from './constants'
+import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE, SCREEN_DIM } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { Camera } from './camera'
@@ -170,9 +170,9 @@ export class Engine {
             friction: 1.0,
             isStatic: true,
             collisionFilter: {
-                mask: 0,
-                category: 0,
-                group: NORMAL_PHYSICS_GROUP
+                category: PHYSICS_CATEGORY_TILE,
+                mask: PHYSICS_CATEGORY_SPRITE,
+                group: 0
             }
         };
         for (let y = 0; y < this.tileMap.dim.h; y++) {

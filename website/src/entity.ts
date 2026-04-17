@@ -1,7 +1,7 @@
 import * as Matter from 'matter-js'
 import { Point, stringToCodePoints } from './util';
 import { Renderer } from './render';
-import { INPUT_PHYSICS_GROUP, NORMAL_PHYSICS_GROUP } from './constants';
+import { PHYSICS_CATEGORY_SENSOR, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE } from './constants';
 import { Camera } from './camera';
 
 type EntityFunction = (self: Entity) => void
@@ -98,6 +98,7 @@ export class PhysicsComponent extends BoxComponent {
     vel: Point;
     static: boolean;
     sensor: boolean;
+    ghost: boolean;
     bounce: number;
     friction: number;
     drag: boolean;
@@ -107,6 +108,7 @@ export class PhysicsComponent extends BoxComponent {
     overlapEnd: EntityOverlapFunction | undefined;
     #physState: null | {
         body: Matter.Body,
+        ghostSensor?: Matter.Body;
         dim: Point,
         parentPos: Point,
     };
@@ -115,6 +117,7 @@ export class PhysicsComponent extends BoxComponent {
         this.vel = {x: 0, y: 0};
         this.static = false;
         this.sensor = false;
+        this.ghost = false;
         this.bounce = 0.0;
         this.friction = 0.0;
         this.drag = false;
@@ -148,6 +151,10 @@ export class PhysicsComponent extends BoxComponent {
         if (this.#physState.dim.y !== this.dim.y) {
             return true;
         }
+        // Body having extra sensor doesn't match ghost
+        if ((this.#physState.ghostSensor !== undefined) !== this.ghost) {
+            return true;
+        }
         // All is fine
         return false;
     }
@@ -157,6 +164,9 @@ export class PhysicsComponent extends BoxComponent {
             if (this.#shouldRemoveBody()) {
                 // Destroy body
                 Matter.Composite.remove(matterEngine.world, this.#physState.body);
+                if (this.#physState.ghostSensor) {
+                    Matter.Composite.remove(matterEngine.world, this.#physState.ghostSensor);
+                }
                 this.#physState = null;
             }
             else {
@@ -180,9 +190,9 @@ export class PhysicsComponent extends BoxComponent {
                 isStatic: this.static,
                 plugin: { entity: this.parent },
                 collisionFilter: {
-                    category: 1,
-                    mask: 0,
-                    group: NORMAL_PHYSICS_GROUP,
+                    category: PHYSICS_CATEGORY_SPRITE,
+                    mask: PHYSICS_CATEGORY_TILE | PHYSICS_CATEGORY_SENSOR | (this.ghost ? 0 : PHYSICS_CATEGORY_SPRITE),
+                    group: 0,
                 }
             }
             let bodyPos = this.gpos;
@@ -190,6 +200,19 @@ export class PhysicsComponent extends BoxComponent {
                 body: Matter.Bodies.rectangle(bodyPos.x, bodyPos.y, this.dim.x, this.dim.y, options),
                 dim: { ...this.dim },
                 parentPos: {...this.parent.pos},
+            }
+            if (this.ghost) {
+                const sensorOptions: Matter.IChamferableBodyDefinition = {
+                    isSensor: true,
+                    plugin: { entity: this.parent },
+                    collisionFilter: {
+                        category: PHYSICS_CATEGORY_SENSOR,
+                        mask: PHYSICS_CATEGORY_SPRITE,
+                        group: 0,
+                    }
+                }
+                this.#physState.ghostSensor = Matter.Bodies.rectangle(bodyPos.x, bodyPos.y, this.dim.x, this.dim.y, sensorOptions);
+                Matter.Composite.add(matterEngine.world, this.#physState.ghostSensor);
             }
             Matter.Composite.add(matterEngine.world, this.#physState.body);
         }
@@ -212,6 +235,10 @@ export class PhysicsComponent extends BoxComponent {
             this.parent.pos.x += newGlobalPos.x - oldGlobalPos.x;
             this.parent.pos.y += newGlobalPos.y - oldGlobalPos.y;
             this.#physState.parentPos = {...this.parent.pos};
+            if (this.#physState.ghostSensor) {
+                Matter.Body.setPosition(this.#physState.ghostSensor, this.#physState.body.position);
+                Matter.Body.setAngle(this.#physState.ghostSensor, this.#physState.body.angle);
+            }
         } else {
             this.vel = {x: 0, y: 0};
         }

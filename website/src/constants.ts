@@ -28,5 +28,6 @@ export const PALETTE_FRACTIONS = [
     [0.56, 0.13, 0.74]
 ]
 
-export const NORMAL_PHYSICS_GROUP = 1;
-export const INPUT_PHYSICS_GROUP = 2;
+export const PHYSICS_CATEGORY_TILE = 1;
+export const PHYSICS_CATEGORY_SPRITE = 2;
+export const PHYSICS_CATEGORY_SENSOR = 4;
