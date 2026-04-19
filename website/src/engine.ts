@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
-import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, NORMAL_PHYSICS_GROUP, SCREEN_DIM } from './constants'
+import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE, SCREEN_DIM } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { Camera } from './camera'
@@ -11,6 +11,7 @@ import glueUrl from 'wasmoon/dist/glue.wasm';
 import PressPlay from './press-play.png';
 import { Renderer } from './render'
 import { AudioAccessor, AudioEngine, BufferSoundNode, FrequencyInput, OscillatorSoundNode, SoundMod } from './audio'
+import { Timer } from './timer'
 
 let pressPlayImage = new Image();
 pressPlayImage.src = PressPlay;
@@ -23,6 +24,8 @@ type QueuedKeyboardEvent = {
     type: "down" | "up",
     event: KeyboardEvent
 }
+
+export type LuaExecutor = (f: Function | undefined, ...args: any[]) => void;
 
 export class Engine {
     gameCanvas: HTMLCanvasElement;
@@ -37,13 +40,15 @@ export class Engine {
     keyboardEventQueue: QueuedKeyboardEvent[];
     game!: Game;
     entities!: Entity[];
+    timers!: Timer[];
     tileMap!: TileMap;
     camera!: Camera;
     matterEngine!: Matter.Engine;
     physicsInput!: PhysicsInput;
     lua!: LuaEngine;
+    luaExecutor: LuaExecutor;
     ranScript: boolean;
-    endScreenString: string | undefined;
+    endScreenData: string[] | undefined;
     luaFrame!: () => void;
     luaDrag!: (point: Util.Point) => void;
     luaTap!: () => void;
@@ -59,6 +64,24 @@ export class Engine {
         this.downPointers = new Map();
         this.downKeys = new Set();
         this.ranScript = false;
+        this.luaExecutor = (f: Function | undefined, ...args: any[]) => {
+            if (f instanceof Function) {
+                try {
+                    f(...args);
+                } catch(error: any) {
+                    const messageCount = this.gameErrors.childElementCount;
+                    if (messageCount < 5) {
+                        let p = document.createElement("p");
+                        p.innerText = `${error}`;
+                        this.gameErrors.appendChild(p);
+                    }else if (messageCount == 5) {
+                        let p = document.createElement("p");
+                        p.innerText = "+++Additional Errors Hidden+++";
+                        this.gameErrors.appendChild(p);
+                    }
+                }
+            }
+        };
         gameCanvas.addEventListener('pointerdown', (event: PointerEvent) => this.pointerEventQueue.push({type: "down", event: event}));
         gameCanvas.addEventListener('pointermove', (event: PointerEvent) => this.pointerEventQueue.push({type: "move", event: event}));
         document.addEventListener('pointerup', (event: PointerEvent) => this.pointerEventQueue.push({type: "up", event: event}));
@@ -94,8 +117,9 @@ export class Engine {
         // Clear game errors
         this.gameErrors.textContent = '';
         this.ranScript = false;
-        this.endScreenString = undefined;
+        this.endScreenData = undefined;
         this.entities = [];
+        this.timers = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
         const gamePatchMap = PatchMap.Copy(game.patchMap);
         this.tileMap = gamePatchMap.createTileMap(gameTileMap);
@@ -110,41 +134,84 @@ export class Engine {
         this.matterEngine = Matter.Engine.create({ 
             gravity: { scale: 0 }
         });
+        Matter.Events.on(this.matterEngine, "collisionStart", (event) => {
+            for (const pair of event.pairs) {
+                if (pair.bodyA.plugin.entity === undefined || pair.bodyB.plugin.entity === undefined) {
+                    return
+                }
+                const entityA = pair.bodyA.plugin.entity as Entity;
+                const entityB = pair.bodyB.plugin.entity as Entity;
+                entityA.physics.overlapping.push(entityB);
+                entityB.physics.overlapping.push(entityA);
+                this.luaExecutor(entityA.physics.overlapBegin, entityA, entityB);
+                this.luaExecutor(entityB.physics.overlapBegin, entityB, entityA);
+            }
+        });
+        Matter.Events.on(this.matterEngine, "collisionEnd", (event) => {
+            for (const pair of event.pairs) {
+                if (pair.bodyA.plugin.entity === undefined || pair.bodyB.plugin.entity === undefined) {
+                    return
+                }
+                const entityA = pair.bodyA.plugin.entity as Entity;
+                const entityB = pair.bodyB.plugin.entity as Entity;
+                Util.removeByValue(entityA.physics.overlapping, entityB);
+                Util.removeByValue(entityB.physics.overlapping, entityA);
+                this.luaExecutor(entityA.physics.overlapEnd, entityA, entityB);
+                this.luaExecutor(entityB.physics.overlapEnd, entityB, entityA);
+            }
+        });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
-            const updateFloorForPair = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
+            const updateOnFloor = (a: Matter.Body, b: Matter.Body, normal: Matter.Vector) => {
                 if (a.plugin.entity === undefined) {
                     return;
                 }
-                const entity = (a.plugin.entity as Entity);
+                const entityA = (a.plugin.entity as Entity);
                 const floorAngle = Math.acos(Matter.Vector.dot({x: 0, y: -1}, normal)) * (180 / Math.PI);
                 if (floorAngle < 50.0) {
-                    entity.physics.onFloor = true;
+                    entityA.physics.onFloor = true;
                 }
             };
             for (const pair of event.pairs) {
-                updateFloorForPair(pair.bodyA, pair.bodyB, pair.collision.normal);
-                updateFloorForPair(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
+                if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
+                    continue;
+                }
+                updateOnFloor(pair.bodyA, pair.bodyB, pair.collision.normal);
+                updateOnFloor(pair.bodyB, pair.bodyA, Matter.Vector.neg(pair.collision.normal));
             }
         });
         // Create bodies
         const options: Matter.IChamferableBodyDefinition = {
             restitution: 1.0,
             frictionAir: 0.0,
-            friction: 0.0,
+            friction: 1.0,
             isStatic: true,
             collisionFilter: {
-                mask: 0,
-                category: 0,
-                group: NORMAL_PHYSICS_GROUP
+                category: PHYSICS_CATEGORY_TILE,
+                mask: PHYSICS_CATEGORY_SPRITE,
+                group: 0
             }
         };
-        for (let y = 0; y < this.tileMap.dim.h; y++) {
-            for (let x = 0; x < this.tileMap.dim.w; x++) {
+        for (let x = 0; x < this.tileMap.dim.w; x++) {
+            const createBody = (yBegin: number, yEnd: number) => {
+                const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (yBegin + yEnd) * 0.5 * CHAR_WIDTH, CHAR_WIDTH, (yEnd - yBegin) * CHAR_WIDTH, options);
+                Matter.Composite.add(this.matterEngine.world, physBody);
+            };
+            let startY: number | null = null;
+            for (let y = 0; y < this.tileMap.dim.h; y++) {
                 const tile = this.tileMap.getTile({x: x, y: y})!;
                 if (game.solidTiles.includes(tile.codePoint)) {
-                    const physBody = Matter.Bodies.rectangle((x + 0.5) * CHAR_WIDTH, (y + 0.5) * CHAR_WIDTH, CHAR_WIDTH, CHAR_WIDTH, options);
-                    Matter.Composite.add(this.matterEngine.world, physBody);
+                    if (startY === null) {
+                        startY = y;
+                    }
+                }else{
+                    if (startY !== null) {
+                        createBody(startY, y);
+                        startY = null;
+                    }
                 }
+            }
+            if (startY !== null) {
+                createBody(startY, this.tileMap.dim.h)
             }
         }
         // Create entity drag constraint
@@ -174,8 +241,16 @@ export class Engine {
             this.entities.push(newEntity);
             return newEntity;
         });
-        this.lua.global.set('endGame', (string: string) => {
-            this.endScreenString = string;
+        this.lua.global.set('createTimer', (duration: number) => {
+            let newTimer = new Timer(duration);
+            this.timers.push(newTimer)
+            return newTimer;
+        });
+        this.lua.global.set('destroyTimer', (timer: Timer) => {
+            this.timers = this.timers.filter(s => s !== timer);
+        });
+        this.lua.global.set('endGame', (...args: string[]) => {
+            this.endScreenData = args;
         });
         this.lua.global.set('getMarkers', (markerId: string) => {
             const id = markerId.codePointAt(0);
@@ -206,39 +281,33 @@ export class Engine {
         if (!this.ranScript) {
             this.ranScript = true;
             // Load Script
-            try {
-                this.lua.doStringSync(this.game.script);
-            } catch(error: any) {
-                let p = document.createElement("p");
-                p.innerText = `${error}`;
-                this.gameErrors.appendChild(p);
-            }
+            this.luaExecutor(() => this.lua.doStringSync(this.game.script));
             // Get Lua References
             this.luaFrame = this.lua.global.get('frame');
             this.luaTap = this.lua.global.get('tap');
             this.luaDrag = this.lua.global.get('drag');
         }
         // Show end screen
-        if (this.endScreenString !== undefined) {
+        if (this.endScreenData !== undefined) {
             // Rendering
             // Fill Background
             this.renderer.beginFrame();
             this.renderer.viewOffset = {x: 0, y: 0};
             // Draw Tilemap
-            const codePoints = Util.stringToCodePoints(this.endScreenString);
-            this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2, 0.5, 0.5, 0, true, false);
+            for(let i = 0; i < this.endScreenData.length; i++) {
+                const codePoints = Util.stringToCodePoints(this.endScreenData[i]);
+                this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2 + (i - (this.endScreenData.length - 1) / 2.0) * CHAR_WIDTH, 0.5, 0.5, 0, true, false);
+            }
             this.renderer.endFrame();
             return;
         }
         // Physics
         for (let entity of this.entities) {
             entity.physics.prePhysicsUpdate(this.matterEngine)
-            entity.input.prePhysicsUpdate(this.matterEngine)
         }
         Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
         for (let entity of this.entities) {
             entity.physics.postPhysicsUpdate(this.matterEngine)
-            entity.input.postPhysicsUpdate(this.matterEngine)
         }
         // Pointer events
         while(this.pointerEventQueue.length > 0) {
@@ -247,25 +316,15 @@ export class Engine {
             switch(queued.type) {
                 case "down":
                     this.downPointers.set(queued.event.pointerId, pos);
-                    if (this.luaDrag)
-                    {
-                        this.luaDrag(pos);
-                    }
-                    if (this.luaTap)
-                    {
-                        this.luaTap();
-                    }
+                    this.luaExecutor(this.luaDrag, pos);
+                    this.luaExecutor(this.luaTap);
                     this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
                     break;
                 case "move":
-                    
                     if (this.downPointers.has(queued.event.pointerId))
                     {
                         this.downPointers.set(queued.event.pointerId, pos);
-                        if (this.luaDrag)
-                        {
-                            this.luaDrag(pos);
-                        }
+                        this.luaExecutor(this.luaDrag, pos);
                     }
                     this.physicsInput.onPointerMove(queued.event.pointerId, pos);
                     break;
@@ -279,24 +338,48 @@ export class Engine {
             let queued = this.keyboardEventQueue.shift()!;
             switch(queued.type) {
                 case "down":
-                    this.downKeys.add(queued.event.code);
+                    this.downKeys.add(queued.event.code.toLowerCase());
                     break;
                 case "up":
-                    this.downKeys.delete(queued.event.code);
+                    this.downKeys.delete(queued.event.code.toLowerCase());
                     break;
             }
         }
-        this.physicsInput.onUpdate(this.matterEngine, this.downPointers, this.entities, this.downKeys);
-        // Frame
-        if (this.luaFrame)
-        {
-            this.luaFrame();
-        }
+        // Update input components
         for (let entity of this.entities) {
-            if (entity.frame instanceof Function) {
-                entity.frame(entity);
+            if (!entity.input.enabled) {
+                entity.input.down = false;
+                continue;
+            }
+            let newDown = false;
+            for (let pointer of this.downPointers) {
+                if (entity.input.isPointInside(this.camera, pointer[1])) {
+                    newDown = true;
+                }
+            }
+            if (typeof entity.input.key === "string" && this.downKeys.has(entity.input.key.toLowerCase())) {
+                newDown = true;
+            }
+            let oldDown = entity.input.down;
+            entity.input.down = newDown;
+            if (newDown) {
+                if (!oldDown) {
+                    this.luaExecutor(entity.input.press, entity);
+                }
+            }
+            else if (oldDown) {
+                this.luaExecutor(entity.input.release, entity);
             }
         }
+        // Frame
+        this.luaExecutor(this.luaFrame);
+        for (let entity of this.entities) {
+            this.luaExecutor(entity.frame, entity);
+        }
+        for (let timer of this.timers) {
+            timer.update(FRAME_TIME, this.luaExecutor);
+        }
+        this.timers = this.timers.filter(t => !t.finished);
         // Rendering
         // Fill Background
         this.renderer.beginFrame();

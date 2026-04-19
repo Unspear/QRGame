@@ -1,7 +1,15 @@
 import { Game } from "../game";
 import { stringToCodePoints } from "../util";
 
-let script = `local left = createScreenEntity(" <- ", 8, 32, 234)
+let script = `local healthVal = 3;
+local timer = createScreenEntity("", 4, 192-6, 6)
+timer.sprite.pivot = {x=1,y=-1}
+local seconds = 0
+timer.frame = function()
+  seconds = seconds + FRAME_TIME
+  timer.sprite.char = tostring(math.floor(seconds*10.0))
+end
+local left = createScreenEntity(" <- ", 8, 32, 234)
 left.input.enabled = true
 left.input.dim = {x = 64, y = 48}
 left.input.key = "arrowleft"
@@ -11,13 +19,12 @@ right.input.dim = {x = 64, y = 48}
 right.input.key = "arrowright"
 local player = createEntity('🐿', 0, 128, 176)
 player.physics.enabled = true
-player.physics.simulate = true
 player.physics.dim = {x=10, y=12}
 player.frame = function()
   if player.physics.vel.y > -0.5 then
-    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 3
-  else
     player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 6
+  else
+    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 12
   end
   camera.x = player.pos.x - 96
   camera.y = player.pos.y - 128
@@ -28,14 +35,14 @@ player.frame = function()
   if left.input.down then
     vel = vel - 1
   end
-  player.physics.vel.x = vel
+  player.physics.vel.x = vel * 2
   if vel ~= 0 then
     player.sprite.fliph = vel > 0
   end
   if player.pos.y > 352 then
     endGame("💀Game Over💀")
-  elseif player.pos.x > 2208 then
-    endGame("🎇You Win🎇")
+  elseif player.pos.x > 1472 and player.physics.onFloor then
+    endGame("🎇You Win🎇", "Time: "..math.floor(seconds*10.0), "Health: "..string.rep("🖤", healthVal))
   end
 end
 
@@ -45,22 +52,53 @@ jump.input.dim = {x = 64, y = 48}
 jump.input.key = "arrowup"
 jump.input.press = function()
   if player.physics.onFloor then
-    player.physics.vel.y = -3.2
+    player.physics.vel.y = -4.5
+    audio.square("C4", 0.25).driveDetune(audio.step(0, 0.1), audio.linear(600, 0.25)).output()
   end
 end
-local timer = createScreenEntity("", 4, 192-6, 6)
-timer.sprite.pivot = {x=1,y=-1}
-local seconds = 0
-timer.frame = function()
-  seconds = seconds + FRAME_TIME
-  timer.sprite.char = tostring(math.floor(seconds*10.0))
-end
 local health = createScreenEntity("🖤🖤🖤", 2, 6, 6)
-health.sprite.pivot = {x=-1,y=-1}`
-let tiles: string = '{"tileMap":{"dim":{"w":2,"h":8},"count":12,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,35,35,61,61,61,61,61,61],"color":[14,14,14,14,14,14,14,14,10,10,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,35,35,61,61,61,61,61,61,61,61,61,61],"color":[14,14,14,14,10,10,11,11,11,11,11,11,11,11,11,11]},{"codePoint":[35,35,61,61,61,61,61,61,61,61,61,61,61,61,61,61],"color":[10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11]},{"codePoint":[32,32,35,35,32,32,32,32,35,35,61,61,61,61,61,61],"color":[14,14,9,9,14,14,14,14,10,10,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,9,9,14,14,14,14]},{"codePoint":[72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,128638,128638,61,61,61,61,61,61],"color":[14,14,14,14,14,14,14,14,8,8,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]}]},"patchMap":{"dim":{"w":72,"h":2},"tileData":{"patchId":[6,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,1,1,1,4,3,3,3,3,4,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,7,1,6],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}}'
+health.sprite.pivot = {x=-1,y=-1}
+local healthTimer = nil
+function damage() 
+  if healthTimer == nil or healthTimer.finished then
+    healthVal = healthVal - 1
+    health.sprite.char = string.rep("🖤", healthVal)
+    healthTimer = createTimer(1)
+    healthTimer.frame = function()
+      player.sprite.color = 2 - player.sprite.color
+    end
+    healthTimer.finish = function()
+      player.sprite.color = 0
+      if healthVal == 0 then
+        endGame("💀Game Over💀")
+      end
+    end
+  end
+end
+
+for i, v in ipairs(getMarkers('g')) do
+  local goose = createEntity('🪿', 0, v.x, v.y)
+  goose.physics.enabled = true
+  goose.physics.friction = 1.0
+  goose.physics.ghost = true
+  goose.physics.dim.x = 10
+  goose.frame = function(self)
+    self.physics.vel.y = self.physics.vel.y + FRAME_TIME * 3
+    for i, v in ipairs(goose.physics.overlapping) do
+      if v == player then
+        damage()
+      end
+    end
+    if math.random() < 0.1 and self.physics.onFloor then
+      self.physics.vel.y = -2
+    end
+  end
+end`
+let tiles: string = '{"tileMap":{"dim":{"w":2,"h":8},"count":12,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,35,35,61,61,61,61,61,61],"color":[14,14,14,14,14,14,14,14,10,10,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,35,35,61,61,61,61,61,61,61,61,61,61],"color":[14,14,14,14,10,10,11,11,11,11,11,11,11,11,11,11]},{"codePoint":[35,35,61,61,61,61,61,61,61,61,61,61,61,61,61,61],"color":[10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11]},{"codePoint":[32,32,35,35,32,32,32,32,35,35,61,61,61,61,61,61],"color":[14,14,9,9,14,14,14,14,10,10,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,35,35,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,9,9,14,14,14,14]},{"codePoint":[72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72],"color":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"codePoint":[32,32,32,32,32,32,32,32,128638,128638,61,61,61,61,61,61],"color":[14,14,14,14,14,14,14,14,8,8,11,11,11,11,11,11]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"color":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]}]},"patchMap":{"dim":{"w":48,"h":2},"tileData":{"patchId":[6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,0,5,5,0,0,5,5,5,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,1,1,1,1,1,1,1,1,0,1,1,0,1,1,2,1,4,4,3,3,3,2,1,1,1,2,2,1,1,1,1,3,3,3,1,1,1,1,1,1,1,1,1,1,1,7,6],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},"markers":[{"x":29,"y":11,"codePoint":103},{"x":40,"y":7,"codePoint":103},{"x":58,"y":4,"codePoint":103},{"x":75,"y":11,"codePoint":103},{"x":81,"y":11,"codePoint":103},{"x":87,"y":11,"codePoint":103},{"x":86,"y":11,"codePoint":103}]}'
 export default function (): Game {
     let parsed = JSON.parse(tiles);
     let game = new Game({ title: "Platformer", description: "A platformer" }, script, parsed.tileMap, parsed.patchMap);
+    game.markers = parsed.markers;
     game.solidTiles = stringToCodePoints('#=H🙾');
     return game;
 }

@@ -3,14 +3,14 @@ import { Game } from "../game";
 let script = `-- Paddles
 local top = createEntity('----', 8, 96, 32)
 top.physics.enabled = true
+top.physics.static = true
 top.physics.dim.x = 32
 local bottom = copyEntity(top)
 bottom.pos.y = 256 - 32
 -- Ball
 local ball = createEntity('⬤', 4, 96, 128)
 ball.physics.enabled = true
-ball.physics.simulate = true
-ball.physics.bounce = true
+ball.physics.bounce = 1.0
 ball.physics.dim.x = 16
 -- Control Paddles
 function drag(pos)

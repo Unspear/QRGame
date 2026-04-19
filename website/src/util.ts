@@ -29,3 +29,10 @@ export function clamp(number: number, min: number, max: number): number {
 export function stringToCodePoints(string: string): number[] {
     return [...string].map(c => c.codePointAt(0) ?? 0);
 }
+
+export function removeByValue<Type>(arr: Type[], value: Type) {
+    const index = arr.indexOf(value);
+    if (index != -1) {
+        arr.splice(index, 1);
+    }
+}
