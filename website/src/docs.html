@@ -1,0 +1,139 @@
+<details>
+    <summary>Game</summary>
+    <div class="indented">
+        <p>A game has 3 components:</p>
+        <ul>
+            <li>Info - The game's metadata, currently only title and description.</li>
+            <li>Level - Defines the layout of the level, there is one level per game.</li>
+            <li>Code - Defines the game's logic and mechanics.</li>
+        </ul>
+    </div>
+</details>
+<details>
+    <summary>Info</summary>
+    <div class="indented">
+        <p>Metadata associated with a game:</p>
+        <ul>
+            <li>Title</li>
+            <li>Description</li>
+        </ul>
+    </div>
+</details>
+<details>
+    <summary>Graphics - Color</summary>
+    <div class="indented">
+        <p>There are 8 base color IDs: </p>
+        <ul>
+            <li><b>0</b> - White</li>
+            <li><b>1</b> - Grey</li>
+            <li><b>2</b> - Red</li>
+            <li><b>3</b> - Orange</li>
+            <li><b>4</b> - Yellow</li>
+            <li><b>5</b> - Green</li>
+            <li><b>6</b> - Blue</li>
+            <li><b>7</b> - Purple</li>
+        </ul>
+        <p>The next 8 IDs (8 to 15) are the same colors but with the foreground and background swapped</p>
+    </div>
+</details>
+<details>
+<summary>Graphics - Characters</summary>
+    <div class="indented">
+        <p>All graphics in this game engine are composed from Unicode text characters, custom sprites are not supported.</p>
+        <p>The game engine supports around 3300 different characters, focusing on Emoji, abstract symbols and the Latin script.</p>
+        <p>Multi-character Emoji are <b>not</b> supported, these include: national flags, combining diacritics, and Emoji which use gender, skin-tone or hair colour modifiers.</p>
+    </div>
+</details>
+<details>
+    <summary>Level - Basics</summary>
+</details>
+<details>
+    <summary>Level - Settings</summary>
+</details>
+<details>
+    <summary>Level - Tilemap</summary>
+</details>
+<details>
+    <summary>Level - Layout</summary>
+</details>
+<details>
+    <summary>Level - Markers</summary>
+</details>
+<details>
+    <summary>Level - Collision</summary>
+</details>
+<details>
+    <summary>Code - Basics</summary>
+</details>
+<details>
+    <summary>Code - Constants</summary>
+    <div class="indented">
+        <p class="function">FRAME_TIME</p>
+        <div class="indented">
+            <p>Frame time is a constant which is the number of seconds between each frame/update.</p>
+            <p>The game engine runs at a fixed frame rate of 60, so <b>FRAME_TIME</b> is always 1/60 = 0.0166…</p>
+        </div>
+    </div>
+</details>
+<details>
+    <summary>Code - Entities</summary>
+    <div class="indented">
+        <p class="function">createEntity(char, color, x, y)</p>
+        <div class="indented">
+            <p>Creates a new entity and adds it to the world</p>
+            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
+            <ul>
+                <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
+                <li><b>color</b> - The color ID of the entity's sprite</li>
+                <li><b>x</b></li> - The x position of the entity
+                <li><b>y</b></li> - The y position of the entity
+            </ul>
+        </div>
+        <p class="function">destroyEntity(target)</p>
+        <div class="indented">
+            <p>Destroys an entity, removing it from the world. Afterward, the entity object will still exist in memory and its parameters can be accessed or it could be used as a source for copyEntity(...)</p>
+            <ul>
+                <li><b>target</b> - The entity that will be destroyed</li>
+            </ul>
+        </div>
+        <p class="function">copyEntity(source)</p>
+        <div class="indented">
+            <p>Creates a new entity with the same parameters as source</p>
+            <ul>
+                <li><b>source</b> - The entity that will be copied</li>
+            </ul>
+        </div>
+    </div>
+</details>
+<details>
+    <summary>Code - Sprite</summary>
+</details>
+<details>
+    <summary>Code - Physics</summary>
+</details>
+<details>
+    <summary>Code - Input</summary>
+</details>
+<details>
+    <summary>Code - Markers</summary>
+</details>
+<details>
+    <summary>Code - Timers</summary>
+</details>
+<details>
+    <summary>Code - Ending</summary>
+    <div class="indented">
+        <p class="function">endGame(char, color, x, y)</p>
+        <div class="indented">
+            <p>Creates a new entity and adds it to the world</p>
+            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
+            <ul>
+                <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
+                <li><b>color</b> - The color ID of the entity's sprite</li>
+                <li><b>x</b></li> - The x position of the entity
+                <li><b>y</b></li> - The y position of the entity
+            </ul>
+        </div>
+    </div>
+</details>
+
