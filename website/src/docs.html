@@ -70,7 +70,7 @@
     <div class="indented">
         <p class="function">FRAME_TIME</p>
         <div class="indented">
-            <p>Frame time is a constant which is the number of seconds between each frame/update.</p>
+            <p>Frame time is a numeric constant which is the number of seconds between each frame/update.</p>
             <p>The game engine runs at a fixed frame rate of 60, so <b>FRAME_TIME</b> is always 1/60 = 0.0166…</p>
         </div>
     </div>
@@ -78,10 +78,10 @@
 <details>
     <summary>Code - Entities</summary>
     <div class="indented">
-        <p class="function">createEntity(char, color, x, y)</p>
+        <p class="function">createEntity(char, color, x, y) → Entity</p>
         <div class="indented">
             <p>Creates a new entity and adds it to the world</p>
-            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
+            <p>Use <b>createScreenEntity(...) → Entity</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
             <ul>
                 <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
                 <li><b>color</b> - The color ID of the entity's sprite</li>
@@ -89,14 +89,14 @@
                 <li><b>y</b></li> - The y position of the entity
             </ul>
         </div>
-        <p class="function">destroyEntity(target)</p>
+        <p class="function">destroyEntity(target) → Entity</p>
         <div class="indented">
             <p>Destroys an entity, removing it from the world. Afterward, the entity object will still exist in memory and its parameters can be accessed or it could be used as a source for copyEntity(...)</p>
             <ul>
                 <li><b>target</b> - The entity that will be destroyed</li>
             </ul>
         </div>
-        <p class="function">copyEntity(source)</p>
+        <p class="function">copyEntity(source) → Entity</p>
         <div class="indented">
             <p>Creates a new entity with the same parameters as source</p>
             <ul>
@@ -116,22 +116,50 @@
 </details>
 <details>
     <summary>Code - Markers</summary>
+    <div class="indented">
+        <p class="function">getMarkers(markerId) → Array of {x, y}</p>
+        <div class="indented">
+            <p>Returns an array of all the markers that match the specified markerId</p>
+            <ul>
+                <li><b>markerId</b> - A string containing a single character which is the marker ID</li>
+            </ul>
+        </div>
+    </div>
 </details>
 <details>
     <summary>Code - Timers</summary>
+    <div class="indented">
+        <p class="function">createTimer(duration) → Timer</p>
+        <div class="indented">
+            <p>Creates a timer object with the specified duration</p>
+            <ul>
+                <li><b>duration</b> - The duration of the timer in seconds</li>
+            </ul>
+        </div>
+        <p class="function">destroyTimer(timer)</p>
+        <div class="indented">
+            <p>Destroys the timer, it will no longer be updated and its finish function will not fire if it has not already</p>
+            <ul>
+                <li><b>timer</b> - The timer to be destroyed</li>
+            </ul>
+        </div>
+    </div>
+</details>
+<details>
+    <summary>Code - Audio</summary>
+</details>
+<details>
+    <summary>Code - Camera</summary>
 </details>
 <details>
     <summary>Code - Ending</summary>
     <div class="indented">
-        <p class="function">endGame(char, color, x, y)</p>
+        <p class="function">endGame(...strings)</p>
         <div class="indented">
-            <p>Creates a new entity and adds it to the world</p>
-            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
+            <p>Ends the game and shows the entered strings on screen</p>
+            <p>For example: <b>endGame("You","Have","Won!")</b> would show "You" on the first line, "Have" on the second line, and "Won!" on the third line.</p>
             <ul>
-                <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
-                <li><b>color</b> - The color ID of the entity's sprite</li>
-                <li><b>x</b></li> - The x position of the entity
-                <li><b>y</b></li> - The y position of the entity
+                <li><b>...args</b> - The strings which will be shown</li>
             </ul>
         </div>
     </div>
