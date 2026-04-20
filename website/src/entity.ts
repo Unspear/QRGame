@@ -58,7 +58,7 @@ export class BoxComponent extends EntityComponent {
 
 export class SpriteComponent extends EntityComponent {
     char: string;
-    color: number;
+    colour: number;
     wrap: number;
     compact: boolean;
     fliph: boolean;
@@ -66,7 +66,7 @@ export class SpriteComponent extends EntityComponent {
     constructor(parent: Entity, enabled: boolean) {
         super(parent, enabled)
         this.char = "";
-        this.color = 0;
+        this.colour = 0;
         this.wrap = 0;
         this.compact = true;
         this.fliph = false;
@@ -81,7 +81,7 @@ export class SpriteComponent extends EntityComponent {
     copyFrom(sprite: SpriteComponent) {
         super.copyFrom(sprite);
         this.char = sprite.char;
-        this.color = sprite.color;
+        this.colour = sprite.colour;
         this.wrap = sprite.wrap;
         this.compact = sprite.compact;
         this.fliph = sprite.fliph;
@@ -90,7 +90,7 @@ export class SpriteComponent extends EntityComponent {
     draw(renderer: Renderer) {
         const codePoints = stringToCodePoints(this.char);
         const globalPos = this.gpos;
-        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.color), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact, this.parent.screen, this.fliph, this.flipv);
+        renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(this.colour), globalPos.x, globalPos.y, this.pivot.x*0.5+0.5, this.pivot.y*0.5+0.5, this.wrap, this.compact, this.parent.screen, this.fliph, this.flipv);
     }
 }
 

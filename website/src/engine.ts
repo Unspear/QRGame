@@ -219,17 +219,17 @@ export class Engine {
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('DELTA_TIME', DELTA_TIME);
-        this.lua.global.set('createEntity', (char: string, color: number, x: number, y: number) => {
+        this.lua.global.set('createEntity', (char: string, colour: number, x: number, y: number) => {
             let newEntity = new Entity({ x: x, y: y}, false);
             newEntity.sprite.char = char;
-            newEntity.sprite.color = color;
+            newEntity.sprite.colour = colour;
             this.entities.push(newEntity);
             return newEntity;
         });
-        this.lua.global.set('createScreenEntity', (char: string, color: number, x: number, y: number) => {
+        this.lua.global.set('createScreenEntity', (char: string, colour: number, x: number, y: number) => {
             let newEntity = new Entity({ x: x, y: y}, true);
             newEntity.sprite.char = char;
-            newEntity.sprite.color = color;
+            newEntity.sprite.colour = colour;
             this.entities.push(newEntity);
             return newEntity;
         });

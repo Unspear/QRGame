@@ -20,11 +20,11 @@
     </div>
 </details>
 <details>
-    <summary>Graphics - Color</summary>
+    <summary>Graphics - Colour</summary>
     <div class="indented">
         <p>All sprites and tiles can have either a coloured foreground or a coloured background</p>
         <p>When setting a sprites colour in coce, the IDs 0 to 7 cause a coloured foreground and 8 to 15 cause a coloured background</p>
-        <p>Color IDs (foreground/background): </p>
+        <p>Colour IDs (foreground/background): </p>
         <ul>
             <li><b>0/8</b> - White</li>
             <li><b>1/9</b> - Grey</li>
@@ -88,8 +88,8 @@
             In comparison to conventional tile-maps, this system allows for larger levels to be made more quickly and with lower storage requirements.
         </p>
         <p>
-            To edit a patch, set the "Brush" field to the character(s) you want to draw with, set the color on the drop down, and toggle between foreground or background colouring.
-            If you want to draw a solid colour: leave the "Brush" field empty, set the desired color, and set it to background.
+            To edit a patch, set the "Brush" field to the character(s) you want to draw with, set the colour on the drop down, and toggle between foreground or background colouring.
+            If you want to draw a solid colour: leave the "Brush" field empty, set the desired colour, and set it to background.
         </p>
         <p>
             To set the brush settings to match an existing tile, tap the ⛏ icon (pick tile) an then tap the tile you want to copy.
@@ -153,13 +153,13 @@
                 <li><b>input</b> - The input component, see the <b>Code - Input</b> tab for more</li>
             </ul>
         </div>
-        <p class="function">createEntity(char, color, x, y) → Entity</p>
+        <p class="function">createEntity(char, colour, x, y) → Entity</p>
         <div class="indented">
             <p>Creates a new entity and adds it to the world</p>
             <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen (ideal for HUD graphics)</p>
             <ul>
                 <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
-                <li><b>color</b> - The color ID of the entity's sprite</li>
+                <li><b>colour</b> - The colour ID of the entity's sprite</li>
                 <li><b>x</b> - The x position of the entity</li>
                 <li><b>y</b> - The y position of the entity</li>
             </ul>
@@ -205,7 +205,7 @@
         <p>Has all the properties seen in <b>Code - Component</b></p>
         <ul>
             <li><b>char</b> - </li>
-            <li><b>color</b> - </li>
+            <li><b>colour</b> - </li>
             <li><b>wrap</b> - I</li>
             <li><b>compact</b> - If true, half width characters are rendered compactly</li>
             <li><b>fliph</b> - If true, the sprite is flipped horizontally</li>

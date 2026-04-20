@@ -39,7 +39,7 @@ export class Editor {
     applySettingsButton: HTMLButtonElement;
     // Draw Tilemap
     charInput: HTMLInputElement;
-    colorInput: HTMLInputElement;
+    colourInput: HTMLInputElement;
     invertedInput: HTMLInputElement;
     invertedLabel: HTMLSpanElement;
     pipetteButton: HTMLButtonElement;
@@ -90,7 +90,7 @@ export class Editor {
         this.applySettingsButton = document.getElementById('tilemap-settings-apply') as HTMLButtonElement;
         //Drawing
         this.charInput = document.getElementById('editor-char-input') as HTMLInputElement;
-        this.colorInput = document.getElementById('editor-color-input') as HTMLInputElement;
+        this.colourInput = document.getElementById('editor-colour-input') as HTMLInputElement;
         this.invertedInput = document.getElementById('editor-invert-input') as HTMLInputElement;
         this.invertedLabel = document.getElementById('editor-invert-label') as HTMLSpanElement;
         this.pipetteButton = document.getElementById('editor-pipette-button') as HTMLButtonElement;
@@ -263,10 +263,10 @@ export class Editor {
     setTileFromEvent(event: PointerEvent) {
         // Get array of codepoints
         let codePoints = Util.stringToCodePoints(this.charInput.value);
-        let color = parseInt(this.colorInput.value);
+        let colour = parseInt(this.colourInput.value);
         const inverted = this.invertedInput.checked;
         if (inverted) {
-            color += 8;
+            colour += 8;
         }
         if (codePoints.length == 0) {
             // Erase
@@ -275,7 +275,7 @@ export class Editor {
         // Draw array to tilemap
         let pair = this.tileMap.getSplitCoords(this.getCoordFromEvent(event));
         for (const codePoint of codePoints) {
-            this.tileMap.setTile({ codePoint: codePoint, color: color }, pair.coords, pair.patchIndex);
+            this.tileMap.setTile({ codePoint: codePoint, colour: colour }, pair.coords, pair.patchIndex);
             pair.coords.x++;
         }
     }
@@ -300,8 +300,8 @@ export class Editor {
         let tileData = this.tileMap.getTile(pair.coords, pair.patchIndex);
         if (tileData !== null) {
             this.charInput.value = String.fromCodePoint(tileData.codePoint);
-            this.colorInput.value = (tileData.color % 8).toString();
-            this.invertedInput.checked = tileData.color > 8;
+            this.colourInput.value = (tileData.colour % 8).toString();
+            this.invertedInput.checked = tileData.colour > 8;
         }
     }
     #isPatchMapView(): boolean {

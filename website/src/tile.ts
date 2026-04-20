@@ -4,11 +4,11 @@ import { Renderer } from './render';
 
 type SingleTileData = {
     codePoint: number;
-    color: number;
+    colour: number;
 }
 type MultiTileData = {
     codePoint: number[],
-    color: number[]
+    colour: number[]
 }
 
 export class TileMap {
@@ -22,7 +22,7 @@ export class TileMap {
         for(let i = 0; i < count; i++){
             this.tileData.push({
                 codePoint: new Array(dim.w * dim.h).fill(' '.codePointAt(0)),
-                color: new Array(dim.w * dim.h,).fill(0)
+                colour: new Array(dim.w * dim.h,).fill(0)
             });
         };
     }
@@ -50,7 +50,7 @@ export class TileMap {
         if (patch == null) {
             return null;
         }
-        return {codePoint: patch.codePoint[index], color: patch.color[index]};
+        return {codePoint: patch.codePoint[index], colour: patch.colour[index]};
     }
     getSplitCoords(globalCoords: Point): {coords: Point, patchIndex: number} {
         return {
@@ -72,7 +72,7 @@ export class TileMap {
             return null;
         }
         patch.codePoint[index] = newTileData.codePoint;
-        patch.color[index] = newTileData.color;
+        patch.colour[index] = newTileData.colour;
     }
     draw(renderer: Renderer, isEditor: boolean = false) {
         for (let i = 0; i < this.count; i++) {
@@ -88,7 +88,7 @@ export class TileMap {
     }
     drawSingle(renderer: Renderer, index: number, point: Point) {
         let patch = this.tileData[index]!;
-        renderer.drawCharacters(patch.codePoint, patch.color, point.x, point.y, 0, 0, this.dim.w, false, false);
+        renderer.drawCharacters(patch.codePoint, patch.colour, point.x, point.y, 0, 0, this.dim.w, false, false);
     }
     getDrawDim(): Dimensions {
         return {

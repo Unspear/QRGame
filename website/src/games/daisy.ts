@@ -4,10 +4,10 @@ let script = `
 local sprites = {}
 
 local chars = "🚲🌹🌷⚘🚲🌹🌷⚘"
-local color = {1, 2, 7, 4, 1, 2, 7, 4}
+local colour = {1, 2, 7, 4, 1, 2, 7, 4}
 local i = 1
 for _, c in utf8.codes(chars) do
-  sprites[i] = createEntity(utf8.char(c), color[i], 0, 0)
+  sprites[i] = createEntity(utf8.char(c), colour[i], 0, 0)
   i = i + 1
 end
 

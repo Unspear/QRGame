@@ -2,17 +2,17 @@
 precision highp float;
 
 in vec2 fTexCoord;
-in vec4 fBackColor;
-in vec4 fFrontColor;
+in vec4 fBackColour;
+in vec4 fFrontColour;
 
-out vec4 outColor;
+out vec4 outColour;
 
 uniform mediump sampler2D uSampler;
 
 void main() {
   float value = texture(uSampler, fTexCoord).a;
-  outColor = (value > 0.5) ? fFrontColor : fBackColor;
-  if (outColor.a < 0.5) {
+  outColour = (value > 0.5) ? fFrontColour : fBackColour;
+  if (outColour.a < 0.5) {
     discard;
   }
 }

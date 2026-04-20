@@ -127,13 +127,13 @@ export function packGame(game: Game, compressor: DataTransform = PPMd.compress):
     packer.packUintVar(game.tileMap.dim.h);
     packer.packUintVar(game.tileMap.count);
     const codePoints = [];
-    const colors = [];
+    const colours = [];
     for(const data of game.tileMap.tileData) {
         codePoints.push(...data.codePoint);
-        colors.push(...data.color);
+        colours.push(...data.colour);
     }
     packer.packString(String.fromCodePoint(...codePoints));
-    packer.packUint8Array(Uint8Array.from(colors));
+    packer.packUint8Array(Uint8Array.from(colours));
     // Patch Map
     packer.packUintVar(game.patchMap.dim.w);
     packer.packUintVar(game.patchMap.dim.h);
@@ -163,12 +163,12 @@ export function unpackGame(data: Uint8Array, decompressor: DataTransform = PPMd.
     const tileMapDimH = unpacker.unpackUintVar();
     const tileMapCount = unpacker.unpackUintVar();
     const tileMapCodePoints = stringToCodePoints(unpacker.unpackString());
-    const tileMapColors = unpacker.unpackUint8Array();
+    const tileMapColours = unpacker.unpackUint8Array();
     const tileMap = new TileMap({w: tileMapDimW, h: tileMapDimH}, tileMapCount);
     const patchSize = tileMapDimW * tileMapDimH;
     for(let p = 0; p < tileMapCount; p++) {
         tileMap.tileData[p].codePoint = tileMapCodePoints.slice(patchSize * p, patchSize * (p + 1));
-        tileMap.tileData[p].color = [...tileMapColors.slice(patchSize * p, patchSize * (p + 1))];
+        tileMap.tileData[p].colour = [...tileMapColours.slice(patchSize * p, patchSize * (p + 1))];
     }
     // Patch Map
     const patchMapDimW = unpacker.unpackUintVar();

@@ -1,8 +1,8 @@
 #version 300 es
 in vec2 vPosition;
 in vec2 vTexCoord;
-in vec4 iBackColor;
-in vec4 iFrontColor;
+in vec4 iBackColour;
+in vec4 iFrontColour;
 in vec2 iOffset;
 in float iTexIndex;
 in float iFlags;
@@ -10,8 +10,8 @@ in float iFlags;
 uniform highp vec4 uView;
 
 out vec2 fTexCoord;
-out vec4 fBackColor;
-out vec4 fFrontColor;
+out vec4 fBackColour;
+out vec4 fFrontColour;
 
 const int atlasWidth = 64;
 
@@ -37,6 +37,6 @@ void main() {
   int texX = int(iTexIndex) % atlasWidth;
   int texY = int(iTexIndex) / atlasWidth;
   fTexCoord = (tex + vec2(float(texX), float(texY))) / float(atlasWidth);
-  fBackColor = iBackColor;
-  fFrontColor = iFrontColor;
+  fBackColour = iBackColour;
+  fFrontColour = iFrontColour;
 }

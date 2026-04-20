@@ -73,8 +73,8 @@ class SpritePipeline {
     #vPositionLoc: number;
     #vTexCoordLoc: number;
     #iOffsetLoc: number;
-    #iBackColorLoc: number;
-    #iFrontColorLoc: number;
+    #iBackColourLoc: number;
+    #iFrontColourLoc: number;
     #iTexIndexLoc: number;
     #iFlags: number;
     #uView: WebGLUniformLocation;
@@ -91,8 +91,8 @@ class SpritePipeline {
         this.#vPositionLoc = gl.getAttribLocation(this.#program, 'vPosition');
         this.#vTexCoordLoc = gl.getAttribLocation(this.#program, 'vTexCoord');
         this.#iOffsetLoc = gl.getAttribLocation(this.#program, 'iOffset');
-        this.#iBackColorLoc = gl.getAttribLocation(this.#program, 'iBackColor');
-        this.#iFrontColorLoc = gl.getAttribLocation(this.#program, 'iFrontColor');
+        this.#iBackColourLoc = gl.getAttribLocation(this.#program, 'iBackColour');
+        this.#iFrontColourLoc = gl.getAttribLocation(this.#program, 'iFrontColour');
         this.#iTexIndexLoc = gl.getAttribLocation(this.#program, 'iTexIndex');
         this.#iFlags = gl.getAttribLocation(this.#program, 'iFlags');
         this.#uView = gl.getUniformLocation(this.#program, 'uView')!;
@@ -126,8 +126,8 @@ class SpritePipeline {
         gl.enableVertexAttribArray(this.#vTexCoordLoc);
         gl.vertexAttribPointer(this.#vTexCoordLoc, 2, GL.FLOAT, false, 0, 0);
         // Sprite Buffer
-        //vec4 iBackColor; 16 bytes
-        //vec4 iFrontColor; 16 bytes
+        //vec4 iBackColour; 16 bytes
+        //vec4 iFrontColour; 16 bytes
         //vec2 iOffset; 8 bytes
         //float iTexIndex; 4 byte
         //float pad; 4 bytes
@@ -138,18 +138,18 @@ class SpritePipeline {
         this.#instanceData = new Float32Array(this.#instanceStride * 16384);
         gl.bufferData(GL.ARRAY_BUFFER, this.#instanceData, GL.DYNAMIC_DRAW);
         const BPE = Float32Array.BYTES_PER_ELEMENT;// Bytes per element
-        gl.enableVertexAttribArray(this.#iBackColorLoc);
-        gl.enableVertexAttribArray(this.#iFrontColorLoc);
+        gl.enableVertexAttribArray(this.#iBackColourLoc);
+        gl.enableVertexAttribArray(this.#iFrontColourLoc);
         gl.enableVertexAttribArray(this.#iOffsetLoc);
         gl.enableVertexAttribArray(this.#iTexIndexLoc);
         gl.enableVertexAttribArray(this.#iFlags);
-        gl.vertexAttribPointer(this.#iBackColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 0 * BPE);
-        gl.vertexAttribPointer(this.#iFrontColorLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 4 * BPE);
+        gl.vertexAttribPointer(this.#iBackColourLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#iFrontColourLoc, 4, GL.FLOAT, true, this.#instanceStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#iOffsetLoc, 2, GL.FLOAT, false, this.#instanceStride * BPE, 8 * BPE);
         gl.vertexAttribPointer(this.#iTexIndexLoc, 1, GL.FLOAT, false, this.#instanceStride * BPE, 10 * BPE);
         gl.vertexAttribPointer(this.#iFlags, 1, GL.FLOAT, false, this.#instanceStride * BPE, 11 * BPE);
-        gl.vertexAttribDivisor(this.#iBackColorLoc, 1);
-        gl.vertexAttribDivisor(this.#iFrontColorLoc, 1);
+        gl.vertexAttribDivisor(this.#iBackColourLoc, 1);
+        gl.vertexAttribDivisor(this.#iFrontColourLoc, 1);
         gl.vertexAttribDivisor(this.#iOffsetLoc, 1);
         gl.vertexAttribDivisor(this.#iTexIndexLoc, 1);
         gl.vertexAttribDivisor(this.#iFlags, 1);
@@ -160,10 +160,10 @@ class SpritePipeline {
             that.#texture = createTexture(gl, spriteSheet);
         });
     }
-    addData(x: number, y: number, color: number, codepoint: number, compact: boolean = false, fliph: boolean = false, flipv: boolean = false) {
+    addData(x: number, y: number, colour: number, codepoint: number, compact: boolean = false, fliph: boolean = false, flipv: boolean = false) {
         let start = this.#numInstances * this.#instanceStride;
-        let values = PALETTE_FRACTIONS[color % 8];
-        if (color >= 8) {
+        let values = PALETTE_FRACTIONS[colour % 8];
+        if (colour >= 8) {
             this.#instanceData.set([values[0], values[1], values[2], 1, 0, 0, 0, 0], start);
         }
         else {
@@ -219,7 +219,7 @@ type LinePattern = {
 
 class LinePipeline {
     #program: WebGLProgram;
-    #vColorLoc: number;
+    #vColourLoc: number;
     #vPositionLoc: number;
     #vOffsetLoc: number;
     #uViewLoc: WebGLUniformLocation;
@@ -233,7 +233,7 @@ class LinePipeline {
         this.#program = createProgram(gl, lineVertexSource, lineFragmentSource)!;
         // Shader Locations
         this.#vPositionLoc = gl.getAttribLocation(this.#program, 'vPosition');
-        this.#vColorLoc = gl.getAttribLocation(this.#program, 'vColor');
+        this.#vColourLoc = gl.getAttribLocation(this.#program, 'vColour');
         this.#vOffsetLoc = gl.getAttribLocation(this.#program, 'vOffset');
         this.#uViewLoc = gl.getUniformLocation(this.#program, 'uView')!;
         this.#uLinePatternLoc = gl.getUniformLocation(this.#program, 'uLinePattern')!;
@@ -247,10 +247,10 @@ class LinePipeline {
         this.#vertexData = new Float32Array(this.#vertexStride * 16384);
         gl.bufferData(GL.ARRAY_BUFFER, this.#vertexData, GL.DYNAMIC_DRAW);
         const BPE = Float32Array.BYTES_PER_ELEMENT;// Bytes per element
-        gl.enableVertexAttribArray(this.#vColorLoc);
+        gl.enableVertexAttribArray(this.#vColourLoc);
         gl.enableVertexAttribArray(this.#vPositionLoc);
         gl.enableVertexAttribArray(this.#vOffsetLoc);
-        gl.vertexAttribPointer(this.#vColorLoc, 4, GL.FLOAT, true, this.#vertexStride * BPE, 0 * BPE);
+        gl.vertexAttribPointer(this.#vColourLoc, 4, GL.FLOAT, true, this.#vertexStride * BPE, 0 * BPE);
         gl.vertexAttribPointer(this.#vPositionLoc, 2, GL.FLOAT, false, this.#vertexStride * BPE, 4 * BPE);
         gl.vertexAttribPointer(this.#vOffsetLoc, 1, GL.FLOAT, false, this.#vertexStride * BPE, 6 * BPE);
     }
@@ -337,8 +337,8 @@ export class Renderer {
         this.#linePipeline.draw(this.#gl, viewData, { offset: this.renderTime * 4.0, interval: 4, dashLength: 2});
         this.#gl.flush();
     }
-    drawCharacters(codePoints: number[], colors: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean, screen: boolean, fliph: boolean = false, flipv: boolean = false) {
-        console.assert(codePoints.length == colors.length)
+    drawCharacters(codePoints: number[], colours: number[], posX: number, posY: number, pivotX: number, pivotY: number, wrap: number, compact: boolean, screen: boolean, fliph: boolean = false, flipv: boolean = false) {
+        console.assert(codePoints.length == colours.length)
         // Find layout
         let offsets = []
         let offsetX = 0;
@@ -369,7 +369,7 @@ export class Renderer {
         for (let i = 0; i < codePoints.length; i++) {
             let offset = offsets[i];
             const pipeline = screen ? this.#screenSpritePipeline : this.#spritePipeline;
-            pipeline.addData(roundedX + offset.x, roundedY + offset.y, colors[i], codePoints[i], compact, fliph, flipv);
+            pipeline.addData(roundedX + offset.x, roundedY + offset.y, colours[i], codePoints[i], compact, fliph, flipv);
         }
     }
     drawBox(x0: number, y0: number, x1: number, y1: number, margin: number) {
