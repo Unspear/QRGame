@@ -1,9 +1,9 @@
 <details>
     <summary>Game</summary>
     <div class="indented">
-        <p>A game has 3 components:</p>
+        <p>A game has three components:</p>
         <ul>
-            <li>Info - The game's metadata, currently only title and description.</li>
+            <li>Info - The game's metadata (title and description).</li>
             <li>Level - Defines the layout of the level, there is one level per game.</li>
             <li>Code - Defines the game's logic and mechanics.</li>
         </ul>
@@ -14,26 +14,27 @@
     <div class="indented">
         <p>Metadata associated with a game:</p>
         <ul>
-            <li>Title</li>
-            <li>Description</li>
+            <li>Title - Displayed at the top of the player, make it descriptive but not too long.</li>
+            <li>Description - Displayed in the pause menu, can be longer than the title but still should not be too long.</li>
         </ul>
     </div>
 </details>
 <details>
     <summary>Graphics - Color</summary>
     <div class="indented">
-        <p>There are 8 base color IDs: </p>
+        <p>All sprites and tiles have either a coloured foreground or a coloured background</p>
+        <p>The IDs 0 to 7 cause a coloured foreground and 8 to 15 cause a coloured background</p>
+        <p>Color IDs (foreground/background): </p>
         <ul>
-            <li><b>0</b> - White</li>
-            <li><b>1</b> - Grey</li>
-            <li><b>2</b> - Red</li>
-            <li><b>3</b> - Orange</li>
-            <li><b>4</b> - Yellow</li>
-            <li><b>5</b> - Green</li>
-            <li><b>6</b> - Blue</li>
-            <li><b>7</b> - Purple</li>
+            <li><b>0/8</b> - White</li>
+            <li><b>1/9</b> - Grey</li>
+            <li><b>2/10</b> - Red</li>
+            <li><b>3/11</b> - Orange</li>
+            <li><b>4/12</b> - Yellow</li>
+            <li><b>5/13</b> - Green</li>
+            <li><b>6/14</b> - Blue</li>
+            <li><b>7/15</b> - Purple</li>
         </ul>
-        <p>The next 8 IDs (8 to 15) are the same colors but with the foreground and background swapped</p>
     </div>
 </details>
 <details>
@@ -46,12 +47,18 @@
 </details>
 <details>
     <summary>Level - Basics</summary>
+    <div class="indented">
+        <p>Levels have patches, a layout, markers, and collision.</p>
+        <p>Patches are groups of tiles, they are assembled in a layout to create the tilemap.</p>
+        <p>Markers are used on top of the patches and layout to define locations which can then be referenced in code, such as spawn locations for enemies or collectables.</p>
+        <p>Check the platformer demo to see an example of how these systems can be used.</p>
+    </div>
 </details>
 <details>
     <summary>Level - Settings</summary>
 </details>
 <details>
-    <summary>Level - Tilemap</summary>
+    <summary>Level - Patches</summary>
 </details>
 <details>
     <summary>Level - Layout</summary>
@@ -78,6 +85,17 @@
 <details>
     <summary>Code - Entities</summary>
     <div class="indented">
+        <p class="function">Entity</p>
+        <div class="indented">
+            <p>Entities are fundamental game object in the engine.</p>
+            <ul>
+                <li><b>pos</b> - The position of the Entity {x, y}</li>
+                <li><b>onUpdate</b> - An event that will be called every update</li>
+                <li><b>sprite</b> - The sprite component, see the <b>Code - Sprite</b> tab for more</li>
+                <li><b>physics</b> - The physics component, see the <b>Code - Physics</b> tab for more</li>
+                <li><b>input</b> - The input component, see the <b>Code - Input</b> tab for more</li>
+            </ul>
+        </div>
         <p class="function">createEntity(char, color, x, y) → Entity</p>
         <div class="indented">
             <p>Creates a new entity and adds it to the world</p>
@@ -85,8 +103,8 @@
             <ul>
                 <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
                 <li><b>color</b> - The color ID of the entity's sprite</li>
-                <li><b>x</b></li> - The x position of the entity
-                <li><b>y</b></li> - The y position of the entity
+                <li><b>x</b> - The x position of the entity</li>
+                <li><b>y</b> - The y position of the entity</li>
             </ul>
         </div>
         <p class="function">destroyEntity(target) → Entity</p>
@@ -106,7 +124,35 @@
     </div>
 </details>
 <details>
+    <summary>Code - Component</summary>
+    <div class="indented">
+        <p class="function">Component</p>
+            <div class="indented">
+            <p>Every entity has a sprite, physics, and input component.</p>
+            <ul>
+                <li><b>parent</b> - The entity that owns this component (mostly for internal use)</li>
+                <li><b>lpos</b> - The local position of this component, relative to the parent entity</li>
+                <li><b>pivot</b> - Default value of {x=0,y=0} means the centre of the component will be at parent.pos</li>
+                <li><b>enabled</b> - The sprite component is enabled by default, others must be enabled before being used</li>
+            </ul>
+        </div>
+    </div>
+</details>
+<details>
     <summary>Code - Sprite</summary>
+    <p class="function">Sprite Component</p>
+        <div class="indented">
+        <p>Controls if/how an entity appears.</p>
+        <p>Has all the properties seen in <b>Code - Component</b></p>
+        <ul>
+            <li><b>char</b> - </li>
+            <li><b>color</b> - </li>
+            <li><b>wrap</b> - I</li>
+            <li><b>compact</b> - If true, half width characters are rendered compactly</li>
+            <li><b>fliph</b> - If true, the sprite is flipped horizontally</li>
+            <li><b>fliph</b> - If true, the sprite is flipped vertically</li>
+        </ul>
+    </div>
 </details>
 <details>
     <summary>Code - Physics</summary>
