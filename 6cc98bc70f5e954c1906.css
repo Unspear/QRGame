@@ -144,5 +144,26 @@ h1, h2, h3, h4, h5, h6 {
 #game-errors {
     border: solid black 
 }
+details {
+    margin: 0.3rem 0;
+}
+details summary {
+    background-color: silver;
+    font-size: 110%;
+    padding: 0.2rem 1rem;
+}
+details ul {
+    margin-top: 3.2px;
+    margin-bottom: 8px;
+    padding-left: 20px;
+}
+.function {
+    font-weight: bold;
+}
+.indented {
+    margin: 0;
+    margin-left: 1em;
+    padding: 0;
+}
 
-/*# sourceMappingURL=be133e1e69041332f778.css.map*/
+/*# sourceMappingURL=6cc98bc70f5e954c1906.css.map*/
