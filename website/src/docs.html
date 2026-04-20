@@ -22,8 +22,8 @@
 <details>
     <summary>Graphics - Color</summary>
     <div class="indented">
-        <p>All sprites and tiles have either a coloured foreground or a coloured background</p>
-        <p>The IDs 0 to 7 cause a coloured foreground and 8 to 15 cause a coloured background</p>
+        <p>All sprites and tiles can have either a coloured foreground or a coloured background</p>
+        <p>When setting a sprites colour in coce, the IDs 0 to 7 cause a coloured foreground and 8 to 15 cause a coloured background</p>
         <p>Color IDs (foreground/background): </p>
         <ul>
             <li><b>0/8</b> - White</li>
@@ -40,37 +40,91 @@
 <details>
 <summary>Graphics - Characters</summary>
     <div class="indented">
-        <p>All graphics in this game engine are composed from Unicode text characters, custom sprites are not supported.</p>
-        <p>The game engine supports around 3300 different Unicode characters, focusing on Emoji, abstract symbols and the Latin script.</p>
-        <p>Multi-character Emoji are <b>not</b> supported, these include: national flags, combining diacritics, and Emoji which use gender, skin-tone or hair colour modifiers.</p>
+        <p>
+            All graphics in this game engine are made from Unicode characters, custom sprites are not supported.
+        </p>
+        <p>
+            The game engine supports around 3300 different Unicode characters, focusing on Emoji, abstract symbols and the Latin script.
+        </p>
+        <p>
+            Multi-character Emoji are <b>not</b> supported, these include: national flags, combining diacritics, and Emoji which use gender, skin-tone or hair colour modifiers.
+        </p>
     </div>
 </details>
 <details>
     <summary>Level - Basics</summary>
     <div class="indented">
-        <p>Levels have patches, a layout, markers, and collision.</p>
-        <p>Patches are groups of tiles, they are assembled in a layout to create the tilemap.</p>
-        <p>Markers are used on top of the patches and layout to define locations which can then be referenced in code, such as spawn locations for enemies or collectables.</p>
-        <p>Check the platformer demo to see an example of how these systems can be used.</p>
+        <p>
+            Levels have patches, a layout, markers, and collision.
+        </p>
+        <p>
+            Patches are groups of tiles, they are assembled in a layout to create the tilemap.
+        </p>
+        <p>
+            Markers are used on top of the layout to define locations which can be referenced in code, such as spawn locations for enemies or collectables.
+        </p>
+        <p>
+            See the platformer demo to see an example of how these systems can be used together.
+        </p>
     </div>
 </details>
 <details>
     <summary>Level - Settings</summary>
-        <div class="indented">
-        <p>The level settings .</p>
+    <div class="indented">
+        <p>
+            The level settings define the shape of patches, the number of patches, and the shape of the layout.
+        </p>
+        <p>
+            When "Apply" is pressed the level will be updated with whatever settings have been entered.
+            If the layout or patches is made smaller, or the patch count decreased, the extra data will be removed.
+        </p>
     </div>
 </details>
 <details>
     <summary>Level - Patches</summary>
+    <div class="indented">
+        <p>
+            Patches are groups of tiles of a predefined size, that can be arranged in a layout to make the level.
+            In comparison to conventional tile-maps, this system allows for larger levels to be made more quickly and with lower storage requirements.
+        </p>
+        <p>
+            To edit a patch, set the "Brush" field to the character(s) you want to draw with, set the color on the drop down, and toggle between foreground or background colouring.
+            If you want to draw a solid colour: leave the "Brush" field empty, set the desired color, and set it to background.
+        </p>
+        <p>
+            To set the brush settings to match an existing tile, tap the ⛏ icon (pick tile) an then tap the tile you want to copy.
+        </p>
+    </div>
 </details>
 <details>
     <summary>Level - Layout</summary>
+    <div class="indented">
+
+    </div>
 </details>
 <details>
     <summary>Level - Markers</summary>
+    <div class="indented">
+        <p>
+            Markers are used to specify locations in a level, independent of the level layout.
+            For example, in the platformer demo, a marker with ID "g" is used to specify the spawn locations of the geese enemies.
+        </p>
+        <p>
+            Markers don't do anything on there own, they must be accessed from code, see <b>Code - Markers</b>
+        </p>
+    </div>
 </details>
 <details>
     <summary>Level - Collision</summary>
+    <div class="indented">
+        <p>
+            The collision tab determines which characters in the level will have solid collision in the physics simulation.
+            Simply add all the characters that should have collision to the "Solid Characters" text input.
+        </p>
+        <p>
+            This does not affect whether entities have collision or not, for entity collision see <b>Code - Physics</b>
+        </p>
+    </div>
 </details>
 <details>
     <summary>Code - Basics</summary>
@@ -90,7 +144,7 @@
     <div class="indented">
         <p class="function">Entity</p>
         <div class="indented">
-            <p>Entities are fundamental game object in the engine.</p>
+            <p>Entities are the fundamental game object in the engine. Entities support graphics, physics, and input functionality.</p>
             <ul>
                 <li><b>pos</b> - The position of the Entity {x, y}</li>
                 <li><b>onUpdate</b> - An event that will be called every update</li>
@@ -102,7 +156,7 @@
         <p class="function">createEntity(char, color, x, y) → Entity</p>
         <div class="indented">
             <p>Creates a new entity and adds it to the world</p>
-            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen, which is perfect for UI elements</p>
+            <p>Use <b>createScreenEntity(...)</b> to create an entity that is attached to the screen (ideal for HUD graphics)</p>
             <ul>
                 <li><b>char</b> - The string of characters which will be the appearance of the entity's sprite</li>
                 <li><b>color</b> - The color ID of the entity's sprite</li>
@@ -132,9 +186,11 @@
         <p class="function">Component</p>
             <div class="indented">
             <p>Every entity has a sprite, physics, and input component.</p>
+            <p>Each component type has its own fields, but they all also support the following:</p>
             <ul>
                 <li><b>parent</b> - The entity that owns this component (mostly for internal use)</li>
                 <li><b>lpos</b> - The local position of this component, relative to the parent entity</li>
+                <li><b>gpos</b> - The global position of this component, read only</li>
                 <li><b>pivot</b> - Default value of {x=0,y=0} means the centre of the component will be at parent.pos</li>
                 <li><b>enabled</b> - The sprite component is enabled by default, others must be enabled before being used</li>
             </ul>
