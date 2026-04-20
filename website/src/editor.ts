@@ -194,10 +194,10 @@ export class Editor {
             this.patchMap = newPatchMap;
             this.patchCamera.setLevelDim(this.patchMap.getDrawDim(this.tileMap));
         };
-        this.leftButton.onclick = () => {this.getCurrentCamera().x -= 64;};
-        this.upButton.onclick = () => {this.getCurrentCamera().y -= 64;};
-        this.rightButton.onclick = () => {this.getCurrentCamera().x += 64;};
-        this.downButton.onclick = () => {this.getCurrentCamera().y += 64;};
+        this.leftButton.onclick = () => {this.getCurrentCamera().pos.x -= 64;};
+        this.upButton.onclick = () => {this.getCurrentCamera().pos.y -= 64;};
+        this.rightButton.onclick = () => {this.getCurrentCamera().pos.x += 64;};
+        this.downButton.onclick = () => {this.getCurrentCamera().pos.y += 64;};
         this.exportButton.onclick = () => {
             let serialised = JSON.stringify({tileMap: this.tileMap, patchMap: this.patchMap, markers: Array.from(this.markers.values())});
             navigator.clipboard.writeText(serialised);

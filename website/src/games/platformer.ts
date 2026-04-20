@@ -26,8 +26,8 @@ player.onUpdate = function()
   else
     player.physics.vel.y = player.physics.vel.y + DELTA_TIME * 12
   end
-  camera.x = player.pos.x - 96
-  camera.y = player.pos.y - 128
+  camera.pos.x = player.pos.x - 96
+  camera.pos.y = player.pos.y - 128
   local vel = 0
   if right.input.down then
     vel = vel + 1

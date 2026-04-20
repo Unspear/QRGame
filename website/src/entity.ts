@@ -44,8 +44,8 @@ export class BoxComponent extends EntityComponent {
     isPointInside(camera: Camera, screenPoint: Point): boolean {
         let point = {x: screenPoint.x, y: screenPoint.y };
         if (!this.parent.screen) {
-            point.x += camera.x;
-            point.y += camera.y;
+            point.x += camera.pos.x;
+            point.y += camera.pos.y;
         }
         const centre = this.gpos;
         const left = centre.x - this.dim.x * 0.5;
