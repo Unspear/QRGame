@@ -188,7 +188,7 @@ export class FilterSoundNode extends AudioNodeWrapper<BiquadFilterNode> {
         driveValue(this.node.context, this.node.detune, cents);
         return this;
     }
-    driveGian(...gain: SoundModInput[]): FilterSoundNode {
+    driveGain(...gain: SoundModInput[]): FilterSoundNode {
         driveValue(this.node.context, this.node.gain, gain);
         return this;
     }
