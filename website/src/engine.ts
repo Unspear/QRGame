@@ -244,7 +244,7 @@ export class Engine {
         this.lua.global.set('createTimer', (duration: number) => {
             let newTimer = new Timer(duration);
             this.timers.push(newTimer)
-            return newTimer;
+            return newTimer.wrapped();
         });
         this.lua.global.set('destroyTimer', (timer: Timer) => {
             this.timers = this.timers.filter(s => s !== timer);
