@@ -2,8 +2,8 @@ import { LuaExecutor } from "./engine";
 
 export class Timer {
     duration: number;
-    frame: Function | undefined;
-    finish: Function | undefined;
+    onUpdate: Function | undefined;
+    onFinish: Function | undefined;
     #time: number;
     constructor(duration: number) {
         this.duration = duration;
@@ -17,9 +17,9 @@ export class Timer {
             return;
         }
         this.#time += deltaTime;
-        luaExecutor(this.frame);
+        luaExecutor(this.onUpdate);
         if (this.#time > this.duration) {
-            luaExecutor(this.finish);
+            luaExecutor(this.onFinish);
         }
     }
 }

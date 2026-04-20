@@ -14,13 +14,13 @@ end
 createEntity("👫", 4, 96, 128)
 
 local seconds = 0
-function frame()
+function onUpdate()
   for i = 1, 8 do
     local r = 6.28 / 8 * i
     sprites[i].pos.x = math.sin(seconds+r) * 60 + 96
     sprites[i].pos.y = math.cos(seconds+r) * 60 + 128
   end
-  seconds = seconds + FRAME_TIME
+  seconds = seconds + DELTA_TIME
 end
 
 audio.speech([[

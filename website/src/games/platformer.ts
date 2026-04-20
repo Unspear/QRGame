@@ -5,8 +5,8 @@ let script = `local healthVal = 3;
 local timer = createScreenEntity("", 4, 192-6, 6)
 timer.sprite.pivot = {x=1,y=-1}
 local seconds = 0
-timer.frame = function()
-  seconds = seconds + FRAME_TIME
+timer.onUpdate = function()
+  seconds = seconds + DELTA_TIME
   timer.sprite.char = tostring(math.floor(seconds*10.0))
 end
 local left = createScreenEntity(" <- ", 8, 32, 234)
@@ -20,11 +20,11 @@ right.input.key = "arrowright"
 local player = createEntity('🐿', 0, 128, 176)
 player.physics.enabled = true
 player.physics.dim = {x=10, y=12}
-player.frame = function()
+player.onUpdate = function()
   if player.physics.vel.y > -0.5 then
-    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 6
+    player.physics.vel.y = player.physics.vel.y + DELTA_TIME * 6
   else
-    player.physics.vel.y = player.physics.vel.y + FRAME_TIME * 12
+    player.physics.vel.y = player.physics.vel.y + DELTA_TIME * 12
   end
   camera.x = player.pos.x - 96
   camera.y = player.pos.y - 128
@@ -40,9 +40,9 @@ player.frame = function()
     player.sprite.fliph = vel > 0
   end
   if player.pos.y > 352 then
-    endGame("💀Game Over💀")
+    stopGame("💀Game Over💀")
   elseif player.pos.x > 1472 and player.physics.onFloor then
-    endGame("🎇You Win🎇", "Time: "..math.floor(seconds*10.0), "Health: "..string.rep("🖤", healthVal))
+    stopGame("🎇You Win🎇", "Time: "..math.floor(seconds*10.0), "Health: "..string.rep("🖤", healthVal))
   end
 end
 
@@ -50,7 +50,7 @@ local jump = createScreenEntity("JUMP", 8, 160, 234)
 jump.input.enabled = true
 jump.input.dim = {x = 64, y = 48}
 jump.input.key = "arrowup"
-jump.input.press = function()
+jump.input.onPress = function()
   if player.physics.onFloor then
     player.physics.vel.y = -4.5
     audio.square("C4", 0.25).driveDetune(audio.step(0, 0.1), audio.linear(600, 0.25)).output()
@@ -64,13 +64,13 @@ function damage()
     healthVal = healthVal - 1
     health.sprite.char = string.rep("🖤", healthVal)
     healthTimer = createTimer(1)
-    healthTimer.frame = function()
+    healthTimer.onUpdate = function()
       player.sprite.color = 2 - player.sprite.color
     end
-    healthTimer.finish = function()
+    healthTimer.onFinish = function()
       player.sprite.color = 0
       if healthVal == 0 then
-        endGame("💀Game Over💀")
+        stopGame("💀Game Over💀")
       end
     end
   end
@@ -82,8 +82,8 @@ for i, v in ipairs(getMarkers('g')) do
   goose.physics.friction = 1.0
   goose.physics.ghost = true
   goose.physics.dim.x = 10
-  goose.frame = function(self)
-    self.physics.vel.y = self.physics.vel.y + FRAME_TIME * 3
+  goose.onUpdate = function(self)
+    self.physics.vel.y = self.physics.vel.y + DELTA_TIME * 3
     for i, v in ipairs(goose.physics.overlapping) do
       if v == player then
         damage()

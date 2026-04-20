@@ -13,7 +13,7 @@ ball.physics.enabled = true
 ball.physics.bounce = 1.0
 ball.physics.dim.x = 16
 -- Control Paddles
-function drag(pos)
+function onDrag(pos)
   local x = math.min(math.max(pos.x, 32), 192-32)
   if pos.y < 64 then
     top.pos.x = x
@@ -39,8 +39,8 @@ function newRound()
     ball.physics.vel.x = (math.random(0, 1)*2-1)*1.5
 end
 newRound()
--- Frame
-function frame()
+-- Update
+function onUpdate()
     if ball.pos.y < 0 then
         top.score = top.score + 1
         newRound()

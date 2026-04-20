@@ -1,6 +1,6 @@
 import { Game } from "../game";
 let script: string = `function frame()
-  camera.x = camera.x + FRAME_TIME * 30
+  camera.x = camera.x + DELTA_TIME * 30
   if camera.x > 16 * 16 then
     camera.x = camera.x - 16 * 16
   end

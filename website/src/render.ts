@@ -1,7 +1,7 @@
 import Chars from './chars.png';
 import CharsText from './chars.txt'
-import { CHAR_WIDTH, FRAME_TIME, PALETTE_FRACTIONS } from './constants';
-import { FRAME_TIME_MS } from './constants'
+import { CHAR_WIDTH, DELTA_TIME, PALETTE_FRACTIONS } from './constants';
+import { DELTA_TIME_MS } from './constants'
 
 
 type SpriteSheetEntry = {
@@ -312,14 +312,14 @@ export class Renderer {
         }
         if ((this.#gl.canvas as HTMLCanvasElement).checkVisibility() && !this.paused) {
             const elapsed = timestamp - this.#previousTimestamp;
-            if (elapsed >= FRAME_TIME_MS) {
+            if (elapsed >= DELTA_TIME_MS) {
                 this.#frameCallback!();
-                this.renderTime += FRAME_TIME;
-                if (elapsed > FRAME_TIME_MS * 5) {
+                this.renderTime += DELTA_TIME;
+                if (elapsed > DELTA_TIME_MS * 5) {
                     console.log("Elapsed time is large, skipping frames")
                     this.#previousTimestamp = timestamp;
                 } else {
-                    this.#previousTimestamp += FRAME_TIME_MS;
+                    this.#previousTimestamp += DELTA_TIME_MS;
                 }
             }
         } else {

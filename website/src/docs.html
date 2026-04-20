@@ -68,10 +68,10 @@
 <details>
     <summary>Code - Constants</summary>
     <div class="indented">
-        <p class="function">FRAME_TIME</p>
+        <p class="function">DELTA_TIME</p>
         <div class="indented">
-            <p>Frame time is a numeric constant which is the number of seconds between each frame/update.</p>
-            <p>The game engine runs at a fixed frame rate of 60, so <b>FRAME_TIME</b> is always 1/60 = 0.0166…</p>
+            <p>Delta time is a numeric constant which is the number of seconds between each call of <b>onUpdate</b>.</p>
+            <p>The game engine runs at a fixed frame rate of 60, so <b>DELTA_TIME</b> is always 1/60 = 0.0166…</p>
         </div>
     </div>
 </details>
@@ -154,10 +154,10 @@
 <details>
     <summary>Code - Ending</summary>
     <div class="indented">
-        <p class="function">endGame(...strings)</p>
+        <p class="function">stopGame(...strings)</p>
         <div class="indented">
             <p>Ends the game and shows the entered strings on screen</p>
-            <p>For example: <b>endGame("You","Have","Won!")</b> would show "You" on the first line, "Have" on the second line, and "Won!" on the third line.</p>
+            <p>For example: <b>stopGame("You","Have","Won!")</b> would show "You" on the first line, "Have" on the second line, and "Won!" on the third line.</p>
             <ul>
                 <li><b>...args</b> - The strings which will be shown</li>
             </ul>

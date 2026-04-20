@@ -2,7 +2,7 @@ import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
 import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
-import { CHAR_WIDTH, FRAME_TIME, FRAME_TIME_MS, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE, SCREEN_DIM } from './constants'
+import { CHAR_WIDTH, DELTA_TIME, DELTA_TIME_MS, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE, SCREEN_DIM } from './constants'
 import { PatchMap, TileMap } from './tile'
 import * as Util from './util'
 import { Camera } from './camera'
@@ -48,10 +48,10 @@ export class Engine {
     lua!: LuaEngine;
     luaExecutor: LuaExecutor;
     ranScript: boolean;
-    endScreenData: string[] | undefined;
-    luaFrame!: () => void;
-    luaDrag!: (point: Util.Point) => void;
-    luaTap!: () => void;
+    stopScreenData: string[] | undefined;
+    luaOnUpdate!: () => void;
+    luaOnDrag!: (point: Util.Point) => void;
+    luaOnTap!: () => void;
     constructor(gameCanvas: HTMLCanvasElement, gameErrors: HTMLDivElement) {
         this.pointerEventQueue = [];
         this.keyboardEventQueue = [];
@@ -117,7 +117,7 @@ export class Engine {
         // Clear game errors
         this.gameErrors.textContent = '';
         this.ranScript = false;
-        this.endScreenData = undefined;
+        this.stopScreenData = undefined;
         this.entities = [];
         this.timers = [];
         const gameTileMap = TileMap.Copy(game.tileMap);
@@ -143,8 +143,8 @@ export class Engine {
                 const entityB = pair.bodyB.plugin.entity as Entity;
                 entityA.physics.overlapping.push(entityB);
                 entityB.physics.overlapping.push(entityA);
-                this.luaExecutor(entityA.physics.overlapBegin, entityA, entityB);
-                this.luaExecutor(entityB.physics.overlapBegin, entityB, entityA);
+                this.luaExecutor(entityA.physics.onOverlapBegin, entityA, entityB);
+                this.luaExecutor(entityB.physics.onOverlapBegin, entityB, entityA);
             }
         });
         Matter.Events.on(this.matterEngine, "collisionEnd", (event) => {
@@ -156,8 +156,8 @@ export class Engine {
                 const entityB = pair.bodyB.plugin.entity as Entity;
                 Util.removeByValue(entityA.physics.overlapping, entityB);
                 Util.removeByValue(entityB.physics.overlapping, entityA);
-                this.luaExecutor(entityA.physics.overlapEnd, entityA, entityB);
-                this.luaExecutor(entityB.physics.overlapEnd, entityB, entityA);
+                this.luaExecutor(entityA.physics.onOverlapEnd, entityA, entityB);
+                this.luaExecutor(entityB.physics.onOverlapEnd, entityB, entityA);
             }
         });
         Matter.Events.on(this.matterEngine, "collisionActive", (event) => {
@@ -218,7 +218,7 @@ export class Engine {
         this.physicsInput = new PhysicsInput(this.matterEngine, this.gameCanvas);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
-        this.lua.global.set('FRAME_TIME', FRAME_TIME);
+        this.lua.global.set('DELTA_TIME', DELTA_TIME);
         this.lua.global.set('createEntity', (char: string, color: number, x: number, y: number) => {
             let newEntity = new Entity({ x: x, y: y}, false);
             newEntity.sprite.char = char;
@@ -249,8 +249,8 @@ export class Engine {
         this.lua.global.set('destroyTimer', (timer: Timer) => {
             this.timers = this.timers.filter(s => s !== timer);
         });
-        this.lua.global.set('endGame', (...args: string[]) => {
-            this.endScreenData = args;
+        this.lua.global.set('stopGame', (...args: string[]) => {
+            this.stopScreenData = args;
         });
         this.lua.global.set('getMarkers', (markerId: string) => {
             const id = markerId.codePointAt(0);
@@ -283,20 +283,20 @@ export class Engine {
             // Load Script
             this.luaExecutor(() => this.lua.doStringSync(this.game.script));
             // Get Lua References
-            this.luaFrame = this.lua.global.get('frame');
-            this.luaTap = this.lua.global.get('tap');
-            this.luaDrag = this.lua.global.get('drag');
+            this.luaOnUpdate = this.lua.global.get('onUpdate');
+            this.luaOnTap = this.lua.global.get('onTap');
+            this.luaOnDrag = this.lua.global.get('onDrag');
         }
-        // Show end screen
-        if (this.endScreenData !== undefined) {
+        // Show stop screen
+        if (this.stopScreenData !== undefined) {
             // Rendering
             // Fill Background
             this.renderer.beginFrame();
             this.renderer.viewOffset = {x: 0, y: 0};
-            // Draw Tilemap
-            for(let i = 0; i < this.endScreenData.length; i++) {
-                const codePoints = Util.stringToCodePoints(this.endScreenData[i]);
-                this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2 + (i - (this.endScreenData.length - 1) / 2.0) * CHAR_WIDTH, 0.5, 0.5, 0, true, false);
+            // Draw Strings
+            for(let i = 0; i < this.stopScreenData.length; i++) {
+                const codePoints = Util.stringToCodePoints(this.stopScreenData[i]);
+                this.renderer.drawCharacters(codePoints, new Array(codePoints.length).fill(0), SCREEN_DIM.w / 2, SCREEN_DIM.h / 2 + (i - (this.stopScreenData.length - 1) / 2.0) * CHAR_WIDTH, 0.5, 0.5, 0, true, false);
             }
             this.renderer.endFrame();
             return;
@@ -305,7 +305,7 @@ export class Engine {
         for (let entity of this.entities) {
             entity.physics.prePhysicsUpdate(this.matterEngine)
         }
-        Matter.Engine.update(this.matterEngine, FRAME_TIME_MS);
+        Matter.Engine.update(this.matterEngine, DELTA_TIME_MS);
         for (let entity of this.entities) {
             entity.physics.postPhysicsUpdate(this.matterEngine)
         }
@@ -316,15 +316,15 @@ export class Engine {
             switch(queued.type) {
                 case "down":
                     this.downPointers.set(queued.event.pointerId, pos);
-                    this.luaExecutor(this.luaDrag, pos);
-                    this.luaExecutor(this.luaTap);
+                    this.luaExecutor(this.luaOnDrag, pos);
+                    this.luaExecutor(this.luaOnTap);
                     this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
                     break;
                 case "move":
                     if (this.downPointers.has(queued.event.pointerId))
                     {
                         this.downPointers.set(queued.event.pointerId, pos);
-                        this.luaExecutor(this.luaDrag, pos);
+                        this.luaExecutor(this.luaOnDrag, pos);
                     }
                     this.physicsInput.onPointerMove(queued.event.pointerId, pos);
                     break;
@@ -364,20 +364,20 @@ export class Engine {
             entity.input.down = newDown;
             if (newDown) {
                 if (!oldDown) {
-                    this.luaExecutor(entity.input.press, entity);
+                    this.luaExecutor(entity.input.onPress, entity);
                 }
             }
             else if (oldDown) {
-                this.luaExecutor(entity.input.release, entity);
+                this.luaExecutor(entity.input.onRelease, entity);
             }
         }
         // Frame
-        this.luaExecutor(this.luaFrame);
+        this.luaExecutor(this.luaOnUpdate);
         for (let entity of this.entities) {
-            this.luaExecutor(entity.frame, entity);
+            this.luaExecutor(entity.onUpdate, entity);
         }
         for (let timer of this.timers) {
-            timer.update(FRAME_TIME, this.luaExecutor);
+            timer.update(DELTA_TIME, this.luaExecutor);
         }
         this.timers = this.timers.filter(t => !t.finished);
         // Rendering

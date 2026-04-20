@@ -104,8 +104,8 @@ export class PhysicsComponent extends BoxComponent {
     drag: boolean;
     onFloor: boolean;
     overlapping: Entity[];
-    overlapBegin: EntityOverlapFunction | undefined;
-    overlapEnd: EntityOverlapFunction | undefined;
+    onOverlapBegin: EntityOverlapFunction | undefined;
+    onOverlapEnd: EntityOverlapFunction | undefined;
     #physState: null | {
         body: Matter.Body,
         ghostSensor?: Matter.Body;
@@ -246,8 +246,8 @@ export class PhysicsComponent extends BoxComponent {
 }
 
 export class InputComponent extends BoxComponent {
-    press: EntityFunction | undefined;
-    release: EntityFunction | undefined;
+    onPress: EntityFunction | undefined;
+    onRelease: EntityFunction | undefined;
     key: string;
     down: boolean;
     constructor(parent: Entity, enabled: boolean) {
@@ -257,8 +257,8 @@ export class InputComponent extends BoxComponent {
     }
     copyFrom(input: InputComponent) {
         super.copyFrom(input);
-        this.press = input.press;
-        this.release = input.release;
+        this.onPress = input.onPress;
+        this.onRelease = input.onRelease;
         this.key = input.key;
         // this.down is not copied because I consider it transient
     }
@@ -266,7 +266,7 @@ export class InputComponent extends BoxComponent {
 
 export class Entity {
     pos: Point;
-    frame: EntityFunction | undefined;
+    onUpdate: EntityFunction | undefined;
     sprite: SpriteComponent;
     physics: PhysicsComponent;
     input: InputComponent;
@@ -280,7 +280,7 @@ export class Entity {
     }
     static Copy(entity: Entity) {
         let s = new Entity(entity.pos, entity.#screen);
-        s.frame = entity.frame;
+        s.onUpdate = entity.onUpdate;
         s.sprite.copyFrom(entity.sprite);
         s.physics.copyFrom(entity.physics);
         s.input.copyFrom(entity.input);
