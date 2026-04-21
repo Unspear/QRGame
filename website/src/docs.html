@@ -190,7 +190,7 @@
             <ul>
                 <li><b>parent</b> - The entity that owns this component (mostly for internal use)</li>
                 <li><b>lpos</b> - The local position of this component, relative to the parent entity</li>
-                <li><b>gpos</b> - The global position of this component, read only</li>
+                <li><b>gpos</b> - The global position of this component, read-only</li>
                 <li><b>pivot</b> - Default value of {x=0,y=0} means the centre of the component will be at parent.pos</li>
                 <li><b>enabled</b> - The sprite component is enabled by default, others must be enabled before being used</li>
             </ul>
@@ -204,9 +204,9 @@
         <p>Controls if/how an entity appears.</p>
         <p>Has all the properties seen in <b>Code - Component</b></p>
         <ul>
-            <li><b>char</b> - </li>
-            <li><b>colour</b> - </li>
-            <li><b>wrap</b> - I</li>
+            <li><b>char</b> - The string of characters which defines the sprites appearance</li>
+            <li><b>colour</b> - The colour ID of the sprite, see <b>Graphics - Colour</b></li>
+            <li><b>wrap</b> - If greater than 0, the sprite will render for this many tiles before going to the next line</li>
             <li><b>compact</b> - If true, half width characters are rendered compactly</li>
             <li><b>fliph</b> - If true, the sprite is flipped horizontally</li>
             <li><b>fliph</b> - If true, the sprite is flipped vertically</li>
@@ -215,9 +215,35 @@
 </details>
 <details>
     <summary>Code - Physics</summary>
+    <p class="function">Physics Component</p>
+        <div class="indented">
+        <p></p>
+        <ul>
+            <li><b>vel</b> - The velocity of the physics body</li>
+            <li><b>static</b> - If true, the body is static, if false then the body will respond to collision and forces</li>
+            <li><b>sensor</b> - If true, the body detects overlapping bodies but doesn't collide with them</li>
+            <li><b>ghost</b> - If true, the body collides with the level but overlaps other entities</li>
+            <li><b>bounce</b> - A value from 0 to 1, a value of one makes all collision perfectly elastic</li>
+            <li><b>friction</b> - A value from 0 to 1, the amount of friction the body experiences</li>
+            <li><b>onFloor</b> - If true, then the body is on the floor, read-only</li>
+            <li><b>overlapping</b> - A list of all entities that are currently colliding or overlapping</li>
+            <li><b>onOverlapBegin</b> - A function that is called when an entity starts overlapping or colliding</li>
+            <li><b>onOverlapEnd</b> - A function that is called when an entity stops overlapping or colliding</li>
+        </ul>
+    </div>
 </details>
 <details>
     <summary>Code - Input</summary>
+    <p class="function">Input Component</p>
+        <div class="indented">
+        <p></p>
+        <ul>
+            <li><b>key</b> - Optional, the keyboard key that can be used to trigger this input, see <a href="https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values" target="_blank">list of key codes</a></li>
+            <li><b>down</b> - True when the input is currently pressed, read-only</li>
+            <li><b>onPress</b> - A function that is called when the input starts being pressed</li>
+            <li><b>onRelease</b> - A function that is called when the input stops being pressed</li>
+        </ul>
+    </div>
 </details>
 <details>
     <summary>Code - Markers</summary>
