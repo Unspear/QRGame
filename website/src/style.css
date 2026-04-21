@@ -16,7 +16,7 @@ article {
 }
 p {
     text-align: left;
-    margin: 0.2rem 0rem 0.5rem;
+    margin: 0.2rem 0rem 0.35rem;
 }
 .cm-editor {
     outline: 2px solid grey;
@@ -167,4 +167,10 @@ details ul {
 }
 .nobr { 
     white-space: nowrap;
+}
+.fields {
+    margin-bottom: 8px;
+}
+.fields div {
+    font-style: italic;
 }
