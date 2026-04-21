@@ -159,10 +159,11 @@ details ul {
 }
 .function {
     font-weight: bold;
+    margin-left: -0.7rem;
 }
 .indented {
     margin: 0;
-    margin-left: 1em;
+    margin-left: 1rem;
     padding: 0;
 }
 .nobr { 
