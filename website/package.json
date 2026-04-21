@@ -2,7 +2,7 @@
   "name": "qrgame",
   "version": "1.0.0",
   "repository": {
-    "url": "git+https://github.com/CyborgCabbage/QRGame.git"
+    "url": "git+https://github.com/Unspear/QRGame-Submission.git"
   },
   "private": true,
   "scripts": {
@@ -11,7 +11,7 @@
     "start": "webpack --config webpack.dev.js && http-server dist",
     "startprod": "webpack --config webpack.prod.js && http-server dist",
     "predeploy": "webpack --config webpack.prod.js",
-    "deploy": "gh-pages -d dist --cname qr.unspear.com --nojekyll"
+    "deploy": "gh-pages -d dist --cname beta-qr.unspear.com --nojekyll"
   },
   "author": "",
   "license": "ISC",
