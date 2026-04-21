@@ -161,6 +161,9 @@ details ul {
     font-weight: bold;
     margin-left: -0.7rem;
 }
+.function:not(:first-child) {
+    margin-top: 1rem;
+}
 .indented {
     margin: 0;
     margin-left: 1rem;
