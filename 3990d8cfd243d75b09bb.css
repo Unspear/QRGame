@@ -161,6 +161,9 @@ details ul {
     font-weight: bold;
     margin-left: -0.7rem;
 }
+.function:not(:first-child) {
+    margin-top: 1rem;
+}
 .indented {
     margin: 0;
     margin-left: 1rem;
@@ -176,4 +179,4 @@ details ul {
     font-style: italic;
 }
 
-/*# sourceMappingURL=bc8862b7670768dd356e.css.map*/
+/*# sourceMappingURL=3990d8cfd243d75b09bb.css.map*/
