@@ -101,7 +101,6 @@ export class PhysicsComponent extends BoxComponent {
     ghost: boolean;
     bounce: number;
     friction: number;
-    drag: boolean;
     onFloor: boolean;
     overlapping: Entity[];
     onOverlapBegin: EntityOverlapFunction | undefined;
@@ -120,7 +119,6 @@ export class PhysicsComponent extends BoxComponent {
         this.ghost = false;
         this.bounce = 0.0;
         this.friction = 0.0;
-        this.drag = false;
         this.onFloor = false;
         this.overlapping = [];
         this.#physState = null;
@@ -132,7 +130,6 @@ export class PhysicsComponent extends BoxComponent {
         this.sensor = physics.sensor;
         this.bounce = physics.bounce;
         this.friction = physics.friction;
-        this.drag = physics.drag;
     }
     #shouldRemoveBody(): boolean {
         // Body doesn't exist

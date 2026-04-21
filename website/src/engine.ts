@@ -1,6 +1,5 @@
 import {LuaEngine, LuaFactory} from 'wasmoon'
 import * as Matter from 'matter-js'
-import { PhysicsInput } from './physicsInput'
 import { Entity } from './entity'
 import { CHAR_WIDTH, DELTA_TIME, DELTA_TIME_MS, PHYSICS_CATEGORY_SPRITE, PHYSICS_CATEGORY_TILE, SCREEN_DIM } from './constants'
 import { PatchMap, TileMap } from './tile'
@@ -44,7 +43,6 @@ export class Engine {
     tileMap!: TileMap;
     camera!: Camera;
     matterEngine!: Matter.Engine;
-    physicsInput!: PhysicsInput;
     lua!: LuaEngine;
     luaExecutor: LuaExecutor;
     ranScript: boolean;
@@ -214,8 +212,6 @@ export class Engine {
                 createBody(startY, this.tileMap.dim.h)
             }
         }
-        // Create entity drag constraint
-        this.physicsInput = new PhysicsInput(this.matterEngine, this.gameCanvas);
         // Setup Lua Environment
         this.lua = await this.luaFactory.createEngine()
         this.lua.global.set('DELTA_TIME', DELTA_TIME);
@@ -318,7 +314,6 @@ export class Engine {
                     this.downPointers.set(queued.event.pointerId, pos);
                     this.luaExecutor(this.luaOnDrag, pos);
                     this.luaExecutor(this.luaOnTap);
-                    this.physicsInput.onPointerDown(this.matterEngine, queued.event.pointerId, pos);
                     break;
                 case "move":
                     if (this.downPointers.has(queued.event.pointerId))
@@ -326,11 +321,9 @@ export class Engine {
                         this.downPointers.set(queued.event.pointerId, pos);
                         this.luaExecutor(this.luaOnDrag, pos);
                     }
-                    this.physicsInput.onPointerMove(queued.event.pointerId, pos);
                     break;
                 case "up":
                     this.downPointers.delete(queued.event.pointerId);
-                    this.physicsInput.onPointerUp(queued.event.pointerId, pos);
                     break;
             }
         }
