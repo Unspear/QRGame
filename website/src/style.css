@@ -165,3 +165,6 @@ details ul {
     margin-left: 1em;
     padding: 0;
 }
+.nobr { 
+    white-space: nowrap;
+}
