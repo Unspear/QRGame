@@ -98,10 +98,10 @@ function damage()
     audio.noise(0.5).addLowpass(500).addGain(0.3).output()
     healthTimer = createTimer(1)
     healthTimer.onUpdate = function()
-      player.sprite.colour = 2 - player.sprite.colour
+      player.sprite.enabled = !player.sprite.enabled 
     end
     healthTimer.onFinish = function()
-      player.sprite.colour = 0
+      player.sprite.enabled = true
     end
   end
 end
