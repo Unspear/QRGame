@@ -34,7 +34,7 @@ right.input.enabled = true
 right.input.dim = {x = 64, y = 48}
 right.input.key = "arrowright"
 -- Player Setup
-local player = createEntity('🐿', 0, 128, 176)
+local player = createEntity('🐿', 4, 128, 176)
 player.physics.enabled = true
 player.physics.dim = {x=10, y=12}
 player.onUpdate = function()
@@ -98,7 +98,7 @@ function damage()
     audio.noise(0.5).addLowpass(500).addGain(0.3).output()
     healthTimer = createTimer(1)
     healthTimer.onUpdate = function()
-      player.sprite.enabled = !player.sprite.enabled 
+      player.sprite.enabled = not player.sprite.enabled
     end
     healthTimer.onFinish = function()
       player.sprite.enabled = true
@@ -107,7 +107,7 @@ function damage()
 end
 -- Spawn geese
 for i, v in ipairs(getMarkers('g')) do
-  local goose = createEntity('🪿', 0, v.x, v.y)
+  local goose = createEntity('🪿', 2, v.x, v.y)
   goose.physics.enabled = true
   goose.physics.friction = 1.0
   goose.physics.ghost = true
@@ -132,6 +132,6 @@ export default function (): Game {
     let parsed = JSON.parse(tiles);
     let game = new Game({ title: "Platformer", description: "A platformer game that demonstrates all engine features" }, script, parsed.tileMap, parsed.patchMap);
     game.markers = parsed.markers;
-    game.solidTiles = stringToCodePoints('-=WM[]🙾');
+    game.solidTiles = stringToCodePoints('-=WMH[]🙾');
     return game;
 }
