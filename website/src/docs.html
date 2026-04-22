@@ -129,17 +129,23 @@
 <details>
     <summary>Code - Overview</summary>
     <div class="indented" id="tabCodeOverview">
-        
+        <p>
+            This game engine uses Lua as the programming language. There are many online resources for learning Lua, a quick overview can be found <a href="https://learnxinyminutes.com/lua/" target="_blank">here</a>.
+        </p>
     </div>
 </details>
 <details>
-    <summary>Code - Constants</summary>
+    <summary>Code - Globals</summary>
     <div class="indented" id="tabCodeConstants">
-        <b>DELTA_TIME: number = 0.0166…</b>
-        <div class="indented">
-            <p>Delta time is a numeric constant which is the number of seconds between each call of <b>onUpdate</b>.</p>
-            <p>The game engine runs at a fixed frame rate of 60, so <b>DELTA_TIME</b> is always 1/60 = 0.0166…</p>
-        </div>
+        <div class="function">DELTA_TIME: number = 0.0166…</div>
+        <p>Delta time is a numeric constant which is the number of seconds between each call of <b>onUpdate</b>.</p>
+        <p>The game engine runs at a fixed frame rate of 60, so <b>DELTA_TIME</b> is always 1/60 = 0.0166…</p>
+        <div class="function">function onUpdate()</div>
+        <p>If this function is defined in the global scope, the engine will call it every frame.</p>
+        <div class="function">function onTap()</div>
+        <p>If this function is defined in the global scope, the engine will call it when the player is tapped or clicked.</p>
+        <div class="function">function on onDrag(pos: {x,y})</div>
+        <p>If this function is defined in the global scope, the engine will call it every time a pointer (mouse or touch) moves.</p>
     </div>
 </details>
 <details>
@@ -188,7 +194,7 @@
 </details>
 <details>
     <summary>Code - Component</summary>
-    <div class="indented" id="tabCodeComponents">
+    <div class="indented" id="tabCodeComponent">
         <div class="function">Component</div>
         <div class="fields">
             <b>enabled: boolean = true for SpriteComponent, false for others</b>
@@ -359,6 +365,73 @@
         </div>
         <p>Creates a new BufferSoundNode with the specified parameters.</p>
         <p>It is separate from the other waves because white noise doesn't have a frequency.</p>
+    </div>
+</details>
+<details>
+    <summary>Audio - Nodes</summary>
+    <div class="indented" id="tabAudioWave">
+        <div class="function">BaseSoundNode</div>
+        <div class="fields">
+            <b>addLowpass(frequency: number) → FilterSoundNode</b>
+            <div class="indented">Adds a lowpass node to the chain</div>
+            <b>addHighpass(frequency: number) → FilterSoundNode</b>
+            <div class="indented">Adds a highpass node to the chain</div>
+            <b>addGain(gain: number) → GainSoundNode</b>
+            <div class="indented">Adds a gain (volume) node to the chain</div>
+        </div>
+        <p>(All sound nodes have the BaseSoundNode functions)</p>
+        <div class="function">BufferSoundNode</div>
+        <div class="fields">
+            <b>driveRate(rate: driven) → BufferSoundNode</b>
+            <div class="indented">Changes the rate (playback speed multiplier)</div>
+            <b>driveDetune(cents: driven) → BufferSoundNode</b>
+            <div class="indented">Changes the playback speed so that the pitch is shifted by however many cents</div>
+        </div>
+        <div class="function">OscillatorSoundNode</div>
+        <div class="fields">
+            <b>driveFrequency(frequency: driven) → OscillatorSoundNode</b>
+            <div class="indented">Change the frequency</div>
+            <b>driveDetune(cents: driven) → OscillatorSoundNode</b>
+            <div class="indented">Changes the playback speed so that the pitch is shifted by however many cents</div>
+        </div>
+        <div class="function">FilterSoundNode</div>
+        <div class="fields">
+            <b>driveQuality(quality: driven) → FilterSoundNode</b>
+            <div class="indented">A larger value means the frequency will be more peaked around the cutoff</div>
+            <b>driveFrequency(frequency: driven) → FilterSoundNode</b>
+            <div class="indented">Changes the frequency cutoff of the lowpass/highpass</div>
+            <b>driveDetune(cents: driven) → FilterSoundNode</b>
+            <div class="indented">Changes the playback speed so that the pitch is shifted by however many cents</div>
+            <b>driveGain(gain: driven) → FilterSoundNode</b>
+            <div class="indented">Changes the gain (a.k.a volume), should be between 0 and 1</div>
+        </div>
+        <div class="function">GainSoundNode</div>
+        <div class="fields">
+            <b>driveGain(gain: driven) → GainSoundNode</b>
+            <div class="indented">Changes the gain (a.k.a volume), should be between 0 and 1</div>
+        </div>
+    </div>
+</details>
+<details>
+    <summary>Audio - Driven Values</summary>
+    <div class="indented" id="tabAudioSpeech">
+        <p>The various "drive" functions allow values to be changed over time.</p>
+        <p>The most basic way to use them is with a raw number, this sets the value directly
+        <p><b>driveGain(0.5)</b></p>
+        <p>But you can also set the time with a delay using <b>audio.step(...)</b>, this example will reduce the volume to 50% (0.5) after 1 second:</p>
+        <p><b>driveGain(audio.step(0.5, 1.0))</b></p>
+        <p>There are also ramp functions which will gradually change the value to reach the target. The following will decrease the volume to 50% gradually over 1 second:</p>
+        <p><b>driveGain(audio.linear(0.5, 1.0))</b></p>
+        <p>These functions can also take a note value:</p>
+        <p><b>driveFrequency(audio.linear("C#4", 1.0))</b></p>
+        <p>There is also an exponential version of the linear function:</p>
+        <p><b>driveFrequency(audio.exp("C#4", 1.0))</b></p>
+        <p>Multiple changes can be combined:</p>
+        <p><b>driveFrequency(400, audio.step(400, 0.5), audio.exp(800, 1.0))</b></p>
+        <p>Here, the value is first set to 400 Hz, then at 0.5 seconds the value ramps exponentially to 800 Hz over the course of 0.5 seconds. In this case <b>audio.step(...)</b> doesn't change the value, it is just there so that the exponential ramp will start at 0.5 seconds rather than immediately.</p>
+        <p>Finally, a wave can be used to drive the value:</p>
+        <p><b>driveGain(audio.square(12, 1))</b></p>
+        <p>Using a square wave here turns the volume on and off 12 times a second, for 1 second</p>
     </div>
 </details>
 <details>
