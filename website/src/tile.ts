@@ -1,4 +1,4 @@
-import { Dimensions, Point } from './util';
+import { Dimensions, Point, stringToCodePoints } from './util';
 import { CHAR_WIDTH } from './constants';
 import { Renderer } from './render';
 
@@ -76,19 +76,26 @@ export class TileMap {
     }
     draw(renderer: Renderer, isEditor: boolean = false) {
         for (let i = 0; i < this.count; i++) {
-            this.drawSingle(renderer, i, {x: i * this.dim.w * CHAR_WIDTH, y: 0 });
+            this.drawSingle(renderer, i, {x: i * this.dim.w * CHAR_WIDTH, y: 0 }, isEditor);
         }
         if (isEditor) {
             renderer.drawGrid(0, 0, this.dim.w * CHAR_WIDTH * this.count, this.dim.h * CHAR_WIDTH, this.dim.w * this.count, this.dim.h);
-            for (let i = 0; i < this.count; i++) {
-                let offset = i * this.dim.w * CHAR_WIDTH;
-                renderer.drawBox(offset, 0, offset + this.dim.w * CHAR_WIDTH, this.dim.h * CHAR_WIDTH, -1.5);
-            }
         }
     }
-    drawSingle(renderer: Renderer, index: number, point: Point) {
-        let patch = this.tileData[index]!;
-        renderer.drawCharacters(patch.codePoint, patch.colour, point.x, point.y, 0, 0, this.dim.w, false, false);
+    drawSingle(renderer: Renderer, index: number, point: Point, isEditor: boolean = false) {
+        let patch = this.tileData[index];
+        if (patch !== undefined) {
+            renderer.drawCharacters(patch.codePoint, patch.colour, point.x, point.y, 0, 0, this.dim.w, false, false);
+        }else {
+            const blankCodePoint = new Array(this.dim.w * this.dim.h).fill(0);
+            const blankColour = new Array(this.dim.w * this.dim.h).fill(0);
+            renderer.drawCharacters(blankCodePoint, blankColour, point.x, point.y, 0, 0, this.dim.w, false, false);
+        }
+        if (isEditor) {
+            renderer.drawBox(point.x, point.y, point.x + this.dim.w * CHAR_WIDTH, point.y + this.dim.h * CHAR_WIDTH, -1.5);
+            const idCodePoints = stringToCodePoints(index.toString());
+            renderer.drawCharacters(idCodePoints, new Array(idCodePoints.length).fill(0), point.x + 2, point.y, 0, 0, 0, true, false);
+        }
     }
     getDrawDim(): Dimensions {
         return {
@@ -159,7 +166,7 @@ export class PatchMap {
             for (let patchY = 0; patchY < this.dim.h; patchY++) {
                 const index = this.getIndex({x: patchX, y: patchY})!;
                 const patchId = this.tileData.patchId[index];
-                patchSource.drawSingle(renderer, patchId, { x: patchX * patchSource.dim.w * CHAR_WIDTH, y: patchY * patchSource.dim.h * CHAR_WIDTH});
+                patchSource.drawSingle(renderer, patchId, { x: patchX * patchSource.dim.w * CHAR_WIDTH, y: patchY * patchSource.dim.h * CHAR_WIDTH}, isEditor);
             }
         }
         if (isEditor) {

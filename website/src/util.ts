@@ -36,3 +36,7 @@ export function removeByValue<Type>(arr: Type[], value: Type) {
         arr.splice(index, 1);
     }
 }
+
+export function mod(n: number, m: number) {
+  return ((n % m) + m) % m;
+}
