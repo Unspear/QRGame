@@ -5,27 +5,6 @@ import { Marker, stringToCodePoints } from './util';
 
 export type DataTransform = (array: Uint8Array) => Uint8Array;
 
-function toUint(value: number) {
-  if (value >= 0) {
-      return value * 2;
-  }else{
-      return -value * 2 - 1;
-  }
-}
-function toInt(value: number) {
-  if (value % 2 === 0) {
-      return value / 2;
-  }else{
-      return -(value + 1) / 2;
-  }
-}
-function compareMarkers(a: Marker, b: Marker) {
-    const result = a.x - b.x;
-    if (result === 0) {// If x is equal sort by y
-        return a.y - b.y;
-    }
-    return result;
-}
 export class Packer {
     #buffer: ArrayBuffer;
     #view: DataView;
@@ -101,7 +80,6 @@ export class Unpacker {
         } while(piece > 127);
         return value;
     }
-
     unpackString(): string {
         const value = this.unpackUint8Array();
         return new TextDecoder().decode(value);
@@ -159,17 +137,11 @@ export function packGame(game: Game, compressor: DataTransform = PPMd.compress):
     packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.patchId));
     packer.packUint8Array(Uint8Array.from(game.patchMap.tileData.transform));
     // Markers
-    const sortedMarkers = game.markers.toSorted(compareMarkers);
-    packer.packString(String.fromCodePoint(...sortedMarkers.map(m => m.codePoint)));
-    let xOffset = 0;
-    for (const marker of sortedMarkers) {
-        packer.packUintVar(toUint(marker.x - xOffset));
-        xOffset = marker.x;
-    }
-    let yOffset = 0;
-    for (const marker of sortedMarkers) {
-        packer.packUintVar(toUint(marker.y - yOffset));
-        yOffset = marker.y;
+    packer.packUintVar(game.markers.length);
+    for (const marker of game.markers) {
+        packer.packUintVar(marker.x);
+        packer.packUintVar(marker.y);
+        packer.packUintVar(marker.codePoint);
     }
     // Solid Tiles
     packer.packString(String.fromCodePoint(...game.solidTiles));
@@ -204,25 +176,13 @@ export function unpackGame(data: Uint8Array, decompressor: DataTransform = PPMd.
     patchMap.tileData.patchId = [...patchMapPatchIds];
     patchMap.tileData.transform = [...patchMapTransforms];
     // Markers
-    const markerCodePoints = stringToCodePoints(unpacker.unpackString());
-    const markerX = [];
-    let xOffset = 0;
-    for (let i = 0; i < markerCodePoints.length; i++) {
-        xOffset += toInt(unpacker.unpackUintVar());
-        markerX.push(xOffset);
-    }
-    const markerY = [];
-    let yOffset = 0;
-    for (let i = 0; i < markerCodePoints.length; i++) {
-        yOffset += toInt(unpacker.unpackUintVar());
-        markerY.push(yOffset);
-    }
+    const markerLength = unpacker.unpackUintVar();
     const markers: Marker[] = [];
-    for (let i = 0; i < markerCodePoints.length; i++) {
+    for (let i = 0; i < markerLength; i++) {
         markers.push({
-            x: markerX[i],
-            y: markerY[i],
-            codePoint: markerCodePoints[i],
+            x: unpacker.unpackUintVar(),
+            y: unpacker.unpackUintVar(),
+            codePoint: unpacker.unpackUintVar(),
         });
     }
     // Solid tiles
