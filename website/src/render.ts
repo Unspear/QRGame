@@ -2,7 +2,7 @@ import Chars from './chars.png';
 import CharsText from './chars.txt'
 import { CHAR_WIDTH, DELTA_TIME, PALETTE_FRACTIONS } from './constants';
 import { DELTA_TIME_MS } from './constants'
-
+import { mod, Point } from './util';
 
 type SpriteSheetEntry = {
   index: number;
@@ -162,7 +162,7 @@ class SpritePipeline {
     }
     addData(x: number, y: number, colour: number, codepoint: number, compact: boolean = false, fliph: boolean = false, flipv: boolean = false) {
         let start = this.#numInstances * this.#instanceStride;
-        let values = PALETTE_FRACTIONS[colour % 8];
+        let values = PALETTE_FRACTIONS[mod(colour, 8)];
         if (colour >= 8) {
             this.#instanceData.set([values[0], values[1], values[2], 1, 0, 0, 0, 0], start);
         }
@@ -209,7 +209,6 @@ class SpritePipeline {
 
 import lineVertexSource from "./shaders/line.vert"
 import lineFragmentSource from "./shaders/line.frag";
-import { Point } from './util';
 
 type LinePattern = {
     offset: number;
