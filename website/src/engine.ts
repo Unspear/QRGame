@@ -7,13 +7,9 @@ import * as Util from './util'
 import { Camera } from './camera'
 import { Game } from './game'
 import glueUrl from 'wasmoon/dist/glue.wasm';
-import PressPlay from './press-play.png';
 import { Renderer } from './render'
 import { AudioAccessor, AudioEngine, BufferSoundNode, FrequencyInput, OscillatorSoundNode, SoundMod } from './audio'
 import { Timer } from './timer'
-
-let pressPlayImage = new Image();
-pressPlayImage.src = PressPlay;
 
 type QueuedPointerEvent = {
     type: "down" | "move" | "up",
