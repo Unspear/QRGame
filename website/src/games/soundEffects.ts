@@ -51,6 +51,6 @@ gameOver.input.onPress = function()
     audio.sawtooth("A3", 4).driveDetune(audio.sine(4, 4).addGain(100)).driveFrequency(audio.linear("E2", 3)).addLowpass(1200).addGain(1).driveGain(audio.linear(0, 4)).output()
 end`
 export default function (): Game {
-    let game = new Game({ title: "Sound Effects", description: "Showcasing sound effects" }, script);
+    let game = new Game({ title: "Sound Effects", description: "A soundboard showcasing the sound effect composition system" }, script);
     return game;
 }

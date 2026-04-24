@@ -20,17 +20,14 @@ export class Packer {
         return new Uint8Array(this.#buffer, 0, this.#offset);
     }
     packUint8(value: number): void {
-        console.assert(256 > value && value >= 0);
         this.#view.setUint8(this.#offset, value);
         this.#offset += 1;
     }
     packUint16(value: number): void {
-        console.assert(65536 > value && value >= 0);
         this.#view.setUint16(this.#offset, value);
         this.#offset += 2;
     }
     packUintVar(value: number): void {
-        console.assert(value >= 0);
         do {
             let piece = value & 127;
             value = value >> 7;

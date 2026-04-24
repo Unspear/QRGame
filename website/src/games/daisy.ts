@@ -34,5 +34,5 @@ But you'll look sweet upon the seat
 Of a bicycle built for two!
 ]]).output()`
 export default function (): Game {
-    return new Game({ title: "Daisy Bell", description: "A demo showing text-to-speech and sprite manipulation" }, script);
+    return new Game({ title: "Daisy Bell", description: "A simple demo showing text-to-speech and sprite manipulation" }, script);
 }

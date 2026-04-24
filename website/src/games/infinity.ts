@@ -8,5 +8,5 @@ end`;
 let tiles: string = `{"tileMap":{"dim":{"w":4,"h":4},"count":4,"tileData":[{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"colour":[12,12,12,12,12,10,10,12,12,10,10,12,12,12,12,12]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"colour":[9,9,9,9,9,8,8,9,9,8,8,9,9,9,9,9]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"colour":[13,13,13,13,13,14,14,13,13,14,14,13,13,13,13,13]},{"codePoint":[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32],"colour":[15,15,15,15,15,11,11,15,15,11,11,15,15,15,15,15]}]},"patchMap":{"dim":{"w":7,"h":4},"tileData":{"patchId":[0,1,2,3,0,1,2,1,2,3,0,1,2,3,2,3,0,1,2,3,0,3,0,1,2,3,0,1],"transform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},"markers":[]}`;
 export default function (): Game {
     let parsed = JSON.parse(tiles);
-    return new Game({title: "Infinity", description: "A demo showing camera movement and the tile patch system"}, script, parsed.tileMap, parsed.patchMap);
+    return new Game({title: "Infinity", description: "A simple demo showing camera movement and the tile patch system"}, script, parsed.tileMap, parsed.patchMap);
 }
