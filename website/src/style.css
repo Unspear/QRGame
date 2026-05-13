@@ -38,6 +38,7 @@ canvas {
 #qr-canvas {
     outline: 2px solid grey;
     background: white;
+    touch-action: auto;
 }
 nav div {
     display: flex;
