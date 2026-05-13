@@ -83,11 +83,12 @@ table {
 }
 .tabs {
     display: flex;
+    gap: 0.2em;
+    margin: 0.2em 0;
 }
 div[tabHeader] {
     flex-grow: 1;
     text-align: center;
-    margin: 0.1em;
     padding: 0.2em;
     background-color: lightgrey;
     cursor: pointer;
