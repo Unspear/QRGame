@@ -29,7 +29,7 @@ export class TileMap {
     static Copy(tileMap: TileMap): TileMap {
         let copied = new TileMap(tileMap.dim, tileMap.count);// Default value is used automatically if 'tileMap.patchDim' is undefined
         if (tileMap.tileData !== undefined) {
-            copied.tileData = structuredClone(tileMap.tileData);
+            copied.tileData = JSON.parse(JSON.stringify(tileMap.tileData));
         }
         return copied;
     }
@@ -127,7 +127,7 @@ export class PatchMap {
     static Copy(patchMap: PatchMap): PatchMap {
         let copied = new PatchMap(patchMap.dim);
         if (patchMap.tileData !== undefined) {
-            copied.tileData = structuredClone(patchMap.tileData);
+            copied.tileData = JSON.parse(JSON.stringify(patchMap.tileData));
         }
         return copied;
     }
