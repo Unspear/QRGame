@@ -189,3 +189,6 @@ details summary::before {
 details[open] summary::before {
     content: "− ";
 }
+input {
+    padding: 0;
+}
