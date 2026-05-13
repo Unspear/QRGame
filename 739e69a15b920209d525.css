@@ -38,6 +38,7 @@ canvas {
 #qr-canvas {
     outline: 2px solid grey;
     background: white;
+    touch-action: auto;
 }
 nav div {
     display: flex;
@@ -179,4 +180,4 @@ details ul {
     font-style: italic;
 }
 
-/*# sourceMappingURL=3990d8cfd243d75b09bb.css.map*/
+/*# sourceMappingURL=739e69a15b920209d525.css.map*/
