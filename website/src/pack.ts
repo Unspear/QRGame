@@ -109,7 +109,7 @@ export function dataToUrl(data: Uint8Array, page: string) {
     const base64 = btoa(Array.from(data, (byte) => String.fromCodePoint(byte)).join(""));
     const params = new URLSearchParams();
     params.set("s", base64);
-    return URL.parse(page, window.location.origin+window.location.pathname)+"?"+params;
+    return window.location.origin+"/"+page+"?"+params;
 }
 
 export function packGame(game: Game, compressor: DataTransform = PPMd.compress): Uint8Array {
