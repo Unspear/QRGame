@@ -403,5 +403,8 @@ details summary::before {
 details[open] summary::before {
     content: "− ";
 }
+input {
+    padding: 0;
+}
 
-/*# sourceMappingURL=24a23ef818f867d6043b.css.map*/
+/*# sourceMappingURL=147a17ca3926765597cf.css.map*/
