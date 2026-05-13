@@ -397,14 +397,17 @@ details ul {
 details summary {
     list-style: none;
 }
+details summary::-webkit-details-marker {
+  display: none;
+}
 details summary::before {
     content: "+ ";
 }
 details[open] summary::before {
     content: "− ";
 }
-input {
+input, button {
     padding: 0;
 }
 
-/*# sourceMappingURL=147a17ca3926765597cf.css.map*/
+/*# sourceMappingURL=c63c75f0adc31defd407.css.map*/
