@@ -2,6 +2,7 @@ import {correction, generate, ImageDataOptions} from 'lean-qr'
 import {Game} from './game'
 import {Engine} from './engine'
 import {gameToUrl} from './pack'
+import ErrorImage from './error.png';
 
 export type GameProvider = (() => Game);
 
@@ -119,7 +120,18 @@ export class Player {
             off: [255, 255, 255, 255],
             pad: 1,
         }
-        generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        try {
+            generate(gameToUrl(this.game), qrGenerateOptions).toCanvas(this.qrCanvas, qrImageOptions);
+        }catch(e) {
+            const ctx = this.qrCanvas.getContext("2d")!;
+            const img = new Image();
+            img.onload = () => {
+                this.qrCanvas.width = img.width;
+                this.qrCanvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = ErrorImage;
+        }
         this.gameTitle.innerText = this.game.metadata.title;
         this.gameDescription.innerText = this.game.metadata.description;
     }
