@@ -183,12 +183,15 @@ details ul {
 details summary {
     list-style: none;
 }
+details summary::-webkit-details-marker {
+  display: none;
+}
 details summary::before {
     content: "+ ";
 }
 details[open] summary::before {
     content: "− ";
 }
-input {
+input, button {
     padding: 0;
 }
