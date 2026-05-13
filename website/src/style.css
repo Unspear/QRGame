@@ -180,3 +180,12 @@ details ul {
 .fields div {
     font-style: italic;
 }
+details summary {
+    list-style: none;
+}
+details summary::before {
+    content: "+ ";
+}
+details[open] summary::before {
+    content: "− ";
+}
